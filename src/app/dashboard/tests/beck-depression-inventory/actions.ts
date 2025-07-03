@@ -12,7 +12,7 @@ export async function analyzeBeckTest(
   const validation = BeckTestSchema.safeParse(formData);
 
   if (!validation.success) {
-    return { success: false, error: 'Invalid form data provided.' };
+    return { success: false, error: 'Geçersiz form verisi sağlandı.' };
   }
   
   const answers = validation.data;
@@ -27,9 +27,9 @@ export async function analyzeBeckTest(
   };
   
   const input = {
-    testName: 'Beck Depression Inventory (BDI-II)',
+    testName: 'Beck Depresyon Envanteri (BDE-II)',
     testResults: testResults,
-    userInformation: 'The user is taking this test to understand their current mood state.',
+    userInformation: 'Kullanıcı bu testi mevcut ruh halini anlamak için yapıyor.',
   };
 
   // 3. Call AI Flow
@@ -38,6 +38,6 @@ export async function analyzeBeckTest(
     return { success: true, data: analysis };
   } catch (error) {
     console.error("AI analysis failed:", error);
-    return { success: false, error: 'Failed to analyze test results. Please try again later.' };
+    return { success: false, error: 'Test sonuçları analiz edilemedi. Lütfen daha sonra tekrar deneyin.' };
   }
 }

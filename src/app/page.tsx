@@ -12,23 +12,23 @@ export default function Home() {
       <div className="flex-1 flex items-center justify-center bg-gradient-to-br from-background via-teal-50 to-background">
         <div className="container mx-auto px-4 text-center">
           <div className="inline-block bg-primary/10 text-primary px-4 py-1 rounded-full text-sm font-semibold mb-4">
-            Now with AI-Powered Insights
+            Şimdi Yapay Zeka Destekli Analizlerle
           </div>
           <h1 className="text-4xl md:text-6xl font-headline font-bold text-foreground mb-4">
-            Your Personal Guide to <br />
-            <span className="text-primary">Mental Well-being</span>
+            Zihinsel Sağlığınız için <br />
+            <span className="text-primary">Kişisel Rehberiniz</span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            PsikoTakip helps you understand your mental health through validated tests and provides personalized, AI-driven guidance for your journey.
+            PsikoTakip, onaylanmış testler aracılığıyla zihinsel sağlığınızı anlamanıza yardımcı olur ve yolculuğunuz için kişiselleştirilmiş, yapay zeka destekli rehberlik sağlar.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg" className="font-bold">
               <Link href="/dashboard">
-                Get Started <MoveRight className="ml-2 h-5 w-5" />
+                Başlayın <MoveRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="font-bold">
-              <Link href="/login">Login to Your Account</Link>
+              <Link href="/login">Hesabınıza Giriş Yapın</Link>
             </Button>
           </div>
         </div>

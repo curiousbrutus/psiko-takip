@@ -7,10 +7,10 @@ import { cn } from '@/lib/utils';
 import { LayoutDashboard, FlaskConical, Settings, User } from 'lucide-react';
 
 const navItems = [
-    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/dashboard/tests', label: 'Tests', icon: FlaskConical },
-    { href: '/dashboard/profile', label: 'Profile', icon: User },
-    { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+    { href: '/dashboard', label: 'Kontrol Paneli', icon: LayoutDashboard },
+    { href: '/dashboard/tests', label: 'Testler', icon: FlaskConical },
+    { href: '/dashboard/profile', label: 'Profil', icon: User },
+    { href: '/dashboard/settings', label: 'Ayarlar', icon: Settings },
 ];
 
 export default function DashboardNav() {

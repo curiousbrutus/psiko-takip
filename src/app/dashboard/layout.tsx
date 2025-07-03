@@ -27,8 +27,8 @@ export default function DashboardLayout({
               <AvatarFallback>U</AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <p className="font-semibold text-sm">User Name</p>
-              <p className="text-xs text-muted-foreground">user@psikotakip.com</p>
+              <p className="font-semibold text-sm">Kullanıcı Adı</p>
+              <p className="text-xs text-muted-foreground">kullanici@psikotakip.com</p>
             </div>
             <Button variant="ghost" size="icon" asChild>
                 <Link href="/"><LogOut className="h-4 w-4" /></Link>
@@ -42,7 +42,7 @@ export default function DashboardLayout({
             <SheetTrigger asChild>
               <Button size="icon" variant="outline">
                 <PanelLeft className="h-5 w-5" />
-                <span className="sr-only">Toggle Menu</span>
+                <span className="sr-only">Menüyü Değiştir</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-64 p-0">
@@ -55,7 +55,7 @@ export default function DashboardLayout({
             </SheetContent>
           </Sheet>
           <div className="flex-1">
-            <h1 className="text-lg font-semibold">Dashboard</h1>
+            <h1 className="text-lg font-semibold">Kontrol Paneli</h1>
           </div>
         </header>
         <main className="flex-1 p-6 bg-gradient-to-br from-background via-teal-50 to-background overflow-auto">

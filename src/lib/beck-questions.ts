@@ -10,212 +10,212 @@ export type BeckQuestion = {
 export const beckQuestions: BeckQuestion[] = [
   {
     id: 1,
-    category: "Sadness",
+    category: "Üzüntü",
     options: [
-      { score: 0, text: "I do not feel sad." },
-      { score: 1, text: "I feel sad much of the time." },
-      { score: 2, text: "I am sad all the time." },
-      { score: 3, text: "I am so sad or unhappy that I can't stand it." }
+      { score: 0, text: "Kendimi üzgün hissetmiyorum." },
+      { score: 1, text: "Çoğu zaman üzgünüm." },
+      { score: 2, text: "Her zaman üzgünüm." },
+      { score: 3, text: "O kadar üzgün ve mutsuzum ki dayanamıyorum." }
     ]
   },
   {
     id: 2,
-    category: "Pessimism",
+    category: "Karamsarlık",
     options: [
-      { score: 0, text: "I am not particularly pessimistic or discouraged about the future." },
-      { score: 1, text: "I feel more pessimistic about the future than I used to." },
-      { score: 2, text: "I do not expect things to work out for me." },
-      { score: 3, text: "I feel that the future is hopeless and that things cannot improve." }
+      { score: 0, text: "Gelecek hakkında özellikle karamsar veya umutsuz değilim." },
+      { score: 1, text: "Gelecek hakkında eskisinden daha karamsarım." },
+      { score: 2, text: "İşlerin benim için yoluna gireceğini beklemiyorum." },
+      { score: 3, text: "Geleceğin umutsuz olduğunu ve hiçbir şeyin düzelmeyeceğini hissediyorum." }
     ]
   },
   {
     id: 3,
-    category: "Past Failure",
+    category: "Geçmişteki Başarısızlık",
     options: [
-      { score: 0, text: "I do not feel like a failure." },
-      { score: 1, text: "I have failed more than I should have." },
-      { score: 2, text: "As I look back on my life, all I can see is a lot of failures." },
-      { score: 3, text: "I feel I am a total failure as a person." }
+      { score: 0, text: "Kendimi başarısız hissetmiyorum." },
+      { score: 1, text: "Gereğinden fazla başarısız oldum." },
+      { score: 2, text: "Hayatıma dönüp baktığımda gördüğüm tek şey bir sürü başarısızlık." },
+      { score: 3, text: "Kişi olarak tam bir başarısızlık olduğumu hissediyorum." }
     ]
   },
   {
     id: 4,
-    category: "Loss of Pleasure",
+    category: "Keyif Alamama",
     options: [
-      { score: 0, text: "I get as much pleasure as I ever did from the things I enjoy." },
-      { score: 1, text: "I don't enjoy things as much as I used to." },
-      { score: 2, text: "I get very little pleasure from the things I used to enjoy." },
-      { score: 3, text: "I can't get any pleasure from the things I used to enjoy." }
+      { score: 0, text: "Zevk aldığım şeylerden eskisi kadar zevk alıyorum." },
+      { score: 1, text: "Eskiden olduğu gibi zevk almıyorum." },
+      { score: 2, text: "Eskiden zevk aldığım şeylerden çok az zevk alıyorum." },
+      { score: 3, text: "Eskiden zevk aldığım şeylerden hiç zevk alamıyorum." }
     ]
   },
   {
     id: 5,
-    category: "Guilty Feelings",
+    category: "Suçluluk Duyguları",
     options: [
-      { score: 0, text: "I don't feel particularly guilty." },
-      { score: 1, text: "I feel guilty over many things I have done or should have done." },
-      { score: 2, text: "I feel quite guilty most of the time." },
-      { score: 3, text: "I feel guilty all of the time." }
+      { score: 0, text: "Özellikle suçlu hissetmiyorum." },
+      { score: 1, text: "Yaptığım ya da yapmam gereken birçok şeyden dolayı suçluluk duyuyorum." },
+      { score: 2, text: "Çoğu zaman kendimi oldukça suçlu hissediyorum." },
+      { score: 3, text: "Her zaman kendimi suçlu hissediyorum." }
     ]
   },
   {
     id: 6,
-    category: "Punishment Feelings",
+    category: "Cezalandırılma Hisleri",
     options: [
-      { score: 0, text: "I don't feel I am being punished." },
-      { score: 1, text: "I feel I may be punished." },
-      { score: 2, text: "I expect to be punished." },
-      { score: 3, text: "I feel I am being punished." }
+      { score: 0, text: "Cezalandırıldığımı hissetmiyorum." },
+      { score: 1, text: "Cezalandırılabileceğimi hissediyorum." },
+      { score: 2, text: "Cezalandırılmayı bekliyorum." },
+      { score: 3, text: "Cezalandırıldığımı hissediyorum." }
     ]
   },
   {
     id: 7,
-    category: "Self-Dislike",
+    category: "Kendinden Hoşlanmama",
     options: [
-      { score: 0, text: "I feel the same about myself as ever." },
-      { score: 1, text: "I have lost confidence in myself." },
-      { score: 2, text: "I am disappointed in myself." },
-      { score: 3, text: "I dislike myself." }
+      { score: 0, text: "Kendimle ilgili her zamanki gibi hissediyorum." },
+      { score: 1, text: "Kendime olan güvenimi kaybettim." },
+      { score: 2, text: "Kendimde hayal kırıklığına uğradım." },
+      { score: 3, text: "Kendimden hoşlanmıyorum." }
     ]
   },
   {
     id: 8,
-    category: "Self-Criticalness",
+    category: "Kendini Eleştirme",
     options: [
-      { score: 0, text: "I don't criticize or blame myself more than usual." },
-      { score: 1, text: "I am more critical of myself than I used to be." },
-      { score: 2, text: "I criticize myself for all of my faults." },
-      { score: 3, text: "I blame myself for everything bad that happens." }
+      { score: 0, text: "Kendimi normalden fazla eleştirmiyor veya suçlamıyorum." },
+      { score: 1, text: "Kendime karşı eskisinden daha eleştirelim." },
+      { score: 2, text: "Tüm hatalarım için kendimi eleştiriyorum." },
+      { score: 3, text: "Olan her kötü şey için kendimi suçluyorum." }
     ]
   },
   {
     id: 9,
-    category: "Suicidal Thoughts or Wishes",
+    category: "İntihar Düşünceleri veya İstekleri",
     options: [
-      { score: 0, text: "I don't have any thoughts of killing myself." },
-      { score: 1, text: "I have thoughts of killing myself, but I would not carry them out." },
-      { score: 2, text: "I would like to kill myself." },
-      { score: 3, text: "I would kill myself if I had the chance." }
+      { score: 0, text: "Kendimi öldürmek gibi bir düşüncem yok." },
+      { score: 1, text: "Kendimi öldürmeyi düşünüyorum ama bunu yapmam." },
+      { score: 2, text: "Kendimi öldürmek isterdim." },
+      { score: 3, text: "Fırsatım olsa kendimi öldürürdüm." }
     ]
   },
   {
     id: 10,
-    category: "Crying",
+    category: "Ağlama",
     options: [
-      { score: 0, text: "I don't cry any more than I used to." },
-      { score: 1, text: "I cry more than I used to." },
-      { score: 2, text: "I cry over every little thing." },
-      { score: 3, text: "I feel like crying, but I can't." }
+      { score: 0, text: "Eskisinden daha fazla ağlamıyorum." },
+      { score: 1, text: "Eskisinden daha fazla ağlıyorum." },
+      { score: 2, text: "Her küçük şeye ağlıyorum." },
+      { score: 3, text: "Ağlamak istiyorum ama ağlayamıyorum." }
     ]
   },
   {
     id: 11,
-    category: "Agitation",
+    category: "Huzursuzluk",
     options: [
-      { score: 0, text: "I am no more restless or wound up than usual." },
-      { score: 1, text: "I feel more restless or wound up than usual." },
-      { score: 2, text: "I am so restless or agitated that it's hard to stay still." },
-      { score: 3, text: "I am so restless or agitated that I have to keep moving or doing something." }
+      { score: 0, text: "Normalden daha huzursuz veya gergin değilim." },
+      { score: 1, text: "Normalden daha huzursuz veya gergin hissediyorum." },
+      { score: 2, text: "O kadar huzursuz ve tedirginim ki yerimde durmakta zorlanıyorum." },
+      { score: 3, text: "O kadar huzursuz ve tedirginim ki sürekli hareket etmek veya bir şeyler yapmak zorundayım." }
     ]
   },
   {
     id: 12,
-    category: "Loss of Interest",
+    category: "İlgi Kaybı",
     options: [
-      { score: 0, text: "I have not lost interest in other people or activities." },
-      { score: 1, text: "I am less interested in other people or things than before." },
-      { score: 2, text: "I have lost most of my interest in other people and have little feeling for them." },
-      { score: 3, text: "I have lost all of my interest in other people and don't care about them at all." }
+      { score: 0, text: "Diğer insanlara veya etkinliklere olan ilgimi kaybetmedim." },
+      { score: 1, text: "Diğer insanlara veya şeylere eskisinden daha az ilgi duyuyorum." },
+      { score: 2, text: "Diğer insanlara olan ilgimin çoğunu kaybettim ve onlara karşı çok az şey hissediyorum." },
+      { score: 3, text: "Diğer insanlara olan tüm ilgimi kaybettim ve onları hiç umursamıyorum." }
     ]
   },
   {
     id: 13,
-    category: "Indecisiveness",
+    category: "Kararsızlık",
     options: [
-      { score: 0, text: "I make decisions about as well as ever." },
-      { score: 1, text: "I find it more difficult to make decisions than usual." },
-      { score: 2, text: "I have much greater difficulty in making decisions than I used to." },
-      { score: 3, text: "I can't make any decisions at all anymore." }
+      { score: 0, text: "Kararlarımı her zamanki gibi iyi veriyorum." },
+      { score: 1, text: "Karar vermekte normalden daha çok zorlanıyorum." },
+      { score: 2, text: "Eskisine göre karar vermekte çok daha fazla zorlanıyorum." },
+      { score: 3, text: "Artık hiç karar veremiyorum." }
     ]
   },
   {
     id: 14,
-    category: "Worthlessness",
+    category: "Değersizlik",
     options: [
-      { score: 0, text: "I do not feel I am worthless." },
-      { score: 1, text: "I don't consider myself as worthwhile and useful as I used to." },
-      { score: 2, text: "I feel more worthless as compared to other people." },
-      { score: 3, text: "I feel utterly worthless." }
+      { score: 0, text: "Kendimi değersiz hissetmiyorum." },
+      { score: 1, text: "Kendimi eskisi kadar değerli ve yararlı görmüyorum." },
+      { score: 2, text: "Diğer insanlara kıyasla kendimi daha değersiz hissediyorum." },
+      { score: 3, text: "Kendimi tamamen değersiz hissediyorum." }
     ]
   },
   {
     id: 15,
-    category: "Loss of Energy",
+    category: "Enerji Kaybı",
     options: [
-      { score: 0, text: "I have as much energy as ever." },
-      { score: 1, text: "I have less energy than I used to have." },
-      { score: 2, text: "I don't have enough energy to do very much." },
-      { score: 3, text: "I don't have enough energy to do anything." }
+      { score: 0, text: "Her zamanki kadar enerjim var." },
+      { score: 1, text: "Eskisinden daha az enerjim var." },
+      { score: 2, text: "Çok fazla bir şey yapacak enerjim yok." },
+      { score: 3, text: "Hiçbir şey yapacak enerjim yok." }
     ]
   },
   {
     id: 16,
-    category: "Changes in Sleeping Pattern",
+    category: "Uyku Düzenindeki Değişiklikler",
     options: [
-      { score: 0, text: "I have not experienced any change in my sleeping pattern." },
-      { score: 1, text: "I sleep somewhat more or less than usual." },
-      { score: 2, text: "I sleep a lot more or less than usual." },
-      { score: 3, text: "I sleep most of the day or I wake up 1-2 hours early and can't get back to sleep." }
+      { score: 0, text: "Uyku düzenimde herhangi bir değişiklik yaşamadım." },
+      { score: 1, text: "Normalden biraz daha fazla veya daha az uyuyorum." },
+      { score: 2, text: "Normalden çok daha fazla veya daha az uyuyorum." },
+      { score: 3, text: "Günün çoğunda uyuyorum veya 1-2 saat erken uyanıyorum ve tekrar uyuyamıyorum." }
     ]
   },
   {
     id: 17,
-    category: "Irritability",
+    category: "Sinirlilik",
     options: [
-      { score: 0, text: "I am no more irritable than usual." },
-      { score: 1, text: "I am more irritable than usual." },
-      { score: 2, text: "I am much more irritable than usual." },
-      { score: 3, text: "I am irritable all the time." }
+      { score: 0, text: "Normalden daha sinirli değilim." },
+      { score: 1, text: "Normalden daha sinirliyim." },
+      { score: 2, text: "Normalden çok daha sinirliyim." },
+      { score: 3, text: "Her zaman sinirliyim." }
     ]
   },
   {
     id: 18,
-    category: "Changes in Appetite",
+    category: "İştah Değişiklikleri",
     options: [
-      { score: 0, text: "I have not experienced any change in my appetite." },
-      { score: 1, text: "My appetite is somewhat less or greater than usual." },
-      { score: 2, text: "My appetite is much less or greater than usual." },
-      { score: 3, text: "I have no appetite at all or I crave food all the time." }
+      { score: 0, text: "İştahımda herhangi bir değişiklik yaşamadım." },
+      { score: 1, text: "İştahım normalden biraz daha az veya daha fazla." },
+      { score: 2, text: "İştahım normalden çok daha az veya daha fazla." },
+      { score: 3, text: "Hiç iştahım yok ya da sürekli yemek aşeriyorum." }
     ]
   },
   {
     id: 19,
-    category: "Concentration Difficulty",
+    category: "Konsantrasyon Güçlüğü",
     options: [
-      { score: 0, text: "I can concentrate as well as ever." },
-      { score: 1, text: "I can't concentrate as well as usual." },
-      { score: 2, text: "It's hard to keep my mind on anything for very long." },
-      { score: 3, text: "I find I can't concentrate on anything." }
+      { score: 0, text: "Her zamanki gibi konsantre olabiliyorum." },
+      { score: 1, text: "Normaldeki gibi konsantre olamıyorum." },
+      { score: 2, text: "Zihnimi uzun süre bir şeye odaklamak zor." },
+      { score: 3, text: "Hiçbir şeye konsantre olamadığımı fark ettim." }
     ]
   },
   {
     id: 20,
-    category: "Tiredness or Fatigue",
+    category: "Yorgunluk veya Bitkinlik",
     options: [
-      { score: 0, text: "I am no more tired or fatigued than usual." },
-      { score: 1, text: "I get tired or fatigued more easily than usual." },
-      { score: 2, text: "I am too tired or fatigued to do a lot of the things I used to do." },
-      { score: 3, text: "I am too tired or fatigued to do most of the things I used to do." }
+      { score: 0, text: "Normalden daha yorgun veya bitkin değilim." },
+      { score: 1, text: "Normalden daha kolay yoruluyor veya bitkin düşüyorum." },
+      { score: 2, text: "Eskiden yaptığım birçok şeyi yapamayacak kadar yorgun veya bitkinim." },
+      { score: 3, text: "Eskiden yaptığım şeylerin çoğunu yapamayacak kadar yorgun veya bitkinim." }
     ]
   },
   {
     id: 21,
-    category: "Loss of Interest in Sex",
+    category: "Cinselliğe İlgi Kaybı",
     options: [
-      { score: 0, text: "I have not noticed any recent change in my interest in sex." },
-      { score: 1, text: "I am less interested in sex than I used to be." },
-      { score: 2, text: "I am much less interested in sex now." },
-      { score: 3, text: "I have lost interest in sex completely." }
+      { score: 0, text: "Cinselliğe olan ilgimde son zamanlarda bir değişiklik fark etmedim." },
+      { score: 1, text: "Cinselliğe eskisinden daha az ilgi duyuyorum." },
+      { score: 2, text: "Şimdi cinselliğe çok daha az ilgi duyuyorum." },
+      { score: 3, text: "Cinselliğe olan ilgimi tamamen kaybettim." }
     ]
   }
 ];

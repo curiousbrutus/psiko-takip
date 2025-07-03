@@ -27,32 +27,32 @@ export default function RegisterPage() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle className="text-2xl">Sign Up</CardTitle>
+        <CardTitle className="text-2xl">Kayıt Ol</CardTitle>
         <CardDescription>
-          Enter your information to create an account.
+          Hesap oluşturmak için bilgilerinizi girin.
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleRegister}>
         <CardContent className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="full-name">Full name</Label>
-            <Input id="full-name" placeholder="Jane Doe" required />
+            <Label htmlFor="full-name">Ad Soyad</Label>
+            <Input id="full-name" placeholder="Adınız Soyadınız" required />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">E-posta</Label>
             <Input id="email" type="email" placeholder="m@example.com" required />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Şifre</Label>
             <Input id="password" type="password" required />
           </div>
         </CardContent>
         <CardFooter className="flex flex-col">
-          <Button className="w-full" type="submit">Create account</Button>
+          <Button className="w-full" type="submit">Hesap Oluştur</Button>
           <div className="mt-4 text-center text-sm">
-            Already have an account?{" "}
+            Zaten bir hesabınız var mı?{" "}
             <Link href="/login" className="underline text-primary">
-              Sign in
+              Giriş Yap
             </Link>
           </div>
         </CardFooter>

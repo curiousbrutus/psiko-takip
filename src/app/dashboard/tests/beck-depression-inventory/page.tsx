@@ -17,7 +17,7 @@ import { Loader2, Lightbulb, ShieldCheck, ClipboardList } from 'lucide-react';
 
 const formSchema = z.object(
   Object.fromEntries(
-    beckQuestions.map(q => [`q${q.id}`, z.string({ required_error: "Please select an option." })])
+    beckQuestions.map(q => [`q${q.id}`, z.string({ required_error: "Lütfen bir seçenek seçin." })])
   )
 );
 
@@ -41,13 +41,13 @@ export default function BeckDepressionInventoryPage() {
     if (result.success) {
       setAnalysisResult(result.data);
       toast({
-        title: "Analysis Complete",
-        description: "Your results have been successfully analyzed.",
+        title: "Analiz Tamamlandı",
+        description: "Sonuçlarınız başarıyla analiz edildi.",
         variant: "default",
       });
     } else {
       toast({
-        title: "Analysis Failed",
+        title: "Analiz Başarısız",
         description: result.error,
         variant: "destructive",
       });
@@ -58,9 +58,9 @@ export default function BeckDepressionInventoryPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold font-headline">Beck Depression Inventory (BDI-II)</h1>
+        <h1 className="text-3xl font-bold font-headline">Beck Depresyon Envanteri (BDE-II)</h1>
         <p className="text-muted-foreground">
-          For each item, please select the statement that best describes how you have been feeling for the past two weeks, including today.
+          Her bir madde için, son iki hafta boyunca, bugün de dahil olmak üzere, nasıl hissettiğinizi en iyi tanımlayan ifadeyi seçin.
         </p>
       </div>
 
@@ -106,9 +106,9 @@ export default function BeckDepressionInventoryPage() {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Analyzing...
+                Analiz ediliyor...
               </>
-            ) : "Submit for Analysis"}
+            ) : "Analiz İçin Gönder"}
           </Button>
         </form>
       </Form>
@@ -116,23 +116,23 @@ export default function BeckDepressionInventoryPage() {
       {analysisResult && (
         <Card className="mt-8">
             <CardHeader>
-                <CardTitle className="text-2xl">Your AI-Powered Analysis</CardTitle>
-                <CardDescription>This is an AI-generated analysis of your results. It is not a diagnosis. Please consult a healthcare professional.</CardDescription>
+                <CardTitle className="text-2xl">Yapay Zeka Destekli Analiziniz</CardTitle>
+                <CardDescription>Bu, sonuçlarınızın yapay zeka tarafından oluşturulmuş bir analizidir. Bu bir teşhis değildir. Lütfen bir sağlık uzmanına danışın.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
                 <Alert>
                     <ShieldCheck className="h-4 w-4" />
-                    <AlertTitle>Severity</AlertTitle>
+                    <AlertTitle>Şiddet</AlertTitle>
                     <AlertDescription>{analysisResult.severity}</AlertDescription>
                 </Alert>
                 <Alert>
                     <Lightbulb className="h-4 w-4" />
-                    <AlertTitle>Personalized Insights</AlertTitle>
+                    <AlertTitle>Kişiselleştirilmiş İçgörüler</AlertTitle>
                     <AlertDescription>{analysisResult.insights}</AlertDescription>
                 </Alert>
                 <Alert>
                     <ClipboardList className="h-4 w-4" />
-                    <AlertTitle>Personalized Guidance</AlertTitle>
+                    <AlertTitle>Kişiselleştirilmiş Rehberlik</AlertTitle>
                     <AlertDescription>{analysisResult.guidance}</AlertDescription>
                 </Alert>
             </CardContent>
