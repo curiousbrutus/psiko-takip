@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Logo } from '@/components/logo';
+import { ArrowRight } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -26,6 +27,13 @@ export default function Home() {
               Hesap Oluştur
             </Link>
           </Button>
+        </div>
+         <div className="mt-6">
+            <Button asChild variant="link" className="text-muted-foreground">
+                <Link href="/demo">
+                    Merak mı ediyorsunuz? Deneme turu yapın <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+            </Button>
         </div>
       </div>
     </main>

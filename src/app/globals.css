@@ -4,6 +4,7 @@
 
 @layer base {
   :root {
+    scroll-behavior: smooth;
     --background: 60 11% 96%; /* #F5F5F3 */
     --foreground: 222 84% 5%;
     --card: 0 0% 100%;
