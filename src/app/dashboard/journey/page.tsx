@@ -1,12 +1,19 @@
+
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/use-auth';
+import { db } from '@/lib/firebase/config';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, limit } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, Sunrise, Sun, Sunset, Smile, Leaf, Meh, HeartPulse, Frown, Wind, BrainCircuit, Book, Sparkles } from 'lucide-react';
+import { CheckCircle2, Sunrise, Sun, Sunset, Smile, Leaf, Meh, HeartPulse, Frown, Wind, BrainCircuit, Book, Sparkles, Loader2, Share2 } from 'lucide-react';
 import Link from 'next/link';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 const moodOptions = [
   { name: 'Mutlu', icon: Smile },
@@ -17,14 +24,125 @@ const moodOptions = [
 ];
 
 export default function DailyJourneyPage() {
+  const { user, userData } = useAuth();
+  const { toast } = useToast();
+
   const [morningMood, setMorningMood] = useState<string | null>(null);
+  const [morningNiyet, setMorningNiyet] = useState("");
   const [eveningMood, setEveningMood] = useState<string | null>(null);
+  const [minnettar, setMinnettar] = useState("");
+  const [gunluk, setGunluk] = useState("");
+  
+  const [isMinnettarShared, setIsMinnettarShared] = useState(false);
+  const [isGunlukShared, setIsGunlukShared] = useState(false);
 
   const [tasksCompleted, setTasksCompleted] = useState({
     morning: false,
     midday: false,
     evening: false,
   });
+
+  const [loading, setLoading] = useState({ morning: false, midday: false, evening: false });
+
+  // Function to check if a task was completed today
+  const checkIfTaskCompletedToday = async (taskName: string) => {
+    if (!user) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const q = query(
+        collection(db, 'journalEntries'), 
+        where('userId', '==', user.uid),
+        where('prompt', '==', taskName),
+        where('createdAt', '>=', today),
+        limit(1)
+    );
+    const querySnapshot = await getDocs(q);
+    return !querySnapshot.empty;
+  };
+
+  useEffect(() => {
+    const checkCompletionStatus = async () => {
+        const morningDone = await checkIfTaskCompletedToday("Günün Niyeti");
+        // This is a simplified check. A full implementation would check all evening tasks.
+        const eveningDone = await checkIfTaskCompletedToday("Serbest Günlük"); 
+        setTasksCompleted({ morning: morningDone, midday: false, evening: eveningDone });
+    };
+    if (user) {
+        checkCompletionStatus();
+    }
+  }, [user]);
+
+  const completeTask = async (task: 'morning' | 'midday' | 'evening') => {
+    if (!user) return;
+    
+    setLoading(prev => ({ ...prev, [task]: true }));
+
+    try {
+        if (task === 'morning') {
+            if (!morningMood) {
+                toast({ title: "Hata", description: "Lütfen sabah ruh halinizi seçin.", variant: "destructive" });
+                setLoading(prev => ({...prev, morning: false}));
+                return;
+            }
+            await addDoc(collection(db, 'moodEntries'), {
+                userId: user.uid,
+                mood: morningMood,
+                triggers: [], 
+                createdAt: serverTimestamp(),
+                period: 'morning'
+            });
+            await addDoc(collection(db, 'journalEntries'), {
+                userId: user.uid,
+                content: morningNiyet,
+                prompt: "Günün Niyeti",
+                isShared: false, // Morning intentions are private by default
+                createdAt: serverTimestamp(),
+            });
+        }
+        
+        if (task === 'evening') {
+             if (!eveningMood) {
+                toast({ title: "Hata", description: "Lütfen akşam ruh halinizi seçin.", variant: "destructive" });
+                setLoading(prev => ({...prev, evening: false}));
+                return;
+            }
+            await addDoc(collection(db, 'moodEntries'), {
+                userId: user.uid,
+                mood: eveningMood,
+                triggers: [],
+                createdAt: serverTimestamp(),
+                period: 'evening'
+            });
+             await addDoc(collection(db, 'journalEntries'), {
+                userId: user.uid,
+                content: minnettar,
+                prompt: "Bugün minnettar olduğun 3 şey nedir?",
+                isShared: isMinnettarShared,
+                createdAt: serverTimestamp(),
+            });
+             await addDoc(collection(db, 'journalEntries'), {
+                userId: user.uid,
+                content: gunluk,
+                prompt: "Serbest Günlük",
+                isShared: isGunlukShared,
+                createdAt: serverTimestamp(),
+            });
+        }
+        
+        // Gamification logic (XP, streak, level) is now handled by a backend Cloud Function.
+        // The function will be triggered by the creation of the documents above.
+
+        toast({ title: "Kaydedildi!", description: "Günün bu bölümünü başarıyla tamamladın." });
+        setTasksCompleted(prev => ({...prev, [task]: true}));
+
+    } catch (error) {
+        console.error("Error completing task: ", error);
+        toast({ title: "Hata", description: "Göreviniz kaydedilemedi. Lütfen tekrar deneyin.", variant: "destructive" });
+    } finally {
+        setLoading(prev => ({ ...prev, [task]: false }));
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -36,7 +154,7 @@ export default function DailyJourneyPage() {
       <Accordion type="multiple" defaultValue={["item-1"]} className="w-full space-y-4">
         <AccordionItem value="item-1" className="border-none">
           <Card>
-            <AccordionTrigger className="p-6 hover:no-underline [&[data-state=open]>div>svg.lucide-check-circle-2]:hidden">
+            <AccordionTrigger className="p-6 hover:no-underline [&[data-state=open]>div>svg.lucide-check-circle-2]:hidden" disabled={tasksCompleted.morning}>
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-4">
                   <Sunrise className="h-6 w-6 text-primary" />
@@ -68,9 +186,12 @@ export default function DailyJourneyPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold mb-2">Günün Niyeti</h3>
-                  <Textarea placeholder="Bugün kendim için yapacağım küçük bir şey... (Örn: 10 dakika mola vereceğim)" />
+                  <Textarea placeholder="Bugün kendim için yapacağım küçük bir şey... (Örn: 10 dakika mola vereceğim)" value={morningNiyet} onChange={(e) => setMorningNiyet(e.target.value)} />
                 </div>
-                <Button onClick={() => setTasksCompleted(prev => ({...prev, morning: true}))}>Sabah Görevini Tamamla</Button>
+                <Button onClick={() => completeTask('morning')} disabled={loading.morning || tasksCompleted.morning}>
+                  {loading.morning && <Loader2 className="animate-spin mr-2" />}
+                  {tasksCompleted.morning ? "Tamamlandı" : "Sabah Görevini Tamamla"}
+                </Button>
               </div>
             </AccordionContent>
           </Card>
@@ -78,7 +199,7 @@ export default function DailyJourneyPage() {
 
         <AccordionItem value="item-2" className="border-none">
           <Card>
-             <AccordionTrigger className="p-6 hover:no-underline [&[data-state=open]>div>svg.lucide-check-circle-2]:hidden">
+             <AccordionTrigger className="p-6 hover:no-underline [&[data-state=open]>div>svg.lucide-check-circle-2]:hidden" disabled={tasksCompleted.midday}>
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-4">
                   <Sun className="h-6 w-6 text-primary" />
@@ -106,7 +227,6 @@ export default function DailyJourneyPage() {
                   <h3 className="font-semibold mb-2">BDT Mini Egzersizleri</h3>
                    <Button variant="outline"><BrainCircuit className="mr-2 h-4 w-4" /> Olumsuz Düşünceye Meydan Oku</Button>
                 </div>
-                <Button onClick={() => setTasksCompleted(prev => ({...prev, midday: true}))}>Bir Destek Egzersizi Tamamladım</Button>
               </div>
             </AccordionContent>
           </Card>
@@ -114,7 +234,7 @@ export default function DailyJourneyPage() {
 
         <AccordionItem value="item-3" className="border-none">
           <Card>
-            <AccordionTrigger className="p-6 hover:no-underline [&[data-state=open]>div>svg.lucide-check-circle-2]:hidden">
+            <AccordionTrigger className="p-6 hover:no-underline [&[data-state=open]>div>svg.lucide-check-circle-2]:hidden" disabled={tasksCompleted.evening}>
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-4">
                   <Sunset className="h-6 w-6 text-primary" />
@@ -130,11 +250,23 @@ export default function DailyJourneyPage() {
                 <div className="space-y-6">
                     <div>
                         <h3 className="font-semibold mb-2 flex items-center gap-2"><Sparkles className="h-4 w-4 text-accent" /> Bugün minnettar olduğun 3 şey nedir?</h3>
-                        <Textarea placeholder="1. ..." />
+                        <Textarea placeholder="1. ..." value={minnettar} onChange={(e) => setMinnettar(e.target.value)} />
+                        {userData?.connectedTherapist && (
+                          <div className="flex items-center space-x-2 mt-2">
+                            <Switch id="share-minnettar" checked={isMinnettarShared} onCheckedChange={setIsMinnettarShared} />
+                            <Label htmlFor="share-minnettar" className="text-sm text-muted-foreground flex items-center gap-1"><Share2 className="h-3 w-3"/> Terapistle paylaş</Label>
+                          </div>
+                        )}
                     </div>
                     <div>
                         <h3 className="font-semibold mb-2 flex items-center gap-2"><Book className="h-4 w-4 text-accent" /> Serbest Günlük</h3>
-                        <Textarea placeholder="Aklından geçenleri buraya yazabilirsin..." />
+                        <Textarea placeholder="Aklından geçenleri buraya yazabilirsin..." value={gunluk} onChange={(e) => setGunluk(e.target.value)} />
+                         {userData?.connectedTherapist && (
+                          <div className="flex items-center space-x-2 mt-2">
+                            <Switch id="share-gunluk" checked={isGunlukShared} onCheckedChange={setIsGunlukShared} />
+                            <Label htmlFor="share-gunluk" className="text-sm text-muted-foreground flex items-center gap-1"><Share2 className="h-3 w-3"/> Terapistle paylaş</Label>
+                          </div>
+                        )}
                     </div>
                      <div>
                         <h3 className="font-semibold mb-2">Günü nasıl bitiriyorsun?</h3>
@@ -152,7 +284,10 @@ export default function DailyJourneyPage() {
                             ))}
                         </div>
                     </div>
-                    <Button onClick={() => setTasksCompleted(prev => ({...prev, evening: true}))}>Akşam Görevini Tamamla</Button>
+                    <Button onClick={() => completeTask('evening')} disabled={loading.evening || tasksCompleted.evening}>
+                      {loading.evening && <Loader2 className="animate-spin mr-2" />}
+                      {tasksCompleted.evening ? "Tamamlandı" : "Akşam Görevini Tamamla"}
+                    </Button>
                 </div>
             </AccordionContent>
           </Card>

@@ -1,10 +1,30 @@
+"use client";
+
+import { useEffect, useState } from 'react';
+import { useAuth } from '@/hooks/use-auth';
+import { db } from '@/lib/firebase/config';
+import { doc, getDoc } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ArrowRight, Flame, Trophy, Award, BarChart3 } from 'lucide-react';
 
 export default function DashboardPage() {
-  const streak = 5; // Placeholder
+  const { user } = useAuth();
+  const [streak, setStreak] = useState(0);
+
+  useEffect(() => {
+    const fetchGamificationData = async () => {
+      if (user) {
+        const gamificationRef = doc(db, 'gamification', user.uid);
+        const docSnap = await getDoc(gamificationRef);
+        if (docSnap.exists()) {
+          setStreak(docSnap.data().currentStreak || 0);
+        }
+      }
+    };
+    fetchGamificationData();
+  }, [user]);
 
   return (
     <div className="space-y-6">

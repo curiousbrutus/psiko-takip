@@ -13,22 +13,19 @@ export default function Home() {
           Psikotakip'e Hoş Geldiniz
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-          Zihinsel sağlık yolculuğunuzda size nasıl yardımcı olabiliriz? Lütfen rolünüzü seçin.
+          Zihinsel sağlık yolculuğunuzda size yardımcı olmak için buradayız. Başlamak için giriş yapın veya yeni bir hesap oluşturun.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button asChild size="lg" className="font-bold">
             <Link href="/login">
-              Danışan Olarak Devam Et
+              Giriş Yap
             </Link>
           </Button>
           <Button asChild size="lg" variant="outline" className="font-bold">
-            <Link href="/therapist/login">
-              Terapist Olarak Devam Et
+            <Link href="/register">
+              Hesap Oluştur
             </Link>
           </Button>
-        </div>
-        <div className="mt-6">
-            <p className="text-sm text-muted-foreground">Terapist misiniz? Profesyonel araçlarımızı keşfedin.</p>
         </div>
       </div>
     </main>
