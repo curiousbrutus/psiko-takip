@@ -1,10 +1,11 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { LayoutDashboard, FlaskConical, Settings, LogOut, PanelLeft, User } from 'lucide-react';
+import { LogOut, PanelLeft } from 'lucide-react';
 import { Logo } from "@/components/logo";
 import Link from 'next/link';
 import DashboardNav from './_components/dashboard-nav';
+import HeaderTitle from "./_components/header-title";
 
 export default function DashboardLayout({
   children,
@@ -23,7 +24,7 @@ export default function DashboardLayout({
         <div className="p-4 border-t mt-auto">
           <div className="flex items-center gap-4">
             <Avatar>
-              <AvatarImage src="https://placehold.co/40x40" alt="@user" />
+              <AvatarImage src="https://placehold.co/40x40.png" data-ai-hint="profile picture" alt="@user" />
               <AvatarFallback>U</AvatarFallback>
             </Avatar>
             <div className="flex-1">
@@ -55,7 +56,7 @@ export default function DashboardLayout({
             </SheetContent>
           </Sheet>
           <div className="flex-1">
-            <h1 className="text-lg font-semibold">Kontrol Paneli</h1>
+            <HeaderTitle />
           </div>
         </header>
         <main className="flex-1 p-6 bg-gradient-to-br from-background via-teal-50 to-background overflow-auto">

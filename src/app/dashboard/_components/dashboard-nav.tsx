@@ -4,10 +4,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, FlaskConical, Settings, User } from 'lucide-react';
+import { LayoutDashboard, FlaskConical, Settings, User, Route } from 'lucide-react';
 
 const navItems = [
     { href: '/dashboard', label: 'Kontrol Paneli', icon: LayoutDashboard },
+    { href: '/dashboard/journey', label: 'Günlük Yolculuk', icon: Route },
     { href: '/dashboard/tests', label: 'Testler', icon: FlaskConical },
     { href: '/dashboard/profile', label: 'Profil', icon: User },
     { href: '/dashboard/settings', label: 'Ayarlar', icon: Settings },
