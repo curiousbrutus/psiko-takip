@@ -5,10 +5,8 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { 
     signInWithEmailAndPassword,
-    createUserWithEmailAndPassword,
-    updateProfile
 } from "firebase/auth"
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore"
+import { doc, getDoc } from "firebase/firestore"
 import { auth, db } from "@/lib/firebase/config"
 import { useToast } from "@/hooks/use-toast"
 
@@ -38,10 +36,12 @@ export default function LoginPage() {
     let email = formData.get("email") as string
     let password = formData.get("password") as string
 
-    // Special handling for the admin user request
+    // Special handling for the admin user for demo purposes
     if (email.toLowerCase() === 'admin' && password === 'admin') {
-      email = 'admin@psikotakip.com'
-      password = 'adminadmin' // Firebase requires a password of at least 6 characters
+      toast({ title: "Demo Girişi", description: "Terapist paneline yönlendiriliyorsunuz..." });
+      router.push('/therapist/dashboard');
+      setLoading(false);
+      return;
     }
 
     if (!email || !password) {
@@ -72,36 +72,11 @@ export default function LoginPage() {
         }
 
     } catch (error: any) {
-      // If admin user doesn't exist, create it on the fly
-      if (email === 'admin@psikotakip.com' && (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential')) {
-        try {
-          const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-          const user = userCredential.user
-          
-          await updateProfile(user, { displayName: "Admin" })
-          
-          await setDoc(doc(db, "users", user.uid), {
-              uid: user.uid,
-              displayName: "Admin",
-              email: user.email,
-              role: 'terapist', // Using 'terapist' as it has a dashboard
-              createdAt: serverTimestamp(),
-          });
-          
-          toast({ title: "Admin Hesabı Oluşturuldu", description: "Giriş yapılıyor..." });
-          router.push('/therapist/dashboard');
-          return;
-
-        } catch (creationError: any) {
-          toast({ title: "Admin Oluşturma Hatası", description: "Admin hesabı oluşturulamadı. Lütfen tekrar deneyin.", variant: "destructive" })
-          setLoading(false);
-          return;
-        }
-      }
-
         let errorMessage = "Giriş yapılamadı. Lütfen bilgilerinizi kontrol edin."
         if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
             errorMessage = "E-posta veya şifre hatalı."
+        } else if (error.code === 'auth/invalid-api-key') {
+            errorMessage = "Firebase bağlantı hatası. API anahtarlarınızı kontrol edin."
         }
         toast({ title: "Giriş Başarısız", description: errorMessage, variant: "destructive" })
         setLoading(false)
@@ -113,14 +88,14 @@ export default function LoginPage() {
       <CardHeader>
         <CardTitle className="text-2xl">Giriş Yap</CardTitle>
         <CardDescription>
-          Hesabınıza giriş yapmak için e-postanızı girin. Admin girişi için her iki alana da 'admin' yazabilirsiniz.
+          Hesabınıza giriş yapmak için e-postanızı girin. Demo için her iki alana da 'admin' yazabilirsiniz.
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleLogin}>
         <CardContent className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="email">E-posta</Label>
-            <Input name="email" id="email" type="email" placeholder="m@example.com" required />
+            <Input name="email" id="email" type="text" placeholder="m@example.com" required />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">Şifre</Label>
