@@ -54,6 +54,7 @@ export default function LoginPage() {
             if (userData.role === 'terapist') {
                 router.push('/therapist/dashboard')
             } else {
+                // This covers both 'danisan' and 'hastane_calisani' roles
                 router.push('/dashboard')
             }
         } else {
@@ -77,7 +78,7 @@ export default function LoginPage() {
       <CardHeader>
         <CardTitle className="text-2xl">Giriş Yap</CardTitle>
         <CardDescription>
-          Hesabınıza giriş yapmak için aşağıya e-postanızı girin.
+          Hesabınıza giriş yapmak için e-postanızı girin. Kurumsal çalışanlar da buradan giriş yapabilir.
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleLogin}>

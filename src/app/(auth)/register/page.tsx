@@ -35,6 +35,11 @@ export default function RegisterPage() {
         const fullName = formData.get("full-name") as string
         const email = formData.get("email") as string
         const password = formData.get("password") as string
+        // Corporate invite code logic would go here in a real scenario
+        // const inviteCode = formData.get("invite-code") as string;
+        
+        // For now, we assume registration is for danisan/terapist
+        // A corporate user would be created via an admin panel or a different flow.
 
         if (!fullName || !email || !password) {
             toast({ title: "Hata", description: "Lütfen tüm alanları doldurun.", variant: "destructive" })
@@ -48,21 +53,19 @@ export default function RegisterPage() {
 
             await updateProfile(user, { displayName: fullName })
 
-            // This is where we create the user document in Firestore.
-            // A Cloud Function (`onUserCreate`) should listen for this creation
-            // to set custom claims for role-based access control.
             await setDoc(doc(db, "users", user.uid), {
                 uid: user.uid,
                 displayName: fullName,
                 email: user.email,
                 role: role,
+                organizationId: null, // Default to null for public registration
                 createdAt: serverTimestamp(),
                 subscription: { status: 'free', expires: null },
                 ...(role === 'terapist' && { danisanlarim: [] }),
                 ...(role === 'danisan' && { connectedTherapist: null }),
             });
 
-            // Create initial gamification document for clients
+            // Create initial gamification document
             if (role === 'danisan') {
                 await setDoc(doc(db, "gamification", user.uid), {
                     xp: 0,
@@ -120,6 +123,9 @@ export default function RegisterPage() {
                     </div>
                 </RadioGroup>
             </div>
+            <p className="text-sm text-center text-muted-foreground">
+                Kurumsal bir davet kodunuz mu var? Şimdilik normal kayıt oluşturun, davet kodu özelliği yakında eklenecektir.
+            </p>
           <div className="grid gap-2">
             <Label htmlFor="full-name">Ad Soyad</Label>
             <Input name="full-name" id="full-name" placeholder="Adınız Soyadınız" required />
