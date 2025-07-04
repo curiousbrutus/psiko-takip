@@ -27,7 +27,7 @@ export default function LoginPage() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle className="text-2xl">Giriş Yap</CardTitle>
+        <CardTitle className="text-2xl">Danışan Girişi</CardTitle>
         <CardDescription>
           Hesabınıza giriş yapmak için aşağıya e-postanızı girin.
         </CardDescription>
@@ -43,12 +43,18 @@ export default function LoginPage() {
             <Input id="password" type="password" required />
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col">
+        <CardFooter className="flex flex-col items-center">
           <Button className="w-full" type="submit">Giriş Yap</Button>
           <div className="mt-4 text-center text-sm">
             Hesabınız yok mu?{" "}
             <Link href="/register" className="underline text-primary">
               Kayıt Ol
+            </Link>
+          </div>
+           <div className="mt-2 text-center text-sm">
+            Terapist misiniz?{" "}
+            <Link href="/therapist/login" className="underline text-primary">
+              Buradan giriş yapın
             </Link>
           </div>
         </CardFooter>

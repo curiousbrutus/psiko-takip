@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { CheckCircle2, Sunrise, Sun, Sunset, Smile, Leaf, Meh, HeartPulse, Frown, Wind, BrainCircuit, Book, Sparkles } from 'lucide-react';
+import Link from 'next/link';
 
 const moodOptions = [
   { name: 'Mutlu', icon: Smile },
@@ -94,8 +95,11 @@ export default function DailyJourneyPage() {
                 <div>
                   <h3 className="font-semibold mb-2">Nefes Egzersizleri</h3>
                   <div className="flex gap-2">
-                    <Button variant="outline"><Wind className="mr-2 h-4 w-4" /> 1 Dakika Mola</Button>
-                    <Button variant="outline"><Wind className="mr-2 h-4 w-4" /> 3 Dakika Kutu Nefesi</Button>
+                     <Button variant="outline" asChild>
+                        <Link href="/dashboard/journey/breathing-exercise">
+                            <Wind className="mr-2 h-4 w-4" /> Bir Mola Ver
+                        </Link>
+                    </Button>
                   </div>
                 </div>
                 <div>
@@ -125,11 +129,11 @@ export default function DailyJourneyPage() {
             <AccordionContent className="p-6 pt-0">
                 <div className="space-y-6">
                     <div>
-                        <h3 className="font-semibold mb-2 flex items-center gap-2"><Sparkles className="h-4 w-4 text-accent-foreground" /> Bugün minnettar olduğun 3 şey nedir?</h3>
+                        <h3 className="font-semibold mb-2 flex items-center gap-2"><Sparkles className="h-4 w-4 text-accent" /> Bugün minnettar olduğun 3 şey nedir?</h3>
                         <Textarea placeholder="1. ..." />
                     </div>
                     <div>
-                        <h3 className="font-semibold mb-2 flex items-center gap-2"><Book className="h-4 w-4 text-accent-foreground" /> Serbest Günlük</h3>
+                        <h3 className="font-semibold mb-2 flex items-center gap-2"><Book className="h-4 w-4 text-accent" /> Serbest Günlük</h3>
                         <Textarea placeholder="Aklından geçenleri buraya yazabilirsin..." />
                     </div>
                      <div>

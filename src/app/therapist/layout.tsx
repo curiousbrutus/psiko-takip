@@ -1,13 +1,33 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { LogOut, PanelLeft } from 'lucide-react';
+import { LogOut, PanelLeft, Users, Calendar, Settings } from 'lucide-react';
 import { Logo } from "@/components/logo";
 import Link from 'next/link';
-import DashboardNav from './_components/dashboard-nav';
-import HeaderTitle from "./_components/header-title";
 
-export default function DashboardLayout({
+function TherapistNav() {
+    return (
+        <ul className="space-y-2">
+            <li>
+                <Button variant="ghost" className="w-full justify-start" asChild>
+                    <Link href="/therapist/dashboard"><Users className="mr-2 h-4 w-4" /> Danışanlar</Link>
+                </Button>
+            </li>
+            <li>
+                <Button variant="ghost" className="w-full justify-start" asChild>
+                    <Link href="#"><Calendar className="mr-2 h-4 w-4" /> Takvim</Link>
+                </Button>
+            </li>
+            <li>
+                <Button variant="ghost" className="w-full justify-start" asChild>
+                    <Link href="#"><Settings className="mr-2 h-4 w-4" /> Ayarlar</Link>
+                </Button>
+            </li>
+        </ul>
+    );
+}
+
+export default function TherapistLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -19,17 +39,17 @@ export default function DashboardLayout({
             <Logo inSidebar />
         </div>
         <nav className="flex-1 p-4">
-            <DashboardNav />
+            <TherapistNav />
         </nav>
         <div className="p-4 border-t mt-auto">
           <div className="flex items-center gap-4">
             <Avatar>
-              <AvatarImage src="https://placehold.co/40x40.png" data-ai-hint="profile picture" alt="@user" />
-              <AvatarFallback>U</AvatarFallback>
+              <AvatarImage src="https://placehold.co/40x40.png" data-ai-hint="profile picture therapist" alt="@therapist" />
+              <AvatarFallback>T</AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <p className="font-semibold text-sm">Kullanıcı Adı</p>
-              <p className="text-xs text-muted-foreground">kullanici@psikotakip.com</p>
+              <p className="font-semibold text-sm">Dr. Aysu Yılmaz</p>
+              <p className="text-xs text-muted-foreground">terapist@psikotakip.com</p>
             </div>
             <Button variant="ghost" size="icon" asChild>
                 <Link href="/"><LogOut className="h-4 w-4" /></Link>
@@ -51,12 +71,12 @@ export default function DashboardLayout({
                     <Logo inSidebar />
                 </div>
                 <nav className="p-4">
-                    <DashboardNav />
+                    <TherapistNav />
                 </nav>
             </SheetContent>
           </Sheet>
           <div className="flex-1">
-            <HeaderTitle />
+            <h1 className="text-lg font-semibold">Terapist Paneli</h1>
           </div>
         </header>
         <main className="flex-1 p-6 bg-muted/40 overflow-auto">

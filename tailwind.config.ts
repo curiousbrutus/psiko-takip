@@ -85,10 +85,21 @@ export default {
             height: '0',
           },
         },
+        'breath-animation': {
+          '0%': { transform: 'scale(0.6)' },
+          '50%': { transform: 'scale(1)' },
+          '100%': { transform: 'scale(0.6)' },
+        },
+        'fade-in': {
+            '0%': { opacity: '0' },
+            '100%': { opacity: '1' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'breath': 'breath-animation 10s ease-in-out infinite',
+        'fade-in': 'fade-in 0.5s ease-in-out',
       },
     },
   },

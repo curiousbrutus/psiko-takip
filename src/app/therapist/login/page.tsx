@@ -15,32 +15,28 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-export default function RegisterPage() {
-    const router = useRouter()
+export default function TherapistLoginPage() {
+  const router = useRouter()
 
-    const handleRegister = (e: React.FormEvent) => {
-        e.preventDefault()
-        // In a real app, you'd have Firebase/other auth logic here
-        router.push("/dashboard")
-    }
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault()
+    // In a real app, you'd have Firebase/other auth logic here
+    router.push("/therapist/dashboard")
+  }
 
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle className="text-2xl">Danışan Kaydı</CardTitle>
+        <CardTitle className="text-2xl">Terapist Girişi</CardTitle>
         <CardDescription>
-          Hesap oluşturmak için bilgilerinizi girin.
+          Profesyonel hesabınıza giriş yapmak için bilgilerinizi girin.
         </CardDescription>
       </CardHeader>
-      <form onSubmit={handleRegister}>
+      <form onSubmit={handleLogin}>
         <CardContent className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="full-name">Ad Soyad</Label>
-            <Input id="full-name" placeholder="Adınız Soyadınız" required />
-          </div>
-          <div className="grid gap-2">
             <Label htmlFor="email">E-posta</Label>
-            <Input id="email" type="email" placeholder="m@example.com" required />
+            <Input id="email" type="email" placeholder="terapist@example.com" required />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">Şifre</Label>
@@ -48,19 +44,12 @@ export default function RegisterPage() {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col items-center">
-          <Button className="w-full" type="submit">Hesap Oluştur</Button>
+          <Button className="w-full" type="submit">Giriş Yap</Button>
           <div className="mt-4 text-center text-sm">
-            Zaten bir hesabınız var mı?{" "}
+            Danışan mısınız?{" "}
             <Link href="/login" className="underline text-primary">
-              Giriş Yap
+              Buradan giriş yapın
             </Link>
-          </div>
-           <div className="mt-2 text-center text-sm">
-            Terapist olarak kayıt olmak için{" "}
-            <Link href="#" className="underline text-primary">
-              bize ulaşın
-            </Link>
-            .
           </div>
         </CardFooter>
       </form>
