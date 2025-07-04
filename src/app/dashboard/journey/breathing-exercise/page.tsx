@@ -62,19 +62,24 @@ export default function BreathingExercisePage() {
           setAnimationClass(''); // "Tut" için animasyon yok
       }
 
-      setTimeout(() => {
+      const cycleTimeout = setTimeout(() => {
         promptIndex = (promptIndex + 1) % currentTechnique.prompts.length;
         runCycle();
       }, currentPrompt.duration * 1000);
+      
+      return () => clearTimeout(cycleTimeout);
     };
 
-    runCycle();
+    const initialTimeout = setTimeout(runCycle, 1000); // Initial delay
 
     const mainTimeout = setTimeout(() => {
         setStage('completed');
-    }, parseInt(duration) * 60 * 1000);
+    }, parseInt(duration) * 60 * 1000 + 1000);
 
-    return () => clearTimeout(mainTimeout);
+    return () => {
+      clearTimeout(initialTimeout);
+      clearTimeout(mainTimeout);
+    }
   }, [stage, duration, currentTechnique]);
 
 
@@ -115,26 +120,6 @@ export default function BreathingExercisePage() {
             <div className="mt-8 text-lg text-white/80">
                 <p>Gözlerini kapat ve ritme odaklan.</p>
             </div>
-             <style jsx global>{`
-                @keyframes scale-up {
-                    from { transform: scale(0.8); }
-                    to { transform: scale(1); }
-                }
-                @keyframes scale-down {
-                    from { transform: scale(1); }
-                    to { transform: scale(0.8); }
-                }
-                .animate-scale-up {
-                    animation-name: scale-up;
-                    animation-timing-function: ease-in-out;
-                    animation-fill-mode: forwards;
-                }
-                .animate-scale-down {
-                    animation-name: scale-down;
-                    animation-timing-function: ease-in-out;
-                    animation-fill-mode: forwards;
-                }
-            `}</style>
         </div>
     );
   }
