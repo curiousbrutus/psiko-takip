@@ -3,8 +3,12 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { signInWithEmailAndPassword } from "firebase/auth"
-import { doc, getDoc } from "firebase/firestore"
+import { 
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    updateProfile
+} from "firebase/auth"
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore"
 import { auth, db } from "@/lib/firebase/config"
 import { useToast } from "@/hooks/use-toast"
 
@@ -30,9 +34,15 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
 
-    const formData = new FormData(e.currentTarget)
-    const email = formData.get("email") as string
-    const password = formData.get("password") as string
+    let formData = new FormData(e.currentTarget)
+    let email = formData.get("email") as string
+    let password = formData.get("password") as string
+
+    // Special handling for the admin user request
+    if (email.toLowerCase() === 'admin' && password === 'admin') {
+      email = 'admin@psikotakip.com'
+      password = 'adminadmin' // Firebase requires a password of at least 6 characters
+    }
 
     if (!email || !password) {
         toast({ title: "Hata", description: "E-posta ve şifre gereklidir.", variant: "destructive" })
@@ -44,26 +54,51 @@ export default function LoginPage() {
         const userCredential = await signInWithEmailAndPassword(auth, email, password)
         const user = userCredential.user
 
-        // Fetch user document from Firestore to determine role and redirect
         const userDocRef = doc(db, 'users', user.uid)
         const userDoc = await getDoc(userDocRef)
 
         if (userDoc.exists()) {
             const userData = userDoc.data()
             toast({ title: "Giriş Başarılı", description: `Hoş geldiniz, ${userData.displayName}!`})
-            if (userData.role === 'terapist') {
+            if (userData.role === 'terapist' || userData.role === 'kurum_yoneticisi') {
                 router.push('/therapist/dashboard')
             } else {
                 // This covers both 'danisan' and 'hastane_calisani' roles
                 router.push('/dashboard')
             }
         } else {
-             // This case should ideally not happen if registration is done correctly
             toast({ title: "Hata", description: "Kullanıcı verisi bulunamadı.", variant: "destructive" })
             setLoading(false)
         }
 
     } catch (error: any) {
+      // If admin user doesn't exist, create it on the fly
+      if (email === 'admin@psikotakip.com' && (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential')) {
+        try {
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password)
+          const user = userCredential.user
+          
+          await updateProfile(user, { displayName: "Admin" })
+          
+          await setDoc(doc(db, "users", user.uid), {
+              uid: user.uid,
+              displayName: "Admin",
+              email: user.email,
+              role: 'terapist', // Using 'terapist' as it has a dashboard
+              createdAt: serverTimestamp(),
+          });
+          
+          toast({ title: "Admin Hesabı Oluşturuldu", description: "Giriş yapılıyor..." });
+          router.push('/therapist/dashboard');
+          return;
+
+        } catch (creationError: any) {
+          toast({ title: "Admin Oluşturma Hatası", description: "Admin hesabı oluşturulamadı. Lütfen tekrar deneyin.", variant: "destructive" })
+          setLoading(false);
+          return;
+        }
+      }
+
         let errorMessage = "Giriş yapılamadı. Lütfen bilgilerinizi kontrol edin."
         if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
             errorMessage = "E-posta veya şifre hatalı."
@@ -78,7 +113,7 @@ export default function LoginPage() {
       <CardHeader>
         <CardTitle className="text-2xl">Giriş Yap</CardTitle>
         <CardDescription>
-          Hesabınıza giriş yapmak için e-postanızı girin. Kurumsal çalışanlar da buradan giriş yapabilir.
+          Hesabınıza giriş yapmak için e-postanızı girin. Admin girişi için her iki alana da 'admin' yazabilirsiniz.
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleLogin}>
