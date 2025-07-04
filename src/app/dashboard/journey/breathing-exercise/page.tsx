@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Check, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 type Stage = 'settings' | 'exercise' | 'completed';
 type Technique = 'sakin' | 'kutu';
@@ -15,17 +14,23 @@ type Technique = 'sakin' | 'kutu';
 const techniques = {
   sakin: {
     name: 'Sakinleştirici Nefes',
-    description: 'Stresi azaltmak için.',
-    animation: 'breath 10s ease-in-out infinite',
-    texts: ['Nefes Al', 'Tut', 'Nefes Ver'],
-    durations: [40, 20, 40], // 4s, 2s, 4s percentages of 10s
+    description: 'Stresi azaltmak için. (4sn al, 4sn ver)',
+    cycle: 8, // seconds
+    prompts: [
+      { text: 'Nefes Al', duration: 4 },
+      { text: 'Nefes Ver', duration: 4 },
+    ]
   },
   kutu: {
     name: 'Kutu Nefesi',
-    description: 'Odaklanmayı artırmak için.',
-    animation: 'breath 8s ease-in-out infinite',
-    texts: ['Nefes Al', 'Tut', 'Nefes Ver', 'Tut'],
-    durations: [25, 25, 25, 25], // 4s, 4s, 4s, 4s percentages of 8s
+    description: 'Odaklanmayı artırmak için. (4sn al, 4sn tut, 4sn ver, 4sn tut)',
+    cycle: 16, // seconds
+    prompts: [
+      { text: 'Nefes Al', duration: 4 },
+      { text: 'Tut', duration: 4 },
+      { text: 'Nefes Ver', duration: 4 },
+      { text: 'Tut', duration: 4 },
+    ]
   },
 }
 
@@ -33,73 +38,103 @@ export default function BreathingExercisePage() {
   const [stage, setStage] = useState<Stage>('settings');
   const [duration, setDuration] = useState('1'); // in minutes
   const [selectedTechnique, setSelectedTechnique] = useState<Technique>('sakin');
-  const [exerciseKey, setExerciseKey] = useState(0); // To reset animation
   const [promptText, setPromptText] = useState('');
+  const [animationClass, setAnimationClass] = useState('');
 
   const router = useRouter();
+
+  const currentTechnique = useMemo(() => techniques[selectedTechnique], [selectedTechnique]);
 
   useEffect(() => {
     if (stage !== 'exercise') return;
 
-    const techniqueData = techniques[selectedTechnique];
-    const cycleDuration = parseFloat(techniqueData.animation.match(/(\d+)s/)![1]) * 1000;
-    let index = 0;
+    let promptIndex = 0;
+    
+    const runCycle = () => {
+      const currentPrompt = currentTechnique.prompts[promptIndex];
+      setPromptText(currentPrompt.text);
+      
+      if (currentPrompt.text === 'Nefes Al') {
+          setAnimationClass('animate-scale-up');
+      } else if (currentPrompt.text === 'Nefes Ver') {
+          setAnimationClass('animate-scale-down');
+      } else {
+          setAnimationClass(''); // "Tut" için animasyon yok
+      }
 
-    const updateText = () => {
-      setPromptText(techniqueData.texts[index % techniqueData.texts.length]);
-      index++;
+      setTimeout(() => {
+        promptIndex = (promptIndex + 1) % currentTechnique.prompts.length;
+        runCycle();
+      }, currentPrompt.duration * 1000);
     };
 
-    updateText();
-    const interval = setInterval(updateText, cycleDuration / techniqueData.texts.length);
-    
-    return () => clearInterval(interval);
+    runCycle();
 
-  }, [stage, selectedTechnique, exerciseKey]);
+    const mainTimeout = setTimeout(() => {
+        setStage('completed');
+    }, parseInt(duration) * 60 * 1000);
+
+    return () => clearTimeout(mainTimeout);
+  }, [stage, duration, currentTechnique]);
 
 
   const startExercise = () => {
     setStage('exercise');
-    setExerciseKey(prev => prev + 1); // Reset animation state
-    
-    const timeoutId = setTimeout(() => {
-      setStage('completed');
-    }, parseInt(duration) * 60 * 1000);
-
-    return () => clearTimeout(timeoutId);
+    setPromptText('Hazırlan...');
   };
   
   const handleExit = () => {
       router.push('/dashboard/journey');
   }
 
-  if (stage === 'exercise') {
-    const techniqueData = techniques[selectedTechnique];
+  const BreathingCircle = () => {
+    const animationStyle = {
+        animationDuration: `${currentTechnique.cycle / 2}s`
+    };
+
     return (
-        <div key={exerciseKey} className="fixed inset-0 bg-[#121212] flex flex-col items-center justify-center z-50 text-white animate-fade-in">
+        <div className="relative flex items-center justify-center w-48 h-48 sm:w-64 sm:h-64">
+            <div 
+                className={`absolute bg-primary rounded-full w-full h-full ${animationClass}`}
+                style={animationStyle}
+            />
+            <span className="relative z-10 text-2xl font-semibold text-primary-foreground transition-opacity duration-500">
+                {promptText}
+            </span>
+        </div>
+    );
+  }
+
+  if (stage === 'exercise') {
+    return (
+        <div className="fixed inset-0 bg-[#121212] flex flex-col items-center justify-center z-50 text-white animate-fade-in">
             <Button variant="ghost" size="icon" className="absolute top-4 right-4 text-white/70 hover:bg-white/10 hover:text-white" onClick={handleExit}>
                 <X className="h-6 w-6" />
             </Button>
-            <div 
-                className="relative flex items-center justify-center w-48 h-48 sm:w-64 sm:h-64"
-            >
-                <div 
-                    className={cn(
-                        "absolute bg-primary rounded-full",
-                    )}
-                    style={{ 
-                        animation: techniqueData.animation,
-                        width: '100%', 
-                        height: '100%'
-                     }}
-                />
-                 <span className="relative z-10 text-2xl font-semibold text-primary-foreground transition-opacity duration-500">
-                    {promptText}
-                 </span>
-            </div>
+            <BreathingCircle />
             <div className="mt-8 text-lg text-white/80">
                 <p>Gözlerini kapat ve ritme odaklan.</p>
             </div>
+             <style jsx global>{`
+                @keyframes scale-up {
+                    from { transform: scale(0.8); }
+                    to { transform: scale(1); }
+                }
+                @keyframes scale-down {
+                    from { transform: scale(1); }
+                    to { transform: scale(0.8); }
+                }
+                .animate-scale-up {
+                    animation-name: scale-up;
+                    animation-timing-function: ease-in-out;
+                    animation-fill-mode: forwards;
+                }
+                .animate-scale-down {
+                    animation-name: scale-down;
+                    animation-timing-function: ease-in-out;
+                    animation-fill-mode: forwards;
+                }
+            `}</style>
         </div>
     );
   }

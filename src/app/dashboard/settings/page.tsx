@@ -1,6 +1,8 @@
 
 "use client"
 
+import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -12,9 +14,67 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton";
 
 
 export default function SettingsPage() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [pushNotifications, setPushNotifications] = useState(false);
+
+  useEffect(() => {
+    setMounted(true)
+  }, []);
+
+  if (!mounted) {
+    return (
+       <div className="space-y-6">
+        <div>
+          <Skeleton className="h-9 w-48" />
+          <Skeleton className="h-5 w-72 mt-2" />
+        </div>
+        <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-24" />
+            <Skeleton className="h-4 w-64 mt-1" />
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col space-y-2">
+                <Skeleton className="h-5 w-24" />
+                <Skeleton className="h-4 w-80" />
+              </div>
+              <Skeleton className="h-6 w-11 rounded-full" />
+            </div>
+          </CardContent>
+        </Card>
+         <Card>
+          <CardHeader>
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-4 w-80 mt-1" />
+          </CardHeader>
+          <CardContent className="space-y-4">
+             <div className="flex items-center justify-between">
+              <div className="flex flex-col space-y-2">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-4 w-96" />
+              </div>
+              <Skeleton className="h-6 w-11 rounded-full" />
+            </div>
+             <div className="flex items-center justify-between">
+              <div className="flex flex-col space-y-2">
+                <Skeleton className="h-5 w-28" />
+                <Skeleton className="h-4 w-96" />
+              </div>
+              <Skeleton className="h-6 w-11 rounded-full" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -35,7 +95,11 @@ export default function SettingsPage() {
                     Gözlerinizi dinlendirmek için karanlık temayı etkinleştirin.
                 </span>
             </Label>
-            <Switch id="dark-mode" />
+            <Switch 
+              id="dark-mode" 
+              checked={theme === 'dark'}
+              onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+            />
           </div>
         </CardContent>
       </Card>
@@ -53,7 +117,7 @@ export default function SettingsPage() {
                     Önemli güncellemeler ve hatırlatıcılar için e-posta alın.
                 </span>
             </Label>
-            <Switch id="email-notifications" checked />
+            <Switch id="email-notifications" checked={emailNotifications} onCheckedChange={setEmailNotifications} />
           </div>
            <div className="flex items-center justify-between">
             <Label htmlFor="push-notifications" className="flex flex-col space-y-1">
@@ -62,7 +126,7 @@ export default function SettingsPage() {
                     Yeni testler ve sonuçlar hakkında anında bildirim alın.
                 </span>
             </Label>
-            <Switch id="push-notifications" />
+            <Switch id="push-notifications" checked={pushNotifications} onCheckedChange={setPushNotifications} />
           </div>
         </CardContent>
       </Card>
@@ -84,10 +148,6 @@ export default function SettingsPage() {
             </Select>
         </CardContent>
       </Card>
-      
-      <div className="flex justify-end">
-        <Button>Ayarları Kaydet</Button>
-      </div>
     </div>
   )
 }
