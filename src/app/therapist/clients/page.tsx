@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -42,9 +43,35 @@ const addClientFormSchema = z.object({
 });
 type AddClientFormValues = z.infer<typeof addClientFormSchema>;
 
+const mockClients: Client[] = [
+    {
+        id: 'client1',
+        displayName: 'Ayşe Yılmaz',
+        email: 'ayse.yilmaz@example.com',
+        photoURL: 'https://placehold.co/40x40.png',
+        lastActivity: '2 gün önce',
+        status: 'Aktif',
+    },
+    {
+        id: 'client2',
+        displayName: 'Mehmet Öztürk',
+        email: 'mehmet.ozturk@example.com',
+        photoURL: 'https://placehold.co/40x40.png',
+        lastActivity: '1 hafta önce',
+        status: 'Pasif',
+    },
+    {
+        id: 'client3',
+        displayName: 'Zeynep Kaya',
+        email: 'zeynep.kaya@example.com',
+        lastActivity: 'Davet bekleniyor',
+        status: 'Davet Edildi',
+    }
+];
+
 
 export default function ClientsPage() {
-    const { user, userData } = useAuth();
+    const { user, userData, loading: authLoading } = useAuth();
     const { toast } = useToast();
     const [clients, setClients] = useState<Client[]>([]);
     const [loading, setLoading] = useState(true);
@@ -59,77 +86,85 @@ export default function ClientsPage() {
         }
     });
 
-    const fetchClients = async () => {
-        if (!user || !userData || !userData.danisanlarim || userData.danisanlarim.length === 0) {
-            setLoading(false);
-            setClients([]);
-            return;
-        }
+    useEffect(() => {
+        const fetchClients = async () => {
+            if (!user || !userData || !userData.danisanlarim || userData.danisanlarim.length === 0) {
+                setLoading(false);
+                setClients([]);
+                return;
+            }
 
-        try {
-            const clientsQuery = query(collection(db, 'users'), where('__name__', 'in', userData.danisanlarim));
-            const clientsSnapshot = await getDocs(clientsQuery);
-            const clientDocs = clientsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            try {
+                const clientsQuery = query(collection(db, 'users'), where('__name__', 'in', userData.danisanlarim));
+                const clientsSnapshot = await getDocs(clientsQuery);
+                const clientDocs = clientsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-            const clientsWithDetails = await Promise.all(
-                clientDocs.map(async (clientDoc) => {
-                    if (clientDoc.status === 'invited') {
+                const clientsWithDetails = await Promise.all(
+                    clientDocs.map(async (clientDoc) => {
+                        if (clientDoc.status === 'invited') {
+                            return {
+                                id: clientDoc.id,
+                                displayName: clientDoc.displayName,
+                                email: clientDoc.email,
+                                photoURL: clientDoc.photoURL,
+                                lastActivity: 'Davet bekleniyor',
+                                status: 'Davet Edildi'
+                            };
+                        }
+
+                        const gamificationRef = doc(db, 'gamification', clientDoc.id);
+                        const gamificationSnap = await getDoc(gamificationRef);
+                        
+                        let lastActivity = 'Aktivite yok';
+                        let status: 'Aktif' | 'Pasif' = 'Pasif';
+
+                        if (gamificationSnap.exists()) {
+                            const gamificationData = gamificationSnap.data();
+                            const lastActivityDate = gamificationData.lastActivityDate as Timestamp;
+                            if (lastActivityDate) {
+                                lastActivity = formatDistanceToNow(lastActivityDate.toDate(), { addSuffix: true, locale: tr });
+                                
+                                const oneWeekAgo = new Date();
+                                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                                if(lastActivityDate.toDate() > oneWeekAgo) {
+                                    status = 'Aktif';
+                                }
+                            }
+                        }
+                        
                         return {
                             id: clientDoc.id,
                             displayName: clientDoc.displayName,
                             email: clientDoc.email,
                             photoURL: clientDoc.photoURL,
-                            lastActivity: 'Davet bekleniyor',
-                            status: 'Davet Edildi'
+                            lastActivity,
+                            status
                         };
-                    }
+                    })
+                );
 
-                    const gamificationRef = doc(db, 'gamification', clientDoc.id);
-                    const gamificationSnap = await getDoc(gamificationRef);
-                    
-                    let lastActivity = 'Aktivite yok';
-                    let status: 'Aktif' | 'Pasif' = 'Pasif';
+                setClients(clientsWithDetails);
 
-                    if (gamificationSnap.exists()) {
-                        const gamificationData = gamificationSnap.data();
-                        const lastActivityDate = gamificationData.lastActivityDate as Timestamp;
-                        if (lastActivityDate) {
-                            lastActivity = formatDistanceToNow(lastActivityDate.toDate(), { addSuffix: true, locale: tr });
-                            
-                            const oneWeekAgo = new Date();
-                            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-                            if(lastActivityDate.toDate() > oneWeekAgo) {
-                                status = 'Aktif';
-                            }
-                        }
-                    }
-                    
-                    return {
-                        id: clientDoc.id,
-                        displayName: clientDoc.displayName,
-                        email: clientDoc.email,
-                        photoURL: clientDoc.photoURL,
-                        lastActivity,
-                        status
-                    };
-                })
-            );
+            } catch (error) {
+                console.error("Error fetching clients:", error);
+                toast({ title: "Hata", description: "Danışanlar getirilemedi.", variant: "destructive" });
+            } finally {
+                setLoading(false);
+            }
+        };
 
-            setClients(clientsWithDetails);
+        if (authLoading) {
+            return;
+        }
 
-        } catch (error) {
-            console.error("Error fetching clients:", error);
-            toast({ title: "Hata", description: "Danışanlar getirilemedi.", variant: "destructive" });
-        } finally {
+        if (user) {
+            fetchClients();
+        } else {
+            // Demo modu
+            setClients(mockClients);
             setLoading(false);
         }
-    };
-
-    useEffect(() => {
-        if (user && userData) {
-            fetchClients();
-        }
-    }, [user, userData]);
+    }, [user, userData, authLoading, toast]);
 
     async function onSubmit(values: AddClientFormValues) {
         if (!user) {
@@ -149,7 +184,70 @@ export default function ClientsPage() {
             setIsDialogOpen(false);
             form.reset();
             setLoading(true); // show skeleton while refetching
-            await fetchClients(); // Refetch the clients list
+            
+            // Refetch clients by re-running the effect logic for a real user
+            const fetchClients = async () => {
+                 if (!user || !userData || !userData.danisanlarim) {
+                    setClients([]);
+                    setLoading(false);
+                    return;
+                }
+                 const danisanlarimWithNew = [...(userData.danisanlarim || [])];
+                 // We don't have the new client's ID here, so we have to refetch all.
+                 // In a real app, the action might return the new client ID.
+
+                try {
+                    const clientsQuery = query(collection(db, 'users'), where('connectedTherapist', '==', user.uid));
+                    const clientsSnapshot = await getDocs(clientsQuery);
+                    const clientDocs = clientsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                    const clientsWithDetails = await Promise.all(
+                        clientDocs.map(async (clientDoc) => {
+                             if (clientDoc.status === 'invited') {
+                                return {
+                                    id: clientDoc.id,
+                                    displayName: clientDoc.displayName,
+                                    email: clientDoc.email,
+                                    photoURL: clientDoc.photoURL,
+                                    lastActivity: 'Davet bekleniyor',
+                                    status: 'Davet Edildi'
+                                };
+                            }
+                            const gamificationRef = doc(db, 'gamification', clientDoc.id);
+                            const gamificationSnap = await getDoc(gamificationRef);
+                            let lastActivity = 'Aktivite yok';
+                            let status: 'Aktif' | 'Pasif' = 'Pasif';
+
+                            if (gamificationSnap.exists()) {
+                                const gamificationData = gamificationSnap.data();
+                                if (gamificationData.lastActivityDate) {
+                                    const lastActivityDate = (gamificationData.lastActivityDate as Timestamp).toDate();
+                                    lastActivity = formatDistanceToNow(lastActivityDate, { addSuffix: true, locale: tr });
+                                    const oneWeekAgo = new Date();
+                                    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                                    if(lastActivityDate > oneWeekAgo) {
+                                        status = 'Aktif';
+                                    }
+                                }
+                            }
+                             return {
+                                id: clientDoc.id,
+                                displayName: clientDoc.displayName,
+                                email: clientDoc.email,
+                                photoURL: clientDoc.photoURL,
+                                lastActivity,
+                                status
+                            };
+                        })
+                    );
+                    setClients(clientsWithDetails);
+                } catch (e) {
+                     toast({ title: "Hata", description: "Danışan listesi güncellenemedi.", variant: "destructive" });
+                } finally {
+                    setLoading(false);
+                }
+            };
+            await fetchClients();
         }
     }
 
@@ -315,7 +413,7 @@ export default function ClientsPage() {
                                         <Badge variant={getBadgeVariant(client.status)}>{client.status}</Badge>
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        <Button asChild variant="outline" size="sm" disabled={client.status === 'Davet Edildi'}>
+                                        <Button asChild variant="outline" size="sm" disabled={!user || client.status === 'Davet Edildi'}>
                                             <Link href={`/therapist/clients/${client.id}`}>
                                                 Profili Görüntüle <ArrowRight className="ml-2 h-4 w-4" />
                                             </Link>
