@@ -1,7 +1,7 @@
-// This is a new file
 "use server";
 
-import { getChatResponse, ChatInputSchema, ChatOutput } from "@/ai/flows/therapeutic-chat-flow";
+import { getChatResponse } from "@/ai/flows/therapeutic-chat-flow";
+import { ChatInputSchema, type ChatOutput } from "@/ai/schemas/chat-schemas";
 import { z } from "zod";
 
 export async function getChatResponseAction(
