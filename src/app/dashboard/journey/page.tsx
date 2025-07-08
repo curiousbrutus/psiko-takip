@@ -10,7 +10,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, Sunrise, Sun, Sunset, Smile, Leaf, Meh, HeartPulse, Frown, Wind, BrainCircuit, Book, Sparkles, Loader2, Share2, Feather, Waves, Droplets } from 'lucide-react';
+import { CheckCircle2, Sunrise, Sun, Sunset, Smile, Leaf, Meh, HeartPulse, Frown, Wind, BrainCircuit, Book, Sparkles, Loader2, Share2, Feather, Droplets } from 'lucide-react';
 import Link from 'next/link';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -63,18 +63,25 @@ export default function DailyJourneyPage() {
 
   useEffect(() => {
     const checkCompletionStatus = async () => {
-        const morningDone = await checkIfTaskCompletedToday("Günün Niyeti");
-        // This is a simplified check. A full implementation would check all evening tasks.
-        const eveningDone = await checkIfTaskCompletedToday("Serbest Günlük"); 
-        setTasksCompleted({ morning: morningDone, midday: false, evening: eveningDone });
+        if (user) {
+            const morningDone = await checkIfTaskCompletedToday("Günün Niyeti");
+            // This is a simplified check. A full implementation would check all evening tasks.
+            const eveningDone = await checkIfTaskCompletedToday("Serbest Günlük"); 
+            setTasksCompleted({ morning: morningDone, midday: false, evening: eveningDone });
+        }
     };
-    if (user) {
-        checkCompletionStatus();
-    }
+    checkCompletionStatus();
   }, [user]);
 
   const completeTask = async (task: 'morning' | 'midday' | 'evening') => {
-    if (!user) return;
+    if (!user) {
+        toast({
+            title: "Demo Modu",
+            description: "Bu özelliği kullanmak için lütfen kayıt olun veya giriş yapın.",
+            variant: "destructive",
+        });
+        return;
+    }
     
     setLoading(prev => ({ ...prev, [task]: true }));
 
