@@ -1,4 +1,3 @@
-// This is a new file
 
 "use client";
 
@@ -12,7 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader2, Send, Sparkles, ShieldAlert } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
-import { getChatResponse } from './actions';
+import { getChatResponseAction } from './actions';
 import Link from 'next/link';
 
 type Message = {
@@ -38,7 +37,7 @@ export default function AssistantPage() {
     setIsLoading(true);
 
     try {
-      const result = await getChatResponse({ message: input });
+      const result = await getChatResponseAction({ message: input });
       const modelMessage: Message = { role: 'model', content: result.response };
       
       if (result.isCrisis) {

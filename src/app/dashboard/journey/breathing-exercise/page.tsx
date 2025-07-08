@@ -39,7 +39,7 @@ export default function BreathingExercisePage() {
   const [duration, setDuration] = useState('1'); // in minutes
   const [selectedTechnique, setSelectedTechnique] = useState<Technique>('sakin');
   const [promptText, setPromptText] = useState('');
-  const [animationClass, setAnimationClass] = useState('');
+  const [circleClass, setCircleClass] = useState('bg-muted');
 
   const router = useRouter();
 
@@ -54,12 +54,18 @@ export default function BreathingExercisePage() {
       const currentPrompt = currentTechnique.prompts[promptIndex];
       setPromptText(currentPrompt.text);
       
-      if (currentPrompt.text === 'Nefes Al') {
-          setAnimationClass('animate-scale-up');
-      } else if (currentPrompt.text === 'Nefes Ver') {
-          setAnimationClass('animate-scale-down');
-      } else {
-          setAnimationClass(''); // "Tut" için animasyon yok
+      switch (currentPrompt.text) {
+        case 'Nefes Al':
+          setCircleClass('bg-green-500 animate-scale-up');
+          break;
+        case 'Nefes Ver':
+          setCircleClass('bg-blue-500 animate-scale-down');
+          break;
+        case 'Tut':
+          setCircleClass('bg-red-500');
+          break;
+        default:
+          setCircleClass('bg-muted');
       }
 
       const cycleTimeout = setTimeout(() => {
@@ -100,10 +106,10 @@ export default function BreathingExercisePage() {
     return (
         <div className="relative flex items-center justify-center w-48 h-48 sm:w-64 sm:h-64">
             <div 
-                className={`absolute bg-primary rounded-full w-full h-full ${animationClass}`}
+                className={`absolute rounded-full w-full h-full transition-colors duration-1000 ${circleClass}`}
                 style={animationStyle}
             />
-            <span className="relative z-10 text-2xl font-semibold text-primary-foreground transition-opacity duration-500">
+            <span className="relative z-10 text-2xl font-semibold text-white transition-opacity duration-500">
                 {promptText}
             </span>
         </div>
