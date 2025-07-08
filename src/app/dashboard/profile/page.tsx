@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,12 +7,16 @@ import { db, auth } from "@/lib/firebase/config";
 import { doc, updateDoc } from "firebase/firestore";
 import { updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Loader2 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { profileSymbols, ProfileSymbol } from "@/lib/profile-symbols";
+
 
 export default function ProfilePage() {
   const { user, userData } = useAuth();
@@ -23,10 +28,15 @@ export default function ProfilePage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loadingProfile, setLoadingProfile] = useState(false);
   const [loadingPassword, setLoadingPassword] = useState(false);
+  const [symbolDetails, setSymbolDetails] = useState<ProfileSymbol | undefined>(undefined);
 
   useEffect(() => {
     if (userData) {
       setFullName(userData.displayName);
+      if (userData.profileSymbol) {
+        const details = profileSymbols.find(s => s.emoji === userData.profileSymbol);
+        setSymbolDetails(details);
+      }
     }
   }, [userData]);
 
@@ -96,10 +106,27 @@ export default function ProfilePage() {
             </CardHeader>
             <CardContent className="space-y-4">
             <div className="flex items-center space-x-4">
-                <Avatar className="h-20 w-20">
-                <AvatarImage src={user?.photoURL || "https://placehold.co/80x80.png"} data-ai-hint="profile picture" alt={userData?.displayName || 'User'} />
-                <AvatarFallback>{userData?.displayName?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
-                </Avatar>
+                <div className="relative w-20 h-20">
+                    <Avatar className="h-20 w-20 border">
+                        <AvatarImage src={user?.photoURL || "https://placehold.co/80x80.png"} data-ai-hint="profile picture" alt={userData?.displayName || 'User'} />
+                        <AvatarFallback>{userData?.displayName?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
+                    </Avatar>
+                    {symbolDetails && (
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="absolute -bottom-1 -right-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-card border-2 border-primary-foreground shadow-md">
+                                        <span className="text-lg">{symbolDetails.emoji}</span>
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p className="font-semibold">Senin simgen: {symbolDetails.emoji} {symbolDetails.name}</p>
+                                    <p className="text-sm text-muted-foreground">{symbolDetails.description}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    )}
+                </div>
                 <Button variant="outline" type="button">Resmi Değiştir</Button>
             </div>
             <div className="grid gap-2">

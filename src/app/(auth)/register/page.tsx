@@ -13,6 +13,7 @@ import {
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore"
 import { auth, db } from "@/lib/firebase/config"
 import { useToast } from "@/hooks/use-toast"
+import { getRandomSymbol } from "@/lib/profile-symbols"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -58,11 +59,13 @@ export default function RegisterPage() {
             const userDoc = await getDoc(userDocRef);
 
             if (!userDoc.exists()) {
+                const randomSymbol = getRandomSymbol();
                 await setDoc(userDocRef, {
                     uid: user.uid,
                     displayName: user.displayName,
                     email: user.email,
                     photoURL: user.photoURL,
+                    profileSymbol: randomSymbol.emoji,
                     role: 'danisan', 
                     organizationId: null,
                     createdAt: serverTimestamp(),
@@ -131,10 +134,12 @@ export default function RegisterPage() {
 
             await updateProfile(user, { displayName: fullName })
 
+            const randomSymbol = getRandomSymbol();
             await setDoc(doc(db, "users", user.uid), {
                 uid: user.uid,
                 displayName: fullName,
                 email: user.email,
+                profileSymbol: randomSymbol.emoji,
                 role: role,
                 organizationId: null,
                 createdAt: serverTimestamp(),
