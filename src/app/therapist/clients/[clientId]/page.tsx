@@ -4,15 +4,26 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase/config';
-import { doc, getDoc, DocumentData } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, orderBy, getDocs, DocumentData, Timestamp } from 'firebase/firestore';
 import { useParams, useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
+import { tr } from 'date-fns/locale';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, User, Mail, Activity, Calendar } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft, Mail, Calendar, FileText, CheckSquare, BarChart2 } from 'lucide-react';
 import Link from 'next/link';
+
+interface SharedJournal extends DocumentData {
+    id: string;
+    content: string;
+    prompt: string;
+    createdAt: Timestamp;
+}
 
 export default function ClientProfilePage() {
     const { user, userData: therapistData } = useAuth();
@@ -23,22 +34,22 @@ export default function ClientProfilePage() {
     const clientId = params.clientId as string;
     
     const [clientData, setClientData] = useState<DocumentData | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [sharedJournals, setSharedJournals] = useState<SharedJournal[]>([]);
+    const [loadingClient, setLoadingClient] = useState(true);
+    const [loadingJournals, setLoadingJournals] = useState(true);
 
     useEffect(() => {
-        const fetchClientData = async () => {
-            if (!user || !therapistData) {
-                return;
-            }
+        const fetchClientAndJournals = async () => {
+            if (!user || !clientId) return;
 
-            // Security check: ensure the therapist is allowed to see this client
-            if (!therapistData.danisanlarim || !therapistData.danisanlarim.includes(clientId)) {
+            if (therapistData && (!therapistData.danisanlarim || !therapistData.danisanlarim.includes(clientId))) {
                 toast({ title: "Yetkisiz Erişim", description: "Bu danışanın profilini görüntüleme yetkiniz yok.", variant: "destructive" });
                 router.push('/therapist/dashboard');
                 return;
             }
 
             try {
+                // Fetch client data
                 const clientDocRef = doc(db, 'users', clientId);
                 const clientDocSnap = await getDoc(clientDocRef);
 
@@ -47,125 +58,184 @@ export default function ClientProfilePage() {
                 } else {
                     toast({ title: "Hata", description: "Danışan bulunamadı.", variant: "destructive" });
                     router.push('/therapist/clients');
+                    return; 
                 }
+                setLoadingClient(false);
+
+                // Fetch shared journals
+                const journalsQuery = query(
+                    collection(db, 'journalEntries'),
+                    where('userId', '==', clientId),
+                    where('isShared', '==', true),
+                    orderBy('createdAt', 'desc')
+                );
+                const journalsSnapshot = await getDocs(journalsQuery);
+                const journals = journalsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SharedJournal));
+                setSharedJournals(journals);
+
             } catch (error) {
-                console.error("Error fetching client data:", error);
-                toast({ title: "Hata", description: "Danışan verileri alınırken bir hata oluştu.", variant: "destructive" });
+                console.error("Error fetching client data or journals:", error);
+                toast({ title: "Hata", description: "Veriler alınırken bir hata oluştu.", variant: "destructive" });
             } finally {
-                setLoading(false);
+                setLoadingClient(false);
+                setLoadingJournals(false);
             }
         };
 
-        if (clientId && user && therapistData) {
-            fetchClientData();
+        if (user) {
+            fetchClientAndJournals();
         }
+    }, [user, clientId, therapistData, router, toast]);
 
-    }, [user, therapistData, clientId, router, toast]);
-
-    if (loading) {
+    const renderJournalSkeleton = () => (
+        <div className="space-y-4">
+            {[...Array(2)].map((_, i) => (
+                <Card key={i}>
+                    <CardHeader>
+                        <Skeleton className="h-5 w-3/4" />
+                        <Skeleton className="h-4 w-1/4" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-2">
+                           <Skeleton className="h-4 w-full" />
+                           <Skeleton className="h-4 w-5/6" />
+                        </div>
+                    </CardContent>
+                </Card>
+            ))}
+        </div>
+    );
+    
+    if (loadingClient) {
         return (
-            <div className="space-y-6">
-                <Button variant="ghost" asChild>
-                    <Link href="/therapist/clients">
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        Tüm Danışanlar
-                    </Link>
-                </Button>
-                <div className="grid md:grid-cols-3 gap-6">
-                    <Card className="md:col-span-1">
-                        <CardHeader className="items-center text-center">
-                            <Skeleton className="h-24 w-24 rounded-full" />
-                            <Skeleton className="h-6 w-32 mt-4" />
-                            <Skeleton className="h-4 w-40 mt-2" />
-                        </CardHeader>
-                        <CardContent className="space-y-4 pt-6">
-                           <Skeleton className="h-10 w-full" />
-                           <Skeleton className="h-10 w-full" />
-                        </CardContent>
-                    </Card>
-                    <div className="md:col-span-2 space-y-6">
-                        <Card>
-                            <CardHeader>
-                                <Skeleton className="h-6 w-48" />
-                                <Skeleton className="h-4 w-64" />
-                            </CardHeader>
-                            <CardContent>
-                               <Skeleton className="h-40 w-full" />
-                            </CardContent>
-                        </Card>
-                         <Card>
-                            <CardHeader>
-                                <Skeleton className="h-6 w-48" />
-                                <Skeleton className="h-4 w-64" />
-                            </CardHeader>
-                            <CardContent>
-                               <Skeleton className="h-40 w-full" />
-                            </CardContent>
-                        </Card>
-                    </div>
-                </div>
+             <div className="space-y-4">
+                <Skeleton className="h-9 w-40" />
+                <Card>
+                    <CardHeader className="flex flex-row items-center gap-4">
+                        <Skeleton className="h-16 w-16 rounded-full" />
+                        <div className="space-y-2">
+                            <Skeleton className="h-7 w-48" />
+                            <Skeleton className="h-5 w-64" />
+                        </div>
+                    </CardHeader>
+                </Card>
+                <Skeleton className="h-96 w-full" />
             </div>
         )
     }
 
     if (!clientData) {
-        return null; // Or a more specific "not found" component
+        return null;
     }
 
     return (
         <div className="space-y-6">
-            <Button variant="ghost" asChild>
-                <Link href="/therapist/clients">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Tüm Danışanlar
-                </Link>
-            </Button>
-            <div className="grid md:grid-cols-3 gap-6">
-                <Card className="md:col-span-1 self-start">
-                    <CardHeader className="items-center text-center">
-                        <Avatar className="h-24 w-24 mb-4">
+            <div>
+                <Button variant="ghost" asChild className="mb-4">
+                    <Link href="/therapist/clients">
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Tüm Danışanlar
+                    </Link>
+                </Button>
+                 <Card>
+                    <CardHeader className="flex flex-row items-center gap-6 space-y-0">
+                         <Avatar className="h-20 w-20 border">
                             <AvatarImage src={clientData.photoURL} data-ai-hint="profile picture" />
                             <AvatarFallback>{clientData.displayName?.[0]}</AvatarFallback>
                         </Avatar>
-                        <CardTitle>{clientData.displayName}</CardTitle>
-                        <CardDescription>{clientData.email}</CardDescription>
+                        <div className="flex-1">
+                            <CardTitle className="text-2xl">{clientData.displayName}</CardTitle>
+                            <CardDescription className="flex items-center gap-2 mt-1">
+                                <Mail className="h-4 w-4" /> {clientData.email}
+                            </CardDescription>
+                             <div className="mt-2 text-sm text-muted-foreground">Genel ilerleme durumu yakında burada gösterilecek.</div>
+                        </div>
+                        <Button>
+                            <Calendar className="mr-2 h-4 w-4" />
+                            Yeni Randevu
+                        </Button>
                     </CardHeader>
-                    <CardContent className="space-y-2">
-                       <Button className="w-full" disabled>
-                           <Activity className="mr-2" />
-                           Aktivite Raporu
-                       </Button>
-                       <Button variant="outline" className="w-full" disabled>
-                           <Calendar className="mr-2" />
-                           Yeni Randevu
-                       </Button>
-                    </CardContent>
                 </Card>
-                 <div className="md:col-span-2 space-y-6">
+            </div>
+
+            <Tabs defaultValue="journals" className="w-full">
+                <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="assignments">
+                        <CheckSquare className="mr-2 h-4 w-4" /> Görevler & Atamalar
+                    </TabsTrigger>
+                    <TabsTrigger value="journals">
+                        <FileText className="mr-2 h-4 w-4" /> Paylaşılan Günlükler
+                    </TabsTrigger>
+                    <TabsTrigger value="results">
+                        <BarChart2 className="mr-2 h-4 w-4" /> Test Sonuçları
+                    </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="assignments" className="mt-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Görevler ve Atamalar</CardTitle>
+                            <CardDescription>
+                                Danışanınıza yeni görevler atayın ve mevcut görevlerin durumunu takip edin. Bu özellik yakında kullanıma sunulacaktır.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="text-center text-muted-foreground py-16">
+                            Bu bölüm geliştirme aşamasındadır.
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="journals" className="mt-6">
                     <Card>
                         <CardHeader>
                             <CardTitle>Paylaşılan Günlükler</CardTitle>
-                             <CardDescription>
-                                Danışanın sizinle paylaştığı günlük kayıtları.
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                           <p className="text-muted-foreground text-center py-8">Bu özellik yakında eklenecektir.</p>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Ruh Hali Takvimi</CardTitle>
                             <CardDescription>
-                                Danışanın ruh hali girişlerinin görselleştirilmesi.
+                                Danışanın sizinle paylaşmayı seçtiği günlük kayıtları ve düşünceleri.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                           <p className="text-muted-foreground text-center py-8">Bu özellik yakında eklenecektir.</p>
+                            {loadingJournals ? (
+                                renderJournalSkeleton()
+                            ) : sharedJournals.length > 0 ? (
+                                <div className="space-y-4">
+                                    {sharedJournals.map(journal => (
+                                        <Card key={journal.id} className="bg-muted/30">
+                                            <CardHeader>
+                                                <CardTitle className="text-lg">{journal.prompt}</CardTitle>
+                                                <CardDescription>
+                                                    {format(journal.createdAt.toDate(), "d MMMM yyyy, HH:mm", { locale: tr })}
+                                                </CardDescription>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <p className="whitespace-pre-wrap">{journal.content}</p>
+                                            </CardContent>
+                                        </Card>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center text-muted-foreground py-16">
+                                    <p>Danışanınız henüz sizinle bir günlük paylaşmadı.</p>
+                                    <p className="text-sm mt-1">"Görevler" sekmesinden bir günlük tutma ödevi atayarak bu süreci teşvik edebilirsiniz.</p>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
-                </div>
-            </div>
+                </TabsContent>
+
+                <TabsContent value="results" className="mt-6">
+                     <Card>
+                        <CardHeader>
+                            <CardTitle>Test Sonuçları</CardTitle>
+                            <CardDescription>
+                                Danışanın tamamladığı testlerin sonuçlarını ve analizlerini görüntüleyin.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="text-center text-muted-foreground py-16">
+                            <p>Henüz tamamlanmış bir test bulunmuyor.</p>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
         </div>
     );
 }
