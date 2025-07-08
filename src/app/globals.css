@@ -106,3 +106,21 @@
     animation-timing-function: ease-in-out;
     animation-fill-mode: forwards;
 }
+
+.has-appointment {
+  position: relative;
+}
+.day-today.has-appointment::after {
+  background-color: hsl(var(--accent-foreground));
+}
+.has-appointment:not([aria-selected=true]):not(.day-today)::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: hsl(var(--primary));
+}

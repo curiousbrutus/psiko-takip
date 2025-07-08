@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { auth } from "@/lib/firebase/config";
 import { useRouter, usePathname } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import TherapistHeaderTitle from "./_components/header-title";
 
 function TherapistNav() {
     const pathname = usePathname();
@@ -106,7 +107,7 @@ export default function TherapistLayout({
             </SheetContent>
           </Sheet>
           <div className="flex-1">
-            <h1 className="text-lg font-semibold">Terapist Paneli</h1>
+            <TherapistHeaderTitle />
           </div>
         </header>
         <main className="flex-1 p-6 bg-muted/40 overflow-auto">
