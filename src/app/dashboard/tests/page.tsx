@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, BrainCircuit } from 'lucide-react';
+import { ArrowRight, BrainCircuit, Flame } from 'lucide-react';
 import Link from 'next/link';
 
 const availableTests = [
@@ -9,6 +9,13 @@ const availableTests = [
     description: "Depresyonun şiddetini ölçmek için en yaygın kullanılan psikometrik testlerden biri olan 21 soruluk çoktan seçmeli bir öz bildirim envanteri.",
     href: "/dashboard/tests/beck-depression-inventory",
     Icon: BrainCircuit,
+    enabled: true,
+  },
+   {
+    title: "Tükenmişlik Envanteri",
+    description: "İşle ilgili stresi, duygusal tükenmeyi ve mesleki doyumu değerlendirmek için tasarlanmış bir öz bildirim envanteri.",
+    href: "/dashboard/tests/burnout-inventory",
+    Icon: Flame,
     enabled: true,
   },
   {
