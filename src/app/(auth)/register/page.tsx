@@ -82,9 +82,29 @@ export default function RegisterPage() {
 
             router.push('/dashboard');
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Google ile giriş hatası:", error);
-            toast({ title: "Hata", description: "Google ile giriş yapılamadı.", variant: "destructive" });
+            let errorMessage = "Google ile giriş yapılamadı. Lütfen daha sonra tekrar deneyin.";
+            if (error.code) {
+                switch (error.code) {
+                    case 'auth/popup-closed-by-user':
+                        errorMessage = "Giriş penceresini kapattınız. Lütfen tekrar deneyin.";
+                        break;
+                    case 'auth/popup-blocked':
+                        errorMessage = "Tarayıcınız giriş penceresini engelledi. Lütfen bu site için pop-up'lara izin verin.";
+                        break;
+                    case 'auth/unauthorized-domain':
+                        errorMessage = "Bu web sitesi, Google ile giriş için yetkilendirilmemiş. Lütfen uygulama yöneticisiyle iletişime geçin.";
+                        break;
+                    case 'auth/cancelled-popup-request':
+                        errorMessage = 'Aynı anda birden fazla giriş penceresi açılamaz.';
+                        break;
+                    default:
+                        // Keep the generic message for other Firebase errors
+                        break;
+                }
+            }
+            toast({ title: "Hata", description: errorMessage, variant: "destructive" });
         } finally {
             setGoogleLoading(false);
         }
