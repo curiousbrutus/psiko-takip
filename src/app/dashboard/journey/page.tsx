@@ -38,11 +38,10 @@ export default function DailyJourneyPage() {
 
   const [tasksCompleted, setTasksCompleted] = useState({
     morning: false,
-    midday: false,
     evening: false,
   });
 
-  const [loading, setLoading] = useState({ morning: false, midday: false, evening: false });
+  const [loading, setLoading] = useState({ morning: false, evening: false });
 
   // Function to check if a task was completed today
   const checkIfTaskCompletedToday = async (taskName: string) => {
@@ -67,13 +66,13 @@ export default function DailyJourneyPage() {
             const morningDone = await checkIfTaskCompletedToday("Günün Niyeti");
             // This is a simplified check. A full implementation would check all evening tasks.
             const eveningDone = await checkIfTaskCompletedToday("Serbest Günlük"); 
-            setTasksCompleted({ morning: morningDone, midday: false, evening: eveningDone });
+            setTasksCompleted({ morning: morningDone, evening: eveningDone });
         }
     };
     checkCompletionStatus();
   }, [user]);
 
-  const completeTask = async (task: 'morning' | 'midday' | 'evening') => {
+  const completeTask = async (task: 'morning' | 'evening') => {
     if (!user) {
         toast({
             title: "Demo Modu",
@@ -203,7 +202,7 @@ export default function DailyJourneyPage() {
             </AccordionContent>
           </Card>
         </AccordionItem>
-        <AccordionItem value="item-3" className="border-none">
+        <AccordionItem value="item-2" className="border-none">
           <Card>
             <AccordionTrigger className="p-6 hover:no-underline [&[data-state=open]>div>svg.lucide-check-circle-2]:hidden" disabled={tasksCompleted.evening}>
               <div className="flex items-center justify-between w-full">
@@ -307,3 +306,5 @@ export default function DailyJourneyPage() {
     </div>
   );
 }
+
+    

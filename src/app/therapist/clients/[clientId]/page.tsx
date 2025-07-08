@@ -42,6 +42,8 @@ export default function ClientProfilePage() {
         const fetchClientAndJournals = async () => {
             if (!user || !clientId) return;
 
+            // This check might be premature if therapistData is still loading.
+            // Let's perform it only after therapistData is confirmed to be loaded.
             if (therapistData && (!therapistData.danisanlarim || !therapistData.danisanlarim.includes(clientId))) {
                 toast({ title: "Yetkisiz Erişim", description: "Bu danışanın profilini görüntüleme yetkiniz yok.", variant: "destructive" });
                 router.push('/therapist/dashboard');
@@ -50,6 +52,7 @@ export default function ClientProfilePage() {
 
             try {
                 // Fetch client data
+                setLoadingClient(true);
                 const clientDocRef = doc(db, 'users', clientId);
                 const clientDocSnap = await getDoc(clientDocRef);
 
@@ -63,6 +66,7 @@ export default function ClientProfilePage() {
                 setLoadingClient(false);
 
                 // Fetch shared journals
+                setLoadingJournals(true);
                 const journalsQuery = query(
                     collection(db, 'journalEntries'),
                     where('userId', '==', clientId),
@@ -82,7 +86,7 @@ export default function ClientProfilePage() {
             }
         };
 
-        if (user) {
+        if (user && therapistData) { // Ensure therapistData is loaded before fetching
             fetchClientAndJournals();
         }
     }, [user, clientId, therapistData, router, toast]);
@@ -215,7 +219,7 @@ export default function ClientProfilePage() {
                             ) : (
                                 <div className="text-center text-muted-foreground py-16">
                                     <p>Danışanınız henüz sizinle bir günlük paylaşmadı.</p>
-                                    <p className="text-sm mt-1">"Görevler" sekmesinden bir günlük tutma ödevi atayarak bu süreci teşvik edebilirsiniz.</p>
+                                    <p className="text-sm mt-1">Danışanınız, "Günlük Yolculuk" sayfasındaki günlük bölümlerinde "Terapistle Paylaş" seçeneğini kullanarak sizinle paylaşımlarda bulunabilir.</p>
                                 </div>
                             )}
                         </CardContent>
