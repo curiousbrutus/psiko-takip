@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -94,12 +95,17 @@ export default {
             '0%': { opacity: '0' },
             '100%': { opacity: '1' },
         },
+        'float-away': {
+            '0%': { transform: 'translateY(0) scale(1)', opacity: '1' },
+            '100%': { transform: 'translateY(-100vh) scale(1.2)', opacity: '0' },
+        }
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'breath': 'breath-animation 10s ease-in-out infinite',
         'fade-in': 'fade-in 0.5s ease-in-out',
+        'float-away': 'float-away 4s ease-in forwards',
       },
     },
   },

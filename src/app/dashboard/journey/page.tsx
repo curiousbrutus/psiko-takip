@@ -8,9 +8,9 @@ import { collection, addDoc, serverTimestamp, query, where, getDocs, limit } fro
 import { useToast } from '@/hooks/use-toast';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, Sunrise, Sun, Sunset, Smile, Leaf, Meh, HeartPulse, Frown, Wind, BrainCircuit, Book, Sparkles, Loader2, Share2 } from 'lucide-react';
+import { CheckCircle2, Sunrise, Sun, Sunset, Smile, Leaf, Meh, HeartPulse, Frown, Wind, BrainCircuit, Book, Sparkles, Loader2, Share2, Feather, Waves, Droplets } from 'lucide-react';
 import Link from 'next/link';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -196,42 +196,6 @@ export default function DailyJourneyPage() {
             </AccordionContent>
           </Card>
         </AccordionItem>
-
-        <AccordionItem value="item-2" className="border-none">
-          <Card>
-             <AccordionTrigger className="p-6 hover:no-underline [&[data-state=open]>div>svg.lucide-check-circle-2]:hidden" disabled={tasksCompleted.midday}>
-              <div className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-4">
-                  <Sun className="h-6 w-6 text-primary" />
-                  <div>
-                    <CardTitle className="text-xl text-left">Gün İçi Destek</CardTitle>
-                    <p className="text-sm text-muted-foreground font-normal">İhtiyaç duyduğunda kendine bir mola ver.</p>
-                  </div>
-                </div>
-                 {tasksCompleted.midday && <CheckCircle2 className="h-6 w-6 text-green-500" />}
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="p-6 pt-0">
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-semibold mb-2">Nefes Egzersizleri</h3>
-                  <div className="flex gap-2">
-                     <Button variant="outline" asChild>
-                        <Link href="/dashboard/journey/breathing-exercise">
-                            <Wind className="mr-2 h-4 w-4" /> Bir Mola Ver
-                        </Link>
-                    </Button>
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-2">BDT Mini Egzersizleri</h3>
-                   <Button variant="outline"><BrainCircuit className="mr-2 h-4 w-4" /> Olumsuz Düşünceye Meydan Oku</Button>
-                </div>
-              </div>
-            </AccordionContent>
-          </Card>
-        </AccordionItem>
-
         <AccordionItem value="item-3" className="border-none">
           <Card>
             <AccordionTrigger className="p-6 hover:no-underline [&[data-state=open]>div>svg.lucide-check-circle-2]:hidden" disabled={tasksCompleted.evening}>
@@ -293,6 +257,46 @@ export default function DailyJourneyPage() {
           </Card>
         </AccordionItem>
       </Accordion>
+
+       <Card>
+            <CardHeader>
+                <CardTitle className="text-xl flex items-center gap-3">
+                    <Sun className="h-6 w-6 text-primary" /> İyi Oluş Aktiviteleri
+                </CardTitle>
+                <CardDescription>Zihnini dinlendirecek ve ana odaklanmanı sağlayacak interaktif egzersizler.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Link href="/dashboard/journey/breathing-exercise" className="block p-4 border rounded-lg hover:bg-muted/50 transition-colors h-full">
+                    <div className="flex items-center gap-3">
+                        <Wind className="h-5 w-5 text-accent"/>
+                        <h4 className="font-semibold">Nefes Molası</h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1 pl-8">Stresi azaltmak ve odaklanmak için yönlendirmeli nefes egzersizleri.</p>
+                </Link>
+                <Link href="/dashboard/journey/thought-bubbles" className="block p-4 border rounded-lg hover:bg-muted/50 transition-colors h-full">
+                    <div className="flex items-center gap-3">
+                        <Feather className="h-5 w-5 text-accent"/>
+                        <h4 className="font-semibold">Düşünce Balonları</h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1 pl-8">Düşüncelerini gözlemle ve sakince gitmelerine izin ver.</p>
+                </Link>
+                 <Link href="/dashboard/journey/grounding-exercise" className="block p-4 border rounded-lg hover:bg-muted/50 transition-colors h-full">
+                    <div className="flex items-center gap-3">
+                        <Droplets className="h-5 w-5 text-accent"/>
+                        <h4 className="font-semibold">5-4-3-2-1 Topraklanma</h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1 pl-8">5 duyunla şimdiki ana demir at.</p>
+                </Link>
+                 <Link href="/dashboard/journey/gratitude-jar" className="block p-4 border rounded-lg hover:bg-muted/50 transition-colors h-full">
+                    <div className="flex items-center gap-3">
+                         <Sparkles className="h-5 w-5 text-accent"/>
+                        <h4 className="font-semibold">Minnet Anı Kavanozu</h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1 pl-8">İyi anları biriktir ve dilediğinde hatırla.</p>
+                </Link>
+            </CardContent>
+        </Card>
+
     </div>
   );
 }
