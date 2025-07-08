@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, FlaskConical, Settings, User, Route, Sparkles, BookOpen } from 'lucide-react';
+import { LayoutDashboard, FlaskConical, Settings, User, Route, Sparkles, BookOpen, Calendar } from 'lucide-react';
 
 const navItems = [
     { href: '/dashboard', label: 'Kontrol Paneli', icon: LayoutDashboard },
@@ -13,6 +13,7 @@ const navItems = [
     { href: '/dashboard/assistant', label: 'Dijital Asistan', icon: Sparkles },
     { href: '/dashboard/tests', label: 'Testler', icon: FlaskConical },
     { href: '/dashboard/education', label: 'Psikoeğitim', icon: BookOpen },
+    { href: '/dashboard/calendar', label: 'Takvim', icon: Calendar },
     { href: '/dashboard/profile', label: 'Profil', icon: User },
     { href: '/dashboard/settings', label: 'Ayarlar', icon: Settings },
 ];

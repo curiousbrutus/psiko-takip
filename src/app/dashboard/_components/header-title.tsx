@@ -19,7 +19,10 @@ export default function HeaderTitle() {
         title = "Ayarlar";
     } else if (pathname.startsWith('/dashboard/assistant')) {
         title = "Dijital Asistan";
+    } else if (pathname.startsWith('/dashboard/calendar')) {
+        title = "Takvim";
     }
+
 
     return <h1 className="text-lg font-semibold">{title}</h1>;
 }
