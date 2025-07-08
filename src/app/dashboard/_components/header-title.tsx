@@ -1,3 +1,4 @@
+
 'use client';
 
 import { usePathname } from 'next/navigation';
@@ -10,6 +11,8 @@ export default function HeaderTitle() {
         title = "Günlük Yolculuk";
     } else if (pathname.startsWith('/dashboard/tests')) {
         title = "Testler";
+    } else if (pathname.startsWith('/dashboard/education')) {
+        title = "Psikoeğitim";
     } else if (pathname.startsWith('/dashboard/profile')) {
         title = "Profil";
     } else if (pathname.startsWith('/dashboard/settings')) {
