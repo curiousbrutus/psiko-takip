@@ -12,6 +12,12 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+// Check if the API key is provided
+if (!firebaseConfig.apiKey) {
+    console.error("Firebase API Key is missing. Please add your Firebase credentials to the .env file.");
+}
+
+
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
