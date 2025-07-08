@@ -40,7 +40,7 @@ export default function TestsPage() {
       <div>
         <h1 className="text-3xl font-bold font-headline">Mevcut Testler</h1>
         <p className="text-muted-foreground">
-          Kendi kendine değerlendirmenize başlamak için aşağıdan bir test seçin.
+          Aşağıdaki testleri tamamladıktan sonra sonuçlarınız doğrudan terapistinizle paylaşılacaktır. Terapistiniz sonuçları sizinle birlikte değerlendirecektir.
         </p>
       </div>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

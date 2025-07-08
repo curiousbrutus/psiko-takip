@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useRouter } from 'next/navigation';
 import { beckQuestions } from '@/lib/beck-questions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,9 +12,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { analyzeBeckTest } from './actions';
-import type { AnalyzeTestResultsOutput } from '@/ai/flows/analyze-test-results';
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, Lightbulb, ShieldCheck, ClipboardList } from 'lucide-react';
+import { Loader2, CheckCircle } from 'lucide-react';
+import Link from 'next/link';
 
 const formSchema = z.object(
   Object.fromEntries(
@@ -25,8 +25,9 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function BeckDepressionInventoryPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<AnalyzeTestResultsOutput | null>(null);
+  const [isCompleted, setIsCompleted] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -34,17 +35,15 @@ export default function BeckDepressionInventoryPage() {
 
   async function onSubmit(values: FormValues) {
     setIsLoading(true);
-    setAnalysisResult(null);
-
+    
     const result = await analyzeBeckTest(values);
 
     if (result.success) {
-      setAnalysisResult(result.data);
       toast({
-        title: "Analiz Tamamlandı",
-        description: "Sonuçlarınız başarıyla analiz edildi.",
-        variant: "default",
+        title: "Test Tamamlandı",
+        description: "Sonuçlarınız terapistinizle paylaşıldı.",
       });
+      setIsCompleted(true);
     } else {
       toast({
         title: "Analiz Başarısız",
@@ -53,6 +52,27 @@ export default function BeckDepressionInventoryPage() {
       });
     }
     setIsLoading(false);
+  }
+
+  if (isCompleted) {
+    return (
+        <Card className="mt-8 text-center">
+            <CardHeader>
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+                    <CheckCircle className="h-8 w-8 text-green-600" />
+                </div>
+                <CardTitle className="text-2xl mt-4">Testiniz Tamamlandı</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p className="text-muted-foreground">
+                    Sonuçlarınız başarıyla terapistinize gönderildi. Terapistiniz, sonuçları sizinle en kısa sürede değerlendirecektir.
+                </p>
+                 <Button asChild className="mt-6">
+                    <Link href="/dashboard/tests">Diğer Testlere Göz At</Link>
+                </Button>
+            </CardContent>
+        </Card>
+    )
   }
 
   return (
@@ -108,36 +128,10 @@ export default function BeckDepressionInventoryPage() {
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Analiz ediliyor...
               </>
-            ) : "Analiz İçin Gönder"}
+            ) : "Tamamla ve Terapistime Gönder"}
           </Button>
         </form>
       </Form>
-
-      {analysisResult && (
-        <Card className="mt-8">
-            <CardHeader>
-                <CardTitle className="text-2xl">Yapay Zeka Destekli Analiziniz</CardTitle>
-                <CardDescription>Bu, sonuçlarınızın yapay zeka tarafından oluşturulmuş bir analizidir. Bu bir teşhis değildir. Lütfen bir sağlık uzmanına danışın.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-                <Alert>
-                    <ShieldCheck className="h-4 w-4" />
-                    <AlertTitle>Şiddet</AlertTitle>
-                    <AlertDescription>{analysisResult.severity}</AlertDescription>
-                </Alert>
-                <Alert>
-                    <Lightbulb className="h-4 w-4" />
-                    <AlertTitle>Kişiselleştirilmiş İçgörüler</AlertTitle>
-                    <AlertDescription>{analysisResult.insights}</AlertDescription>
-                </Alert>
-                <Alert>
-                    <ClipboardList className="h-4 w-4" />
-                    <AlertTitle>Kişiselleştirilmiş Rehberlik</AlertTitle>
-                    <AlertDescription>{analysisResult.guidance}</AlertDescription>
-                </Alert>
-            </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

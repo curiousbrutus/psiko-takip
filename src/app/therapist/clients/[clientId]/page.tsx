@@ -12,11 +12,14 @@ import { tr } from 'date-fns/locale';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Mail, Calendar, FileText, CheckSquare, BarChart2 } from 'lucide-react';
+import { ArrowLeft, Mail, Calendar, FileText, CheckSquare, BarChart2, Lightbulb, ShieldCheck, ClipboardList } from 'lucide-react';
 import Link from 'next/link';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
 
 interface SharedJournal extends DocumentData {
     id: string;
@@ -35,15 +38,16 @@ export default function ClientProfilePage() {
     
     const [clientData, setClientData] = useState<DocumentData | null>(null);
     const [sharedJournals, setSharedJournals] = useState<SharedJournal[]>([]);
+    const [testResults, setTestResults] = useState<DocumentData[]>([]);
+    
     const [loadingClient, setLoadingClient] = useState(true);
     const [loadingJournals, setLoadingJournals] = useState(true);
+    const [loadingResults, setLoadingResults] = useState(true);
 
     useEffect(() => {
-        const fetchClientAndJournals = async () => {
+        const fetchAllData = async () => {
             if (!user || !clientId) return;
 
-            // This check might be premature if therapistData is still loading.
-            // Let's perform it only after therapistData is confirmed to be loaded.
             if (therapistData && (!therapistData.danisanlarim || !therapistData.danisanlarim.includes(clientId))) {
                 toast({ title: "Yetkisiz Erişim", description: "Bu danışanın profilini görüntüleme yetkiniz yok.", variant: "destructive" });
                 router.push('/therapist/dashboard');
@@ -76,18 +80,31 @@ export default function ClientProfilePage() {
                 const journalsSnapshot = await getDocs(journalsQuery);
                 const journals = journalsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SharedJournal));
                 setSharedJournals(journals);
+                setLoadingJournals(false);
+
+                // Fetch test results
+                setLoadingResults(true);
+                const resultsQuery = query(
+                    collection(db, 'testSubmissions'),
+                    where('userId', '==', clientId),
+                    orderBy('createdAt', 'desc')
+                );
+                const resultsSnapshot = await getDocs(resultsQuery);
+                const results = resultsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                setTestResults(results);
+                setLoadingResults(false);
 
             } catch (error) {
-                console.error("Error fetching client data or journals:", error);
+                console.error("Error fetching client data:", error);
                 toast({ title: "Hata", description: "Veriler alınırken bir hata oluştu.", variant: "destructive" });
-            } finally {
-                setLoadingClient(false);
-                setLoadingJournals(false);
+                 setLoadingClient(false);
+                 setLoadingJournals(false);
+                 setLoadingResults(false);
             }
         };
 
-        if (user && therapistData) { // Ensure therapistData is loaded before fetching
-            fetchClientAndJournals();
+        if (user && therapistData) {
+            fetchAllData();
         }
     }, [user, clientId, therapistData, router, toast]);
 
@@ -106,6 +123,14 @@ export default function ClientProfilePage() {
                         </div>
                     </CardContent>
                 </Card>
+            ))}
+        </div>
+    );
+
+    const renderResultsSkeleton = () => (
+        <div className="space-y-4">
+            {[...Array(2)].map((_, i) => (
+                 <Skeleton key={i} className="h-14 w-full rounded-md" />
             ))}
         </div>
     );
@@ -231,11 +256,47 @@ export default function ClientProfilePage() {
                         <CardHeader>
                             <CardTitle>Test Sonuçları</CardTitle>
                             <CardDescription>
-                                Danışanın tamamladığı testlerin sonuçlarını ve analizlerini görüntüleyin.
+                                Danışanın tamamladığı testlerin sonuçlarını ve yapay zeka analizlerini görüntüleyin.
                             </CardDescription>
                         </CardHeader>
-                        <CardContent className="text-center text-muted-foreground py-16">
-                            <p>Henüz tamamlanmış bir test bulunmuyor.</p>
+                        <CardContent>
+                           {loadingResults ? (
+                                renderResultsSkeleton()
+                            ) : testResults.length > 0 ? (
+                                <Accordion type="single" collapsible className="w-full space-y-2">
+                                    {testResults.map(result => (
+                                        <AccordionItem value={result.id} key={result.id} className="border rounded-md px-4 bg-muted/20">
+                                            <AccordionTrigger>
+                                                <div className="flex justify-between w-full pr-4">
+                                                  <span className="font-semibold">{result.testName}</span>
+                                                  <span className="text-muted-foreground text-sm">{format(result.createdAt.toDate(), "d MMMM yyyy", { locale: tr })}</span>
+                                                </div>
+                                            </AccordionTrigger>
+                                            <AccordionContent className="space-y-4 pt-4">
+                                                <Alert>
+                                                    <ShieldCheck className="h-4 w-4" />
+                                                    <AlertTitle>{result.testName === 'Tükenmişlik Envanteri' ? 'Risk Seviyesi' : 'Şiddet'}</AlertTitle>
+                                                    <AlertDescription>{result.analysis.severity}</AlertDescription>
+                                                </Alert>
+                                                <Alert>
+                                                    <Lightbulb className="h-4 w-4" />
+                                                    <AlertTitle>Kişiselleştirilmiş İçgörüler</AlertTitle>
+                                                    <AlertDescription>{result.analysis.insights}</AlertDescription>
+                                                </Alert>
+                                                <Alert>
+                                                    <ClipboardList className="h-4 w-4" />
+                                                    <AlertTitle>Kişiselleştirilmiş Rehberlik</AlertTitle>
+                                                    <AlertDescription>{result.analysis.guidance}</AlertDescription>
+                                                </Alert>
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                    ))}
+                                </Accordion>
+                            ) : (
+                                <div className="text-center text-muted-foreground py-16">
+                                    <p>Danışanınız henüz bir test tamamlamadı.</p>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </TabsContent>
