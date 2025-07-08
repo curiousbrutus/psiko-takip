@@ -159,7 +159,7 @@ export default function ClientProfilePage() {
                             <CardDescription>
                                 Danışanın ruh hali girişlerinin görselleştirilmesi.
                             </CardDescription>
-                        </Header>
+                        </CardHeader>
                         <CardContent>
                            <p className="text-muted-foreground text-center py-8">Bu özellik yakında eklenecektir.</p>
                         </CardContent>
