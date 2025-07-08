@@ -43,6 +43,14 @@ export default function LoginPage() {
       setLoading(false);
       return;
     }
+    
+    // Special handling for the demo danışan
+    if (email.toLowerCase() === 'mehmet.ozturk@example.com' && password === 'admin') {
+      toast({ title: "Demo Girişi", description: "Danışan paneline yönlendiriliyorsunuz..." });
+      router.push('/dashboard');
+      setLoading(false);
+      return;
+    }
 
     if (!email || !password) {
         toast({ title: "Hata", description: "E-posta ve şifre gereklidir.", variant: "destructive" })
@@ -88,7 +96,7 @@ export default function LoginPage() {
       <CardHeader>
         <CardTitle className="text-2xl">Giriş Yap</CardTitle>
         <CardDescription>
-          Hesabınıza giriş yapmak için e-postanızı girin. Demo için her iki alana da 'admin' yazabilirsiniz.
+          Hesabınıza giriş yapmak için e-postanızı girin. Terapist demosu için 'admin'/'admin', danışan demosu için 'mehmet.ozturk@example.com'/'admin' kullanabilirsiniz.
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleLogin}>
