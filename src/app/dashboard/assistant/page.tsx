@@ -32,12 +32,16 @@ export default function AssistantPage() {
     if (!input.trim()) return;
 
     const userMessage: Message = { role: 'user', content: input };
-    setMessages((prev) => [...prev, userMessage]);
+    const newMessages = [...messages, userMessage];
+
+    setMessages(newMessages);
     setInput('');
     setIsLoading(true);
 
     try {
-      const result = await getChatResponseAction({ message: input });
+      // Pass the last 10 messages for context
+      const history = messages.slice(-10);
+      const result = await getChatResponseAction({ message: input, history });
       const modelMessage: Message = { role: 'model', content: result.response };
       
       if (result.isCrisis) {
@@ -72,21 +76,21 @@ export default function AssistantPage() {
           <CardContent className="space-y-4">
             <Alert variant="destructive">
               <ShieldAlert className="h-4 w-4" />
-              <AlertTitle>Önemli Bilgilendirme</AlertTitle>
+              <AlertTitle>Önemli Bilgilendirme ve Sınırlar</AlertTitle>
               <AlertDescription>
-                Bu bir yapay zeka sohbet robotudur ve gerçek bir terapist değildir. Lütfen acil durumlar veya ciddi ruh sağlığı sorunları için profesyonel yardım alın.
+                Ben bir yapay zeka asistanıyım, gerçek bir terapist değilim. Sağladığım destek, profesyonel tıbbi tavsiye, teşhis veya tedavinin yerini tutmaz. Acil durumlar veya ciddi ruh sağlığı sorunları için lütfen profesyonel yardım alın.
               </AlertDescription>
             </Alert>
             <div className="p-4 border rounded-md text-sm text-muted-foreground space-y-2">
-              <h3 className="font-semibold text-foreground">KVKK ve Gizlilik Politikası</h3>
+              <h3 className="font-semibold text-foreground">Veri Kullanımı ve Gizlilik Onayı</h3>
               <p>
-                Bu sohbeti kullanarak, verilerinizin anonim bir şekilde yapay zeka tarafından işleneceğini kabul etmiş olursunuz.
+                Bu sohbeti kullanarak, anonimleştirilmiş konuşma verilerinizin, size daha iyi ve bağlamsal destek sağlamak amacıyla yapay zeka tarafından işleneceğini kabul etmiş olursunuz.
               </p>
               <p>
-                Sohbetlerinizde lütfen ad, e-posta gibi kişisel bilgilerinizi paylaşmayınız.
+                Lütfen sohbetlerinizde ad, e-posta, adres gibi tanımlanabilir kişisel bilgilerinizi paylaşmayınız. Gizliliğiniz bizim için önemlidir.
               </p>
                <p>
-                Acil bir kriz (kendine zarar verme, intihar vb.) durumu tespit edildiğinde, sistem sizi otomatik olarak acil durum kaynaklarına yönlendirecektir.
+                Konuşmalarımızda kendine veya başkasına zarar verme gibi bir kriz durumu tespit edersem, sizi güvende tutmak amacıyla otomatik olarak acil durum kaynaklarına yönlendirmekle programlandım.
               </p>
             </div>
           </CardContent>
@@ -101,15 +105,18 @@ export default function AssistantPage() {
 
   return (
     <div className="h-full flex flex-col max-w-3xl mx-auto">
-        <h1 className="text-2xl font-bold font-headline mb-4">Dijital Asistanım</h1>
+        <div className="mb-4">
+          <h1 className="text-2xl font-bold font-headline">Dijital Terapötik Asistan</h1>
+          <p className="text-sm text-muted-foreground">Bu bir yapay zeka sohbetidir. Gerçek bir terapistin yerini tutmaz.</p>
+        </div>
         <Card className="flex-1 flex flex-col">
             <CardContent className="flex-1 p-0">
-                <ScrollArea className="h-[calc(100vh-20rem)] p-4">
+                <ScrollArea className="h-[calc(100vh-22rem)] p-4">
                     <div className="space-y-4">
                     {messages.length === 0 && (
                         <div className="text-center text-muted-foreground p-8">
-                            <p>Merhaba! Ben senin dijital asistanınım.</p>
-                            <p>Bugün sana nasıl yardımcı olabilirim?</p>
+                            <p>Merhaba, size destek olmak için buradayım.</p>
+                            <p>Bugün ne hakkında konuşmak istersiniz?</p>
                         </div>
                     )}
                     {messages.map((msg, index) => (
