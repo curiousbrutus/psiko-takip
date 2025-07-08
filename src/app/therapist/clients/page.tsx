@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -7,15 +6,25 @@ import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, doc, getDoc, Timestamp, DocumentData } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { formatDistanceToNow } from 'date-fns';
+import { tr } from 'date-fns/locale';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { formatDistanceToNow } from 'date-fns';
-import { tr } from 'date-fns/locale';
-import { ArrowRight, PlusCircle, Users } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { ArrowRight, PlusCircle, Users, Loader2 } from 'lucide-react';
+
+import { addClientAction } from './actions';
 
 interface Client extends DocumentData {
     id: string;
@@ -23,8 +32,15 @@ interface Client extends DocumentData {
     email: string;
     photoURL?: string;
     lastActivity?: string;
-    status: 'Aktif' | 'Pasif';
+    status: 'Aktif' | 'Pasif' | 'Davet Edildi';
 }
+
+const addClientFormSchema = z.object({
+  fullName: z.string().min(3, { message: 'Ad Soyad en az 3 karakter olmalıdır.' }),
+  email: z.string().email({ message: 'Geçersiz e-posta adresi.' }),
+  phone: z.string().optional(),
+});
+type AddClientFormValues = z.infer<typeof addClientFormSchema>;
 
 
 export default function ClientsPage() {
@@ -32,67 +48,110 @@ export default function ClientsPage() {
     const { toast } = useToast();
     const [clients, setClients] = useState<Client[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-    useEffect(() => {
-        const fetchClients = async () => {
-            if (!user || !userData || !userData.danisanlarim || userData.danisanlarim.length === 0) {
-                setLoading(false);
-                return;
-            }
+    const form = useForm<AddClientFormValues>({
+        resolver: zodResolver(addClientFormSchema),
+        defaultValues: {
+            fullName: '',
+            email: '',
+            phone: '',
+        }
+    });
 
-            try {
-                // Fetch client user data
-                const clientsQuery = query(collection(db, 'users'), where('__name__', 'in', userData.danisanlarim));
-                const clientsSnapshot = await getDocs(clientsQuery);
-                const clientDocs = clientsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const fetchClients = async () => {
+        if (!user || !userData || !userData.danisanlarim || userData.danisanlarim.length === 0) {
+            setLoading(false);
+            setClients([]);
+            return;
+        }
 
-                // Fetch gamification data for each client
-                const clientsWithDetails = await Promise.all(
-                    clientDocs.map(async (clientDoc) => {
-                        const gamificationRef = doc(db, 'gamification', clientDoc.id);
-                        const gamificationSnap = await getDoc(gamificationRef);
-                        
-                        let lastActivity = 'Aktivite yok';
-                        let status: 'Aktif' | 'Pasif' = 'Pasif';
+        try {
+            const clientsQuery = query(collection(db, 'users'), where('__name__', 'in', userData.danisanlarim));
+            const clientsSnapshot = await getDocs(clientsQuery);
+            const clientDocs = clientsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-                        if (gamificationSnap.exists()) {
-                            const gamificationData = gamificationSnap.data();
-                            const lastActivityDate = gamificationData.lastActivityDate as Timestamp;
-                            if (lastActivityDate) {
-                                lastActivity = formatDistanceToNow(lastActivityDate.toDate(), { addSuffix: true, locale: tr });
-                                
-                                // if last activity was within the last 7 days, consider active
-                                const oneWeekAgo = new Date();
-                                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-                                if(lastActivityDate.toDate() > oneWeekAgo) {
-                                    status = 'Aktif';
-                                }
-                            }
-                        }
-                        
+            const clientsWithDetails = await Promise.all(
+                clientDocs.map(async (clientDoc) => {
+                    if (clientDoc.status === 'invited') {
                         return {
                             id: clientDoc.id,
                             displayName: clientDoc.displayName,
                             email: clientDoc.email,
                             photoURL: clientDoc.photoURL,
-                            lastActivity,
-                            status
+                            lastActivity: 'Davet bekleniyor',
+                            status: 'Davet Edildi'
                         };
-                    })
-                );
+                    }
 
-                setClients(clientsWithDetails);
+                    const gamificationRef = doc(db, 'gamification', clientDoc.id);
+                    const gamificationSnap = await getDoc(gamificationRef);
+                    
+                    let lastActivity = 'Aktivite yok';
+                    let status: 'Aktif' | 'Pasif' = 'Pasif';
 
-            } catch (error) {
-                console.error("Error fetching clients:", error);
-                toast({ title: "Hata", description: "Danışanlar getirilemedi.", variant: "destructive" });
-            } finally {
-                setLoading(false);
-            }
-        };
+                    if (gamificationSnap.exists()) {
+                        const gamificationData = gamificationSnap.data();
+                        const lastActivityDate = gamificationData.lastActivityDate as Timestamp;
+                        if (lastActivityDate) {
+                            lastActivity = formatDistanceToNow(lastActivityDate.toDate(), { addSuffix: true, locale: tr });
+                            
+                            const oneWeekAgo = new Date();
+                            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                            if(lastActivityDate.toDate() > oneWeekAgo) {
+                                status = 'Aktif';
+                            }
+                        }
+                    }
+                    
+                    return {
+                        id: clientDoc.id,
+                        displayName: clientDoc.displayName,
+                        email: clientDoc.email,
+                        photoURL: clientDoc.photoURL,
+                        lastActivity,
+                        status
+                    };
+                })
+            );
 
-        fetchClients();
-    }, [user, userData, toast]);
+            setClients(clientsWithDetails);
+
+        } catch (error) {
+            console.error("Error fetching clients:", error);
+            toast({ title: "Hata", description: "Danışanlar getirilemedi.", variant: "destructive" });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (user && userData) {
+            fetchClients();
+        }
+    }, [user, userData]);
+
+    async function onSubmit(values: AddClientFormValues) {
+        if (!user) {
+            toast({ title: "Hata", description: "Giriş yapmalısınız.", variant: "destructive"});
+            return;
+        }
+
+        const result = await addClientAction({ ...values, therapistId: user.uid });
+        
+        toast({
+            title: result.success ? "Başarılı" : "Hata",
+            description: result.message,
+            variant: result.success ? "default" : "destructive",
+        });
+
+        if (result.success) {
+            setIsDialogOpen(false);
+            form.reset();
+            setLoading(true); // show skeleton while refetching
+            await fetchClients(); // Refetch the clients list
+        }
+    }
 
 
     const renderSkeleton = () => (
@@ -113,12 +172,24 @@ export default function ClientsPage() {
                 <TableCell>
                      <Skeleton className="h-6 w-16 rounded-full" />
                 </TableCell>
-                <TableCell>
+                <TableCell className="text-right">
                     <Skeleton className="h-9 w-32 rounded-md" />
                 </TableCell>
             </TableRow>
         ))
     );
+
+    const getBadgeVariant = (status: Client['status']) => {
+        switch (status) {
+            case 'Aktif':
+                return 'default';
+            case 'Davet Edildi':
+                return 'outline';
+            case 'Pasif':
+            default:
+                return 'secondary';
+        }
+    };
 
     return (
         <div className="space-y-6">
@@ -127,10 +198,74 @@ export default function ClientsPage() {
                     <h1 className="text-3xl font-bold font-headline">Danışanlarım</h1>
                     <p className="text-muted-foreground">Danışanlarınızın listesini ve ilerlemelerini buradan takip edin.</p>
                 </div>
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Yeni Danışan Ekle
-                </Button>
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button>
+                            <PlusCircle className="mr-2 h-4 w-4" />
+                            Yeni Danışan Ekle
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Yeni Danışan Ekle</DialogTitle>
+                            <DialogDescription>
+                                Yeni danışanınızın bilgilerini girin. Danışan, bu e-posta adresi ile kayıt olduğunda hesabınıza otomatik olarak bağlanacaktır.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 py-4">
+                                <FormField
+                                    control={form.control}
+                                    name="fullName"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Ad Soyad</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="Ali Veli" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="email"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>E-posta</FormLabel>
+                                            <FormControl>
+                                                <Input type="email" placeholder="danisan@example.com" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="phone"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Telefon Numarası (İsteğe Bağlı)</FormLabel>
+                                            <FormControl>
+                                                <Input type="tel" placeholder="555 123 4567" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <DialogFooter>
+                                    <DialogClose asChild>
+                                        <Button type="button" variant="secondary">İptal</Button>
+                                    </DialogClose>
+                                    <Button type="submit" disabled={form.formState.isSubmitting}>
+                                        {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        Danışanı Davet Et
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        </Form>
+                    </DialogContent>
+                </Dialog>
             </div>
             
             <Card>
@@ -177,10 +312,10 @@ export default function ClientsPage() {
                                     </TableCell>
                                     <TableCell>{client.lastActivity}</TableCell>
                                     <TableCell>
-                                        <Badge variant={client.status === 'Aktif' ? 'default' : 'secondary'}>{client.status}</Badge>
+                                        <Badge variant={getBadgeVariant(client.status)}>{client.status}</Badge>
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        <Button asChild variant="outline" size="sm">
+                                        <Button asChild variant="outline" size="sm" disabled={client.status === 'Davet Edildi'}>
                                             <Link href={`/therapist/clients/${client.id}`}>
                                                 Profili Görüntüle <ArrowRight className="ml-2 h-4 w-4" />
                                             </Link>
