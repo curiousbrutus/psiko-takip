@@ -28,6 +28,36 @@ interface SharedJournal extends DocumentData {
     createdAt: Timestamp;
 }
 
+// Mock data for demo mode
+const mockClientData = {
+    displayName: 'Mehmet Öztürk',
+    email: 'mehmet.ozturk@example.com',
+    photoURL: 'https://placehold.co/80x80.png',
+};
+
+const mockSharedJournals: SharedJournal[] = [
+    {
+        id: 'journal1',
+        prompt: 'Bugün minnettar olduğun 3 şey nedir?',
+        content: '1. Sabah kahvesinin kokusu.\n2. Uzun bir aradan sonra bir arkadaşımla konuşmak.\n3. Akşam yürüyüşündeki serin hava.',
+        createdAt: new Timestamp(Math.floor(Date.now() / 1000) - 86400, 0), // 1 day ago
+    },
+];
+
+const mockTestResults: DocumentData[] = [
+    {
+        id: 'result1',
+        testName: 'Tükenmişlik Envanteri',
+        createdAt: new Timestamp(Math.floor(Date.now() / 1000) - 86400 * 3, 0), // 3 days ago
+        analysis: {
+            severity: 'Orta Düzeyde Tükenmişlik Riski',
+            insights: 'Kullanıcı, iş yükü ve duygusal yorgunluk arasında bir denge kurmakta zorlanıyor olabilir. Özellikle kişisel başarı hissi son zamanlarda azalmış görünüyor.',
+            guidance: 'Kısa molalar vermek, iş dışında hobilere zaman ayırmak ve bir sonraki seansta bu duyguları konuşmak faydalı olabilir. Sınır koyma üzerine çalışılabilir.',
+        }
+    }
+];
+
+
 export default function ClientProfilePage() {
     const { user, userData: therapistData } = useAuth();
     const params = useParams();
@@ -105,6 +135,17 @@ export default function ClientProfilePage() {
 
         if (user && therapistData) {
             fetchAllData();
+        } else if (!user && clientId === 'client2') {
+            // Demo mode for Mehmet Öztürk
+            setClientData(mockClientData);
+            setSharedJournals(mockSharedJournals);
+            setTestResults(mockTestResults);
+            setLoadingClient(false);
+            setLoadingJournals(false);
+            setLoadingResults(false);
+        } else if (!user) {
+            toast({ title: "Giriş Gerekli", description: "Danışan profilini görmek için lütfen giriş yapın.", variant: "destructive" });
+            router.push('/login');
         }
     }, [user, clientId, therapistData, router, toast]);
 
