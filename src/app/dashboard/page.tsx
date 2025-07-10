@@ -9,7 +9,7 @@ import type { DocumentData, Timestamp } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowRight, Flame, Trophy, Award, Lightbulb, Heart, Leaf, BarChart2 } from 'lucide-react';
+import { ArrowRight, Flame, Lightbulb, Heart, Leaf } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { Progress } from '@/components/ui/progress';
@@ -193,43 +193,6 @@ export default function DashboardPage() {
               </div>
             </div>
             <CompanionCard />
-        </div>
-
-      </div>
-      
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold font-headline">İlerleme Paneli</h2>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium">Lig Sıralaması</CardTitle>
-                    <Trophy className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold">Elmas Ligi</div>
-                    <p className="text-xs text-muted-foreground">Sıralamada #3 sıradasın</p>
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium">Başarımlar</CardTitle>
-                    <Award className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold">12 Rozet</div>
-                    <p className="text-xs text-muted-foreground">Son kazanılan: Zen Ustası</p>
-                </CardContent>
-            </Card>
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-sm font-medium">Ruh Hali Takvimi</CardTitle>
-                    <BarChart2 className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold">Çoğunlukla Sakin</div>
-                    <p className="text-xs text-muted-foreground">Son 7 günün analizi</p>
-                </CardContent>
-            </Card>
         </div>
       </div>
     </div>
