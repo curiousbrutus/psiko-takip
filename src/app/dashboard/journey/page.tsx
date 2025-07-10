@@ -4,13 +4,13 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase/config';
-import { collection, addDoc, serverTimestamp, query, where, getDocs, limit, doc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, limit, doc, updateDoc, getDoc, increment } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, Sunrise, Sun, Sunset, Smile, Leaf, Meh, HeartPulse, Frown, Wind, BrainCircuit, Book, Sparkles, Loader2, Share2, Feather, Droplets, Flame } from 'lucide-react';
+import { CheckCircle2, Sunrise, Sun, Sunset, Smile, Leaf, Meh, HeartPulse, Frown, Wind, BrainCircuit, Book, Sparkles, Loader2, Share2, Feather, Droplets, Flame, Waves } from 'lucide-react';
 import Link from 'next/link';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -72,16 +72,16 @@ export default function DailyJourneyPage() {
     checkCompletionStatus();
   }, [user]);
 
-  const updateGamificationStats = async () => {
+  const updateGamificationStats = async (xp: number) => {
       if (!user) return;
       
       const gamificationRef = doc(db, 'gamification', user.uid);
-      const today = new Date();
       
       try {
         const docSnap = await getDoc(gamificationRef);
         if (docSnap.exists()) {
              await updateDoc(gamificationRef, {
+                xp: increment(xp),
                 lastActivityDate: serverTimestamp(),
             });
         }
@@ -103,6 +103,7 @@ export default function DailyJourneyPage() {
     setLoading(prev => ({ ...prev, [task]: true }));
 
     try {
+        let xpGained = 0;
         if (task === 'morning') {
             if (!morningMood) {
                 toast({ title: "Hata", description: "Lütfen sabah ruh halinizi seçin.", variant: "destructive" });
@@ -123,6 +124,7 @@ export default function DailyJourneyPage() {
                 isShared: false, // Morning intentions are private by default
                 createdAt: serverTimestamp(),
             });
+            xpGained = 10;
         }
         
         if (task === 'evening') {
@@ -152,11 +154,12 @@ export default function DailyJourneyPage() {
                 isShared: isGunlukShared,
                 createdAt: serverTimestamp(),
             });
+            xpGained = 15;
         }
         
-        await updateGamificationStats();
+        await updateGamificationStats(xpGained);
 
-        toast({ title: "Kaydedildi!", description: "Günün bu bölümünü başarıyla tamamladın." });
+        toast({ title: "Kaydedildi!", description: `Günün bu bölümünü başarıyla tamamladın. +${xpGained} XP kazandın!` });
         setTasksCompleted(prev => ({...prev, [task]: true}));
 
     } catch (error) {
@@ -288,7 +291,7 @@ export default function DailyJourneyPage() {
                 </CardTitle>
                 <CardDescription>Zihnini dinlendirecek ve ana odaklanmanı sağlayacak interaktif egzersizler.</CardDescription>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <Link href="/dashboard/journey/breathing-exercise" className="block p-4 border rounded-lg hover:bg-muted/50 transition-colors h-full">
                     <div className="flex items-center gap-3">
                         <Wind className="h-5 w-5 text-accent"/>
@@ -316,6 +319,13 @@ export default function DailyJourneyPage() {
                         <h4 className="font-semibold">Minnet Anı Kavanozu</h4>
                     </div>
                     <p className="text-sm text-muted-foreground mt-1 pl-8">İyi anları biriktir ve dilediğinde hatırla.</p>
+                </Link>
+                <Link href="/dashboard/journey/zen-garden" className="block p-4 border rounded-lg hover:bg-muted/50 transition-colors h-full">
+                    <div className="flex items-center gap-3">
+                         <Waves className="h-5 w-5 text-accent"/>
+                        <h4 className="font-semibold">Zen Bahçesi</h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1 pl-8">Sanal kumda desenler çizerek zihnini sakinleştir.</p>
                 </Link>
             </CardContent>
         </Card>

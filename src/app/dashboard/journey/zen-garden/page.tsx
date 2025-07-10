@@ -32,8 +32,11 @@ export default function ZenGardenPage() {
       pt.y = e.clientY;
     }
     
-    const transformedPoint = pt.matrixTransform(svg.getScreenCTM()?.inverse());
-    return transformedPoint;
+    const ctm = svg.getScreenCTM();
+    if (ctm) {
+        return pt.matrixTransform(ctm.inverse());
+    }
+    return null;
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -85,6 +88,13 @@ export default function ZenGardenPage() {
 
   const handleFinish = () => {
     setIsFinished(true);
+    // In a real app, you would add XP here based on time spent.
+    // For example:
+    // if (hasSpentEnoughTime) {
+    //   updateGamificationStats(20);
+    // } else {
+    //   updateGamificationStats(5);
+    // }
   };
 
   const hasSpentEnoughTime = startTime && (new Date().getTime() - startTime.getTime()) > 30000; // 30 seconds

@@ -51,7 +51,9 @@ export default function ProfilePage() {
       await updateDoc(userDocRef, { displayName: fullName });
       
       // Update Auth profile
-      await updateProfile(user, { displayName: fullName });
+      if (auth.currentUser) {
+        await updateProfile(auth.currentUser, { displayName: fullName });
+      }
 
       toast({ title: "Başarılı", description: "Profiliniz güncellendi." });
     } catch (error) {
@@ -127,7 +129,7 @@ export default function ProfilePage() {
                         </TooltipProvider>
                     )}
                 </div>
-                <Button variant="outline" type="button">Resmi Değiştir</Button>
+                <Button variant="outline" type="button" disabled>Resmi Değiştir</Button>
             </div>
             <div className="grid gap-2">
                 <Label htmlFor="full-name">Ad Soyad</Label>

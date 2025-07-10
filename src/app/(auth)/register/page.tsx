@@ -148,14 +148,14 @@ export default function RegisterPage() {
                 ...(role === 'danisan' && { connectedTherapist: null }),
             });
 
-            if (role === 'danisan') {
-                await setDoc(doc(db, "gamification", user.uid), {
-                    xp: 0,
-                    level: 1,
-                    currentStreak: 0,
-                    lastActivityDate: null,
-                });
-            }
+            // Create gamification document for both roles
+            await setDoc(doc(db, "gamification", user.uid), {
+                xp: 0,
+                level: 1,
+                currentStreak: 0,
+                lastActivityDate: null,
+                // companion data can be added later
+            });
 
             toast({ title: "Başarılı", description: "Hesabınız başarıyla oluşturuldu." })
             
