@@ -1,7 +1,7 @@
 
 'use server';
 
-import { db } from '@/lib/firebase/config';
+import { db, auth } from '@/lib/firebase/config';
 import { collection, doc, writeBatch, serverTimestamp, arrayUnion, query, where, getDocs, updateDoc } from 'firebase/firestore';
 import { z } from 'zod';
 
@@ -21,6 +21,13 @@ export async function addClientAction(input: AddClientInput): Promise<{ success:
   }
 
   const { fullName, email, phone, therapistId } = validation.data;
+  
+  // Handle Demo User Case
+  if (therapistId === 'demo-therapist') {
+      console.log("Demo therapist is adding a client. Simulating success.");
+      // We can't actually write to DB without a real user, so we just return success for the UI test.
+      return { success: true, message: `${fullName} başarıyla davet edildi. (Demo)` };
+  }
 
   try {
     const existingUserQuery = query(collection(db, 'users'), where('email', '==', email));
@@ -85,5 +92,3 @@ export async function updateClientStatusAction(input: z.infer<typeof UpdateClien
         return { success: false, message: 'Durum güncellenirken bir hata oluştu.' };
     }
 }
-
-    

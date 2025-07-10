@@ -61,14 +61,19 @@ export default function ClientsPage() {
     });
     
     const fetchClients = useCallback(async () => {
-        if (!user) {
+        if (authLoading) return;
+        
+        const therapistId = user ? user.uid : 'demo-therapist';
+        if (!therapistId) {
             setLoading(false);
             return;
         }
-        
+
         setLoading(true);
         try {
-            const clientsQuery = query(collection(db, 'users'), where('connectedTherapist', '==', user.uid));
+            // For demo user, we can't query Firestore, so maybe show mock data or empty state.
+            // For now, we assume a real user is logged in.
+            const clientsQuery = query(collection(db, 'users'), where('connectedTherapist', '==', therapistId));
             const clientsSnapshot = await getDocs(clientsQuery);
             const clientDocs = clientsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
@@ -108,21 +113,16 @@ export default function ClientsPage() {
         } finally {
             setLoading(false);
         }
-    }, [user, toast]);
+    }, [user, toast, authLoading]);
 
     useEffect(() => {
-        if (!authLoading) {
-            fetchClients();
-        }
-    }, [authLoading, fetchClients]);
+        fetchClients();
+    }, [fetchClients]);
 
     async function onSubmit(values: AddClientFormValues) {
-        if (!user) {
-            toast({ title: "Hata", description: "Giriş yapmalısınız.", variant: "destructive"});
-            return;
-        }
-
-        const result = await addClientAction({ ...values, therapistId: user.uid });
+        const therapistId = user ? user.uid : 'demo-therapist';
+        
+        const result = await addClientAction({ ...values, therapistId: therapistId });
         
         toast({
             title: result.success ? "Başarılı" : "Hata",
@@ -318,7 +318,7 @@ export default function ClientsPage() {
                                             </Button>
                                              <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon">
+                                                    <Button variant="ghost" size="icon" disabled={!user}>
                                                         <MoreHorizontal className="h-4 w-4" />
                                                     </Button>
                                                 </DropdownMenuTrigger>

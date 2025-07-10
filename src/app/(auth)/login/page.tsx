@@ -26,6 +26,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Loader2 } from "lucide-react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Clock } from "lucide-react"
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
     return (
@@ -43,6 +45,7 @@ export default function LoginPage() {
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
+  const [pendingTherapist, setPendingTherapist] = useState(false);
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
@@ -116,6 +119,7 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
+    setPendingTherapist(false)
 
     let formData = new FormData(e.currentTarget)
     let email = formData.get("email") as string
@@ -149,6 +153,11 @@ export default function LoginPage() {
 
         if (userDoc.exists()) {
             const userData = userDoc.data()
+            if (userData.role === 'pending_therapist') {
+                setPendingTherapist(true);
+                setLoading(false);
+                return;
+            }
             toast({ title: "Giriş Başarılı", description: `Hoş geldiniz, ${userData.displayName}!`})
             if (userData.role === 'terapist' || userData.role === 'kurum_yoneticisi') {
                 router.push('/therapist/dashboard')
@@ -180,6 +189,15 @@ export default function LoginPage() {
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
+          {pendingTherapist && (
+            <Alert>
+              <Clock className="h-4 w-4" />
+              <AlertTitle>Hesabınız İnceleniyor</AlertTitle>
+              <AlertDescription>
+                Terapist başvurunuz onay bekliyor. Onaylandığında e-posta ile bilgilendirileceksiniz.
+              </AlertDescription>
+            </Alert>
+          )}
           <Button variant="outline" type="button" onClick={handleGoogleSignIn} disabled={loading || googleLoading}>
             {googleLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon className="mr-2 h-4 w-4" />}
             Google ile Giriş Yap

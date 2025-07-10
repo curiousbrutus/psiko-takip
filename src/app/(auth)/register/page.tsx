@@ -136,35 +136,42 @@ export default function RegisterPage() {
             await updateProfile(user, { displayName: fullName })
 
             const randomSymbol = getRandomSymbol();
+            
+            // Determine role and status based on selection
+            const isTherapistRole = role === 'terapist';
+            const finalRole = isTherapistRole ? 'pending_therapist' : 'danisan';
+
             await setDoc(doc(db, "users", user.uid), {
                 uid: user.uid,
                 displayName: fullName,
                 email: user.email,
                 profileSymbol: randomSymbol.emoji,
-                role: role,
+                role: finalRole,
+                ...(isTherapistRole && { status: 'pending' }),
                 organizationId: null,
                 createdAt: serverTimestamp(),
                 subscription: { status: 'free', expires: null },
-                ...(role === 'terapist' && { danisanlarim: [] }),
+                ...(isTherapistRole && { danisanlarim: [] }),
                 ...(role === 'danisan' && { connectedTherapist: null }),
             });
 
-            // Create gamification document for both roles
-            await setDoc(doc(db, "gamification", user.uid), {
-                xp: 0,
-                level: 1,
-                currentStreak: 0,
-                lastActivityDate: null,
-                // Default to 'animal' for now to bypass the onboarding bug
-                ...(role === 'danisan' && { companion: { type: 'animal', createdAt: new Date() } }),
-            });
-
-            toast({ title: "Başarılı", description: "Hesabınız başarıyla oluşturuldu." })
+            // Create gamification document for 'danisan' role
+            if (role === 'danisan') {
+                await setDoc(doc(db, "gamification", user.uid), {
+                    xp: 0,
+                    level: 1,
+                    currentStreak: 0,
+                    lastActivityDate: null,
+                    companion: { type: 'animal', createdAt: new Date() },
+                });
+            }
             
-            if (role === 'terapist') {
-                router.push("/therapist/dashboard")
+            if (isTherapistRole) {
+                toast({ title: "Başvurunuz Alındı", description: "Terapist hesabınız inceleniyor. Onaylandığında size e-posta ile bilgi verilecektir." });
+                router.push("/login");
             } else {
-                router.push("/dashboard")
+                toast({ title: "Başarılı", description: "Hesabınız başarıyla oluşturuldu." });
+                router.push("/dashboard");
             }
 
         } catch (error: any) {
@@ -190,7 +197,7 @@ export default function RegisterPage() {
       <CardContent className="grid gap-4">
           <Button variant="outline" type="button" onClick={handleGoogleSignIn} disabled={loading || googleLoading}>
             {googleLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon className="mr-2 h-4 w-4" />}
-            Google ile Kaydol
+            Google ile Kaydol (Danışan)
           </Button>
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
@@ -234,7 +241,7 @@ export default function RegisterPage() {
               </div>
               <Button className="w-full" type="submit" disabled={loading || googleLoading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Hesap Oluştur
+                {role === 'terapist' ? 'Terapist Olarak Başvur' : 'Hesap Oluştur'}
               </Button>
           </form>
       </CardContent>
