@@ -301,7 +301,7 @@ export default function ClientProfilePage() {
                 </TabsContent>
 
                 <TabsContent value="insights" className="mt-6">
-                    <Card>
+                     <Card>
                         <CardHeader>
                             <CardTitle>İçgörü Paneli</CardTitle>
                             <CardDescription>
@@ -391,7 +391,7 @@ export default function ClientProfilePage() {
                                                 <CardTitle className="text-lg">{journal.prompt}</CardTitle>
                                                 <CardDescription>
                                                     {format(journal.createdAt.toDate(), "d MMMM yyyy, HH:mm", { locale: tr })}
-                                                </CrdDescription>
+                                                </CardDescription>
                                             </CardHeader>
                                             <CardContent>
                                                 <p className="whitespace-pre-wrap">{journal.content}</p>
