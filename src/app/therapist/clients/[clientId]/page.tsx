@@ -4,7 +4,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase/config';
-import { doc, getDoc, collection, query, where, orderBy, getDocs, DocumentData, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, orderBy, getDocs, DocumentData, Timestamp, addDoc } from 'firebase/firestore';
 import { useParams, useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -20,10 +20,10 @@ import Link from 'next/link';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { assignTaskAction } from './task-actions';
+import { assignTaskAction, assignAssessmentAction } from './task-actions';
 import { updateClientStatusAction } from '../actions';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-
+import ProgressChart from './_components/progress-chart';
 
 interface SharedJournal extends DocumentData {
     id: string;
@@ -44,12 +44,15 @@ export default function ClientProfilePage() {
     const [sharedJournals, setSharedJournals] = useState<SharedJournal[]>([]);
     const [testResults, setTestResults] = useState<DocumentData[]>([]);
     const [assignedTasks, setAssignedTasks] = useState<DocumentData[]>([]);
+    const [assessmentResults, setAssessmentResults] = useState<DocumentData[]>([]);
     
     const [loadingClient, setLoadingClient] = useState(true);
     const [loadingJournals, setLoadingJournals] = useState(true);
     const [loadingResults, setLoadingResults] = useState(true);
     const [loadingTasks, setLoadingTasks] = useState(true);
+    const [loadingAssessments, setLoadingAssessments] = useState(true);
     const [isAssigningTask, setIsAssigningTask] = useState(false);
+    const [isAssigningAssessment, setIsAssigningAssessment] = useState(false);
 
     const fetchAllData = useCallback(async () => {
         if (!user || !clientId) return;
@@ -64,8 +67,10 @@ export default function ClientProfilePage() {
         setLoadingJournals(true);
         setLoadingResults(true);
         setLoadingTasks(true);
+        setLoadingAssessments(true);
 
         try {
+            // Client Data
             const clientDocRef = doc(db, 'users', clientId);
             const clientDocSnap = await getDoc(clientDocRef);
             if (clientDocSnap.exists()) {
@@ -76,37 +81,44 @@ export default function ClientProfilePage() {
                 return;
             }
 
+            // Shared Journals
             const journalsQuery = query(collection(db, 'journalEntries'), where('userId', '==', clientId), where('isShared', '==', true), orderBy('createdAt', 'desc'));
             const journalsSnapshot = await getDocs(journalsQuery);
             setSharedJournals(journalsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SharedJournal)));
+            setLoadingJournals(false);
 
+            // Test Submissions
             const resultsQuery = query(collection(db, 'testSubmissions'), where('userId', '==', clientId), orderBy('createdAt', 'desc'));
             const resultsSnapshot = await getDocs(resultsQuery);
             setTestResults(resultsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+            setLoadingResults(false);
             
+            // Collaborative Tasks
             const tasksQuery = query(collection(db, 'collaborativeTasks'), where('clientId', '==', clientId), orderBy('assignedAt', 'desc'));
             const tasksSnapshot = await getDocs(tasksQuery);
             setAssignedTasks(tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+            setLoadingTasks(false);
+
+            // Assessment Results
+            const assessmentsQuery = query(collection(db, 'assessmentResults'), where('userId', '==', clientId), orderBy('completedAt', 'asc'));
+            const assessmentsSnapshot = await getDocs(assessmentsQuery);
+            setAssessmentResults(assessmentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), completedAt: doc.data().completedAt.toDate() })));
+            setLoadingAssessments(false);
+
 
         } catch (error) {
             console.error("Error fetching client data:", error);
             toast({ title: "Hata", description: "Veriler alınırken bir hata oluştu.", variant: "destructive" });
         } finally {
             setLoadingClient(false);
-            setLoadingJournals(false);
-            setLoadingResults(false);
-            setLoadingTasks(false);
         }
     }, [user, clientId, therapistData, router, toast]);
 
     useEffect(() => {
         if (user && therapistData) {
             fetchAllData();
-        } else if (!user) {
-            toast({ title: "Giriş Gerekli", description: "Danışan profilini görmek için lütfen giriş yapın.", variant: "destructive" });
-            router.push('/login');
         }
-    }, [user, clientId, therapistData, router, toast, fetchAllData]);
+    }, [user, therapistData, fetchAllData]);
 
     const handleAssignTask = async () => {
         if (!clientData || !user) return;
@@ -122,9 +134,29 @@ export default function ClientProfilePage() {
             variant: result.success ? "default" : "destructive",
         });
         if (result.success) {
-            await fetchAllData(); 
+            fetchAllData(); 
         }
         setIsAssigningTask(false);
+    };
+
+    const handleAssignAssessment = async (testName: 'GAD-7' | 'PHQ-9') => {
+        if (!clientData || !user) return;
+        setIsAssigningAssessment(true);
+        const result = await assignAssessmentAction({
+            clientId,
+            clientName: clientData.displayName,
+            therapistId: user.uid,
+            testName,
+        });
+        toast({
+            title: result.success ? "Başarılı" : "Hata",
+            description: result.message,
+            variant: result.success ? "default" : "destructive",
+        });
+        if (result.success) {
+            fetchAllData();
+        }
+        setIsAssigningAssessment(false);
     };
     
     const renderJournalSkeleton = () => (
@@ -186,7 +218,7 @@ export default function ClientProfilePage() {
                  <Card>
                     <CardHeader className="flex flex-row items-center gap-6 space-y-0">
                          <Avatar className="h-20 w-20 border">
-                            <AvatarImage src={clientData.photoURL} data-ai-hint="profile picture"/>
+                            <AvatarImage src={clientData.photoURL} data-ai-hint="profile picture" />
                             <AvatarFallback>{clientData.displayName?.[0]}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
@@ -204,13 +236,13 @@ export default function ClientProfilePage() {
                 </Card>
             </div>
 
-            <Tabs defaultValue="assignments" className="w-full">
+            <Tabs defaultValue="progress" className="w-full">
                 <TabsList className="grid w-full grid-cols-5">
+                    <TabsTrigger value="progress">
+                        <TrendingUp className="mr-2 h-4 w-4" /> İlerleme
+                    </TabsTrigger>
                     <TabsTrigger value="briefing">
                         <Star className="mr-2 h-4 w-4" /> Seans Brifingi
-                    </TabsTrigger>
-                    <TabsTrigger value="insights">
-                        <BrainCircuit className="mr-2 h-4 w-4" /> İçgörüler
                     </TabsTrigger>
                     <TabsTrigger value="assignments">
                         <CheckSquare className="mr-2 h-4 w-4" /> Görevler & Atamalar
@@ -223,6 +255,47 @@ export default function ClientProfilePage() {
                     </TabsTrigger>
                 </TabsList>
                 
+                 <TabsContent value="progress" className="mt-6">
+                    <Card>
+                        <CardHeader>
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <CardTitle className="text-2xl">Ölçülebilir İlerleme ve İttifak Paneli</CardTitle>
+                                    <CardDescription>
+                                        Danışanınızın standart ölçeklerdeki ilerlemesini ve terapötik ittifak geri bildirimlerini takip edin.
+                                    </CardDescription>
+                                </div>
+                                 <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button disabled={isAssigningAssessment}>
+                                            {isAssigningAssessment ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4" />}
+                                            Yeni Değerlendirme Ata
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent>
+                                        <DropdownMenuItem onClick={() => handleAssignAssessment('GAD-7')}>GAD-7 (Anksiyete)</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleAssignAssessment('PHQ-9')}>PHQ-9 (Depresyon)</DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="space-y-8">
+                             {loadingAssessments ? (
+                                <div className="flex justify-center items-center h-64">
+                                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                </div>
+                             ) : assessmentResults.length > 0 ? (
+                                <ProgressChart data={assessmentResults} />
+                             ) : (
+                                <div className="text-center text-muted-foreground py-16">
+                                    <p>Henüz tamamlanmış bir ilerleme değerlendirmesi yok.</p>
+                                    <p className="text-sm mt-1">Yukarıdaki butonu kullanarak bir değerlendirme atayabilirsiniz.</p>
+                                </div>
+                             )}
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
                 <TabsContent value="briefing" className="mt-6">
                     <Card>
                         <CardHeader>
@@ -275,65 +348,7 @@ export default function ClientProfilePage() {
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="insights" className="mt-6">
-                     <Card>
-                        <CardHeader>
-                            <CardTitle>İçgörü Paneli</CardTitle>
-                            <CardDescription>
-                                Danışanınızın verilerinden elde edilen anlamlı özetler ve korelasyonlar (Son 30 gün).
-                            </CardDescription>
-                        </CardHeader>
-                        <CardContent className="grid gap-6 md:grid-cols-2">
-                             <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-lg">Anlamlı Korelasyonlar</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <Alert>
-                                        <Wind className="h-4 w-4" />
-                                        <AlertTitle className="font-semibold">Nefes Egzersizi &amp; Ruh Hali</AlertTitle>
-                                        <AlertDescription>
-                                            Danışanınız, 'Nefes Egzersizi' yaptığı günlerde ruh halini <span className="font-bold text-primary">%40 daha pozitif</span> işaretleme eğiliminde.
-                                        </AlertDescription>
-                                    </Alert>
-                                    <Alert>
-                                        <HeartPulse className="h-4 w-4" />
-                                        <AlertTitle className="font-semibold">Endişe &amp; Günlük Yazma</AlertTitle>
-                                        <AlertDescription>
-                                           'Endişeli' ruh hali işaretlendiğinde, o gün serbest günlük yazma aktivitesini tamamlama olasılığı <span className="font-bold text-primary">%60 daha yüksek.</span> Bu, yazmayı bir başa çıkma mekanizması olarak kullandığını gösterebilir.
-                                        </AlertDescription>
-                                    </Alert>
-                                     <Alert>
-                                        <Users className="h-4 w-4" />
-                                        <AlertTitle className="font-semibold">Sosyal Etkileşim &amp; Ruh Hali</AlertTitle>
-                                        <AlertDescription>
-                                           "Aile" kelimesinin geçtiği günlüklerde, "Mutlu" ruh hali işaretlenme oranı diğer günlere göre daha düşük. Bu konunun seanslarda keşfedilmesi faydalı olabilir.
-                                        </AlertDescription>
-                                    </Alert>
-                                </CardContent>
-                            </Card>
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-lg">Günlüklerden Kelime Bulutu</CardTitle>
-                                     <CardDescription>Danışanın son günlüklerinde en sık kullandığı kelimeler.</CardDescription>
-                                </CardHeader>
-                                <CardContent className="flex flex-wrap gap-2 items-center justify-center p-8 rounded-md bg-muted/50">
-                                    <Badge variant="default" className="text-3xl h-auto py-2 px-4">kaygı</Badge>
-                                    <Badge variant="secondary" className="text-lg">iş</Badge>
-                                    <Badge variant="secondary" className="text-2xl h-auto py-1 px-3">stres</Badge>
-                                    <Badge variant="secondary" className="text-md">yorgun</Badge>
-                                    <Badge variant="default" className="text-xl h-auto py-1 px-3">aile</Badge>
-                                    <Badge variant="secondary" className="text-lg">uyku</Badge>
-                                    <Badge variant="secondary" className="text-md">zaman</Badge>
-                                    <Badge variant="default" className="text-2xl h-auto py-1 px-3">belirsizlik</Badge>
-                                     <Badge variant="secondary" className="text-md">ilişki</Badge>
-                                </CardContent>
-                            </Card>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-
-                <TabsContent value="assignments" className="mt-6">
+                 <TabsContent value="assignments" className="mt-6">
                     <Card>
                         <CardHeader>
                             <CardTitle>İnteraktif Terapötik Araçlar</CardTitle>
@@ -383,7 +398,7 @@ export default function ClientProfilePage() {
                             <CardDescription>
                                 Danışanın sizinle paylaşmayı seçtiği günlük kayıtları ve düşünceleri.
                             </CardDescription>
-                        </CardHeader>
+                        </Header>
                         <CardContent>
                             {loadingJournals ? (
                                 renderJournalSkeleton()
