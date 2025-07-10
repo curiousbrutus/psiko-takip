@@ -21,7 +21,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ArrowRight, PlusCircle, Users, Loader2, MoreHorizontal } from 'lucide-react';
@@ -44,35 +43,9 @@ const addClientFormSchema = z.object({
 });
 type AddClientFormValues = z.infer<typeof addClientFormSchema>;
 
-const mockClients: Client[] = [
-    {
-        id: 'client1',
-        displayName: 'Ayşe Yılmaz',
-        email: 'ayse.yilmaz@example.com',
-        photoURL: 'https://placehold.co/40x40.png',
-        lastActivity: '2 gün önce',
-        status: 'Aktif',
-    },
-    {
-        id: 'client2',
-        displayName: 'Mehmet Öztürk',
-        email: 'mehmet.ozturk@example.com',
-        photoURL: 'https://placehold.co/40x40.png',
-        lastActivity: '1 hafta önce',
-        status: 'Pasif',
-    },
-    {
-        id: 'client3',
-        displayName: 'Zeynep Kaya',
-        email: 'zeynep.kaya@example.com',
-        lastActivity: 'Davet bekleniyor',
-        status: 'Davet Edildi',
-    }
-];
-
 
 export default function ClientsPage() {
-    const { user, userData, loading: authLoading } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const { toast } = useToast();
     const [clients, setClients] = useState<Client[]>([]);
     const [loading, setLoading] = useState(true);
@@ -90,7 +63,6 @@ export default function ClientsPage() {
     const fetchClients = useCallback(async () => {
         if (!user) {
             setLoading(false);
-            setClients(mockClients);
             return;
         }
         

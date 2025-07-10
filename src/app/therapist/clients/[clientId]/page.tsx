@@ -4,7 +4,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase/config';
-import { doc, getDoc, collection, query, where, orderBy, getDocs, DocumentData, Timestamp, addDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, orderBy, getDocs, DocumentData, Timestamp } from 'firebase/firestore';
 import { useParams, useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -15,14 +15,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Mail, Calendar, FileText, CheckSquare, BarChart2, Lightbulb, ShieldCheck, ClipboardList, BrainCircuit, Users, HeartPulse, Wind, MessageSquare, Star, TrendingUp, AlertTriangle, MessageCircle, Edit, Loader2, PlusCircle, MoreHorizontal } from 'lucide-react';
+import { ArrowLeft, Mail, Calendar, FileText, CheckSquare, BarChart2, Lightbulb, ShieldCheck, ClipboardList, TrendingUp, AlertTriangle, MessageSquare, Star, Loader2, PlusCircle, MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { assignTaskAction, assignAssessmentAction } from './task-actions';
-import { updateClientStatusAction } from '../actions';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { assignTaskAction, assignAssessmentAction } from './task-actions';
 import ProgressChart from './_components/progress-chart';
 
 interface SharedJournal extends DocumentData {
@@ -70,7 +68,6 @@ export default function ClientProfilePage() {
         setLoadingAssessments(true);
 
         try {
-            // Client Data
             const clientDocRef = doc(db, 'users', clientId);
             const clientDocSnap = await getDoc(clientDocRef);
             if (clientDocSnap.exists()) {
@@ -81,31 +78,21 @@ export default function ClientProfilePage() {
                 return;
             }
 
-            // Shared Journals
             const journalsQuery = query(collection(db, 'journalEntries'), where('userId', '==', clientId), where('isShared', '==', true), orderBy('createdAt', 'desc'));
             const journalsSnapshot = await getDocs(journalsQuery);
             setSharedJournals(journalsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SharedJournal)));
             
-
-            // Test Submissions
             const resultsQuery = query(collection(db, 'testSubmissions'), where('userId', '==', clientId), orderBy('createdAt', 'desc'));
             const resultsSnapshot = await getDocs(resultsQuery);
             setTestResults(resultsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
             
-            
-            // Collaborative Tasks
             const tasksQuery = query(collection(db, 'collaborativeTasks'), where('clientId', '==', clientId), orderBy('assignedAt', 'desc'));
             const tasksSnapshot = await getDocs(tasksQuery);
             setAssignedTasks(tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
             
-
-            // Assessment Results
             const assessmentsQuery = query(collection(db, 'assessmentResults'), where('userId', '==', clientId), orderBy('completedAt', 'asc'));
             const assessmentsSnapshot = await getDocs(assessmentsQuery);
             setAssessmentResults(assessmentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), completedAt: doc.data().completedAt.toDate() })));
-            
-
-
         } catch (error) {
             console.error("Error fetching client data:", error);
             toast({ title: "Hata", description: "Veriler alınırken bir hata oluştu.", variant: "destructive" });
@@ -123,7 +110,7 @@ export default function ClientProfilePage() {
             fetchAllData();
         }
     }, [user, therapistData, fetchAllData]);
-
+    
     const handleAssignTask = async () => {
         if (!clientData || !user) return;
         setIsAssigningTask(true);
@@ -162,7 +149,7 @@ export default function ClientProfilePage() {
         }
         setIsAssigningAssessment(false);
     };
-    
+
     const renderJournalSkeleton = () => (
         <div className="space-y-4">
             {[...Array(2)].map((_, i) => (
@@ -380,7 +367,6 @@ export default function ClientProfilePage() {
                                                 <Link href={`/dashboard/tasks/${task.id}`} key={task.id}>
                                                     <div className="p-3 border rounded-md hover:bg-muted/50 transition-colors flex justify-between items-center">
                                                         <p className="font-semibold">{task.title}</p>
-                                                        <Badge variant={task.status === 'completed' ? 'default' : 'secondary'}>{task.status}</Badge>
                                                     </div>
                                                 </Link>
                                             ))}

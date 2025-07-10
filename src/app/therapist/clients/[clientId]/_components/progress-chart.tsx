@@ -46,7 +46,7 @@ export default function ProgressChart({ data }: { data: any[] }) {
     score: item.score,
   }));
     
-  const allianceData = data.map(item => ({
+  const allianceData = data.filter(item => item.allianceScore !== undefined).map(item => ({
     date: format(item.completedAt, 'dd MMM'),
     score: item.allianceScore,
   }));
@@ -79,7 +79,7 @@ export default function ProgressChart({ data }: { data: any[] }) {
                          />
                         <Tooltip content={<ChartTooltipContent indicator="dot" />} />
                         {thresholds.map(line => (
-                             <ReferenceLine key={line.label} y={line.y} label={{ value: line.label, position: 'insideTopRight', fill: line.stroke, fontSize: 10 }} stroke={line.stroke} strokeDasharray={line.strokeDasharray} />
+                             <ReferenceLine key={line.label} y={line.y} label={{ value: line.label, position: 'insideTopRight', fill: line.stroke, fontSize: 10 }} stroke={line.stroke} strokeDasharray="3 3" />
                         ))}
                         <Area
                             dataKey="score"
