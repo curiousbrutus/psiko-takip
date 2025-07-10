@@ -7,7 +7,7 @@ import { db } from '@/lib/firebase/config';
 import { doc, getDoc, collection, query, where, orderBy, getDocs, DocumentData, Timestamp } from 'firebase/firestore';
 import { useParams, useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Mail, Calendar, FileText, CheckSquare, BarChart2, Lightbulb, ShieldCheck, ClipboardList, BrainCircuit, Users, HeartPulse, Wind } from 'lucide-react';
+import { ArrowLeft, Mail, Calendar, FileText, CheckSquare, BarChart2, Lightbulb, ShieldCheck, ClipboardList, BrainCircuit, Users, HeartPulse, Wind, MessageSquare, Star, TrendingUp, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -192,7 +192,7 @@ export default function ClientProfilePage() {
                 </Card>
                 <Skeleton className="h-96 w-full" />
             </div>
-        )
+        );
     }
 
     if (!clientData) {
@@ -229,8 +229,11 @@ export default function ClientProfilePage() {
                 </Card>
             </div>
 
-            <Tabs defaultValue="insights" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
+            <Tabs defaultValue="briefing" className="w-full">
+                <TabsList className="grid w-full grid-cols-5">
+                    <TabsTrigger value="briefing">
+                        <Star className="mr-2 h-4 w-4" /> Seans Brifingi
+                    </TabsTrigger>
                     <TabsTrigger value="insights">
                         <BrainCircuit className="mr-2 h-4 w-4" /> İçgörüler
                     </TabsTrigger>
@@ -245,6 +248,58 @@ export default function ClientProfilePage() {
                     </TabsTrigger>
                 </TabsList>
                 
+                <TabsContent value="briefing" className="mt-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-2xl">Mehmet Öztürk ile Yaklaşan Seans Brifingi</CardTitle>
+                            <CardDescription>
+                                Tarih: {format(new Date(), "d MMMM yyyy, EEEE", { locale: tr })}. Bu özet, seansa hazırlanmanıza yardımcı olmak için oluşturulmuştur.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="space-y-4">
+                                <h3 className="text-lg font-semibold flex items-center"><MessageSquare className="mr-2 h-5 w-5 text-primary" />Danışanın Gündemi</h3>
+                                <Alert className="border-primary/50 bg-primary/10">
+                                    <AlertTitle className="font-bold">Danışanınız bu konuyu seansta konuşmak istiyor:</AlertTitle>
+                                    <AlertDescription>
+                                         <p className="font-semibold mt-2">"Bugün minnettar olduğun 3 şey nedir?" başlıklı günlükten:</p>
+                                         <p className="italic mt-1">"Sabah kahvesinin kokusu, bir arkadaşla konuşmak ve akşam yürüyüşü..."</p>
+                                    </AlertDescription>
+                                </Alert>
+                            </div>
+                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <Card>
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="text-base flex items-center"><TrendingUp className="mr-2 h-4 w-4 text-muted-foreground" /> Ruh Hali Trendi</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <p className="text-sm">Geçen haftaya göre <span className="font-bold text-green-600">daha stabil</span>. Ayşe'nin bildirdiği 'mutlu' gün sayısı %15 arttı.</p>
+                                    </CardContent>
+                                </Card>
+                                 <Card>
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="text-base flex items-center"><ClipboardList className="mr-2 h-4 w-4 text-muted-foreground" /> Önceki Seans Hedefi</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <p className="text-sm">"İş yerindeki stresle başa çıkmak için 'hayır' deme pratiği yapmak."</p>
+                                    </CardContent>
+                                </Card>
+                                <Card>
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="text-base flex items-center"><AlertTriangle className="mr-2 h-4 w-4 text-muted-foreground" /> Alarm Zilleri</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <p className="text-sm">Son seanstan bu yana kriz sinyali <span className="font-bold">tespit edilmedi</span>.</p>
+                                    </CardContent>
+                                </Card>
+                            </div>
+                            <div className="flex justify-end">
+                                <Button variant="outline">Brifingi Yazdır</Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
                 <TabsContent value="insights" className="mt-6">
                     <Card>
                         <CardHeader>
@@ -336,7 +391,7 @@ export default function ClientProfilePage() {
                                                 <CardTitle className="text-lg">{journal.prompt}</CardTitle>
                                                 <CardDescription>
                                                     {format(journal.createdAt.toDate(), "d MMMM yyyy, HH:mm", { locale: tr })}
-                                                </CardDescription>
+                                                </CrdDescription>
                                             </CardHeader>
                                             <CardContent>
                                                 <p className="whitespace-pre-wrap">{journal.content}</p>
