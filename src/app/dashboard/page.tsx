@@ -90,13 +90,13 @@ export default function DashboardPage() {
             const data = doc.data();
             setGamificationData(data);
             generateDailyInsight(data.lastActivityDate);
-            // If gamification doc exists but no companion is selected, redirect
-            if (!data.companion) {
+            // Only redirect if the companion data is explicitly missing after the doc has been loaded.
+            if (doc.data() && !doc.data().companion) {
               router.push('/dashboard/companion/onboarding');
             }
         } else {
-            // This might happen for older users before the gamification doc was created.
-            // Or if the creation failed. We redirect to start the process.
+            // This case handles brand new users or errors in doc creation.
+            // Pushing them to onboarding is the correct flow.
             router.push('/dashboard/companion/onboarding');
         }
     });
