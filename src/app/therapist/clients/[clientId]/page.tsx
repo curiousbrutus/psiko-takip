@@ -85,25 +85,25 @@ export default function ClientProfilePage() {
             const journalsQuery = query(collection(db, 'journalEntries'), where('userId', '==', clientId), where('isShared', '==', true), orderBy('createdAt', 'desc'));
             const journalsSnapshot = await getDocs(journalsQuery);
             setSharedJournals(journalsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SharedJournal)));
-            setLoadingJournals(false);
+            
 
             // Test Submissions
             const resultsQuery = query(collection(db, 'testSubmissions'), where('userId', '==', clientId), orderBy('createdAt', 'desc'));
             const resultsSnapshot = await getDocs(resultsQuery);
             setTestResults(resultsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-            setLoadingResults(false);
+            
             
             // Collaborative Tasks
             const tasksQuery = query(collection(db, 'collaborativeTasks'), where('clientId', '==', clientId), orderBy('assignedAt', 'desc'));
             const tasksSnapshot = await getDocs(tasksQuery);
             setAssignedTasks(tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-            setLoadingTasks(false);
+            
 
             // Assessment Results
             const assessmentsQuery = query(collection(db, 'assessmentResults'), where('userId', '==', clientId), orderBy('completedAt', 'asc'));
             const assessmentsSnapshot = await getDocs(assessmentsQuery);
             setAssessmentResults(assessmentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), completedAt: doc.data().completedAt.toDate() })));
-            setLoadingAssessments(false);
+            
 
 
         } catch (error) {
@@ -111,6 +111,10 @@ export default function ClientProfilePage() {
             toast({ title: "Hata", description: "Veriler alınırken bir hata oluştu.", variant: "destructive" });
         } finally {
             setLoadingClient(false);
+            setLoadingJournals(false);
+            setLoadingResults(false);
+            setLoadingTasks(false);
+            setLoadingAssessments(false);
         }
     }, [user, clientId, therapistData, router, toast]);
 
@@ -139,7 +143,7 @@ export default function ClientProfilePage() {
         setIsAssigningTask(false);
     };
 
-    const handleAssignAssessment = async (testName: 'GAD-7' | 'PHQ-9') => {
+    const handleAssignAssessment = async (testName: 'GAD-7' | 'PHQ-9' | 'TherapeuticAlliance') => {
         if (!clientData || !user) return;
         setIsAssigningAssessment(true);
         const result = await assignAssessmentAction({
@@ -275,6 +279,7 @@ export default function ClientProfilePage() {
                                     <DropdownMenuContent>
                                         <DropdownMenuItem onClick={() => handleAssignAssessment('GAD-7')}>GAD-7 (Anksiyete)</DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => handleAssignAssessment('PHQ-9')}>PHQ-9 (Depresyon)</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleAssignAssessment('TherapeuticAlliance')}>Terapötik İttifak</DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </div>
@@ -398,7 +403,7 @@ export default function ClientProfilePage() {
                             <CardDescription>
                                 Danışanın sizinle paylaşmayı seçtiği günlük kayıtları ve düşünceleri.
                             </CardDescription>
-                        </Header>
+                        </CardHeader>
                         <CardContent>
                             {loadingJournals ? (
                                 renderJournalSkeleton()
@@ -435,7 +440,7 @@ export default function ClientProfilePage() {
                             <CardDescription>
                                 Danışanın tamamladığı testlerin sonuçlarını ve yapay zeka analizlerini görüntüleyin.
                             </CardDescription>
-                        </Header>
+                        </CardHeader>
                         <CardContent>
                            {loadingResults ? (
                                 renderResultsSkeleton()
@@ -481,3 +486,4 @@ export default function ClientProfilePage() {
         </div>
     );
 }
+

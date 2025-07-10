@@ -98,7 +98,96 @@ export const assessments: Assessment[] = [
     title: 'Hasta Sağlık Anketi-9 (PHQ-9)',
     description: 'Son 2 hafta içinde, aşağıdaki sorunlar tarafından ne sıklıkla rahatsız edildiniz?',
     questions: [
-      // PHQ-9 questions can be added here following the same structure
+      {
+        id: 'q1',
+        text: 'Yapmaktan zevk aldığınız şeylere karşı az ilgi veya zevk duyma',
+        options: [
+          { text: 'Hiç', score: 0 },
+          { text: 'Birkaç gün', score: 1 },
+          { text: 'Yarıdan fazla gün', score: 2 },
+          { text: 'Neredeyse her gün', score: 3 },
+        ],
+      },
+      {
+        id: 'q2',
+        text: 'Kendini çökkün, depresif veya umutsuz hissetme',
+        options: [
+          { text: 'Hiç', score: 0 },
+          { text: 'Birkaç gün', score: 1 },
+          { text: 'Yarıdan fazla gün', score: 2 },
+          { text: 'Neredeyse her gün', score: 3 },
+        ],
+      },
+       {
+        id: 'q3',
+        text: 'Uykuya dalmada veya uykuda kalmada güçlük, ya da çok fazla uyuma',
+        options: [
+          { text: 'Hiç', score: 0 },
+          { text: 'Birkaç gün', score: 1 },
+          { text: 'Yarıdan fazla gün', score: 2 },
+          { text: 'Neredeyse her gün', score: 3 },
+        ],
+      },
+       {
+        id: 'q4',
+        text: 'Yorgun veya az enerjili hissetme',
+        options: [
+          { text: 'Hiç', score: 0 },
+          { text: 'Birkaç gün', score: 1 },
+          { text: 'Yarıdan fazla gün', score: 2 },
+          { text: 'Neredeyse her gün', score: 3 },
+        ],
+      },
+       {
+        id: 'q5',
+        text: 'İştahsızlık veya aşırı yeme',
+        options: [
+          { text: 'Hiç', score: 0 },
+          { text: 'Birkaç gün', score: 1 },
+          { text: 'Yarıdan fazla gün', score: 2 },
+          { text: 'Neredeyse her gün', score: 3 },
+        ],
+      },
+       {
+        id: 'q6',
+        text: 'Kendiniz hakkında kötü hissetme - ya da bir başarısızlık olduğunuzu veya kendinizi ya da ailenizi hayal kırıklığına uğrattığınızı düşünme',
+        options: [
+          { text: 'Hiç', score: 0 },
+          { text: 'Birkaç gün', score: 1 },
+          { text: 'Yarıdan fazla gün', score: 2 },
+          { text: 'Neredeyse her gün', score: 3 },
+        ],
+      },
+       {
+        id: 'q7',
+        text: 'Bir şeyler okurken veya TV izlerken konsantre olmakta zorluk çekme',
+        options: [
+          { text: 'Hiç', score: 0 },
+          { text: 'Birkaç gün', score: 1 },
+          { text: 'Yarıdan fazla gün', score: 2 },
+          { text: 'Neredeyse her gün', score: 3 },
+        ],
+      },
+      {
+        id: 'q8',
+        text: 'Başkalarının fark edebileceği kadar yavaş hareket etme veya konuşma. Veya tam tersi - normalden daha fazla kıpır kıpır veya huzursuz olma',
+        options: [
+          { text: 'Hiç', score: 0 },
+          { text: 'Birkaç gün', score: 1 },
+          { text: 'Yarıdan fazla gün', score: 2 },
+          { text: 'Neredeyse her gün', score: 3 },
+        ],
+      },
+      {
+        id: 'q9',
+        text: 'Ölü olmanın daha iyi olacağı veya bir şekilde kendinize zarar vereceğiniz düşünceleri',
+        options: [
+          { text: 'Hiç', score: 0 },
+          { text: 'Birkaç gün', score: 1 },
+          { text: 'Yarıdan fazla gün', score: 2 },
+          { text: 'Neredeyse her gün', score: 3 },
+        ],
+      },
     ],
   },
    {

@@ -10,7 +10,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, Sunrise, Sun, Sunset, Smile, Leaf, Meh, HeartPulse, Frown, Wind, BrainCircuit, Book, Sparkles, Loader2, Share2, Feather, Droplets, Flame, Waves, ClipboardCheck } from 'lucide-react';
+import { CheckCircle2, Sunrise, Sun, Sunset, Smile, Leaf, Meh, HeartPulse, Frown, Wind, BrainCircuit, Book, Sparkles, Loader2, Share2, Feather, Droplets, Flame, Waves, ClipboardCheck, FileQuestion } from 'lucide-react';
 import Link from 'next/link';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -199,6 +199,24 @@ export default function DailyJourneyPage() {
         setLoading(prev => ({ ...prev, [task]: false }));
     }
   }
+  
+  const getTaskIcon = (type: string) => {
+    switch (type) {
+        case 'assessment':
+            return <FileQuestion className="h-6 w-6 text-primary" />;
+        case 'collaborative':
+        default:
+            return <ClipboardCheck className="h-6 w-6 text-primary" />;
+    }
+  };
+
+  const getTaskLink = (task: DocumentData) => {
+    if (task.type === 'assessment') {
+        return `/dashboard/assessment/${task.id}`;
+    }
+    return `/dashboard/tasks/${task.id}`;
+  };
+
 
   return (
     <div className="space-y-6">
@@ -211,9 +229,9 @@ export default function DailyJourneyPage() {
             <Card>
                 <CardHeader>
                     <CardTitle className="text-xl flex items-center gap-3">
-                        <ClipboardCheck className="h-6 w-6 text-primary" /> Terapistinden Gelen Görevler
+                        Terapistinden Gelen Görevler
                     </CardTitle>
-                    <CardDescription>Terapistinin senin için atadığı interaktif görevleri buradan takip edebilirsin.</CardDescription>
+                    <CardDescription>Terapistinin senin için atadığı interaktif görevleri ve değerlendirmeleri buradan takip edebilirsin.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     {loading.tasks ? (
@@ -224,11 +242,14 @@ export default function DailyJourneyPage() {
                     ) : assignedTasks.length > 0 ? (
                         <div className="space-y-2">
                             {assignedTasks.map(task => (
-                                <Link key={task.id} href={`/dashboard/tasks/${task.id}`} className="block">
+                                <Link key={task.id} href={getTaskLink(task)} className="block">
                                     <div className="p-3 border rounded-md hover:bg-muted/50 transition-colors flex justify-between items-center">
-                                        <div>
-                                            <p className="font-semibold">{task.title}</p>
-                                            <p className="text-sm text-muted-foreground">Atanma tarihi: {task.assignedAt.toDate().toLocaleDateString('tr-TR')}</p>
+                                        <div className="flex items-center gap-4">
+                                            {getTaskIcon(task.type)}
+                                            <div>
+                                                <p className="font-semibold">{task.title}</p>
+                                                <p className="text-sm text-muted-foreground">Atanma tarihi: {task.assignedAt.toDate().toLocaleDateString('tr-TR')}</p>
+                                            </div>
                                         </div>
                                         <Button variant="ghost" size="sm">Görevi Aç</Button>
                                     </div>
@@ -398,5 +419,3 @@ export default function DailyJourneyPage() {
     </div>
   );
 }
-
-    
