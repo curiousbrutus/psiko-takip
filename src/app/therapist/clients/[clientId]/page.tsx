@@ -184,7 +184,7 @@ export default function ClientProfilePage() {
                  <Card>
                     <CardHeader className="flex flex-row items-center gap-6 space-y-0">
                          <Avatar className="h-20 w-20 border">
-                            <AvatarImage src={clientData.photoURL} data-ai-hint="profile picture" />
+                            <AvatarImage src={clientData.photoURL} data-ai-hint="profile picture"/>
                             <AvatarFallback>{clientData.displayName?.[0]}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
