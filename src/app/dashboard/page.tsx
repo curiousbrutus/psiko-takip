@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase/config';
-import { doc, getDoc, collection, query, where, orderBy, limit } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import type { DocumentData, Timestamp } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,19 +26,21 @@ export default function DashboardPage() {
   const [dailyInsight, setDailyInsight] = useState<DailyInsight | null>(null);
 
   useEffect(() => {
-    const fetchGamificationData = async () => {
-      if (user) {
-        const gamificationRef = doc(db, 'gamification', user.uid);
-        const docSnap = await getDoc(gamificationRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setStreak(data.currentStreak || 0);
-          generateDailyInsight(data.lastActivityDate);
+    if (!user) {
+        generateDailyInsight(null);
+        return;
+    };
+    
+    const gamificationRef = doc(db, 'gamification', user.uid);
+    const unsubscribe = onSnapshot(gamificationRef, (doc) => {
+        if (doc.exists()) {
+            const data = doc.data();
+            setStreak(data.currentStreak || 0);
+            generateDailyInsight(data.lastActivityDate);
         } else {
             generateDailyInsight(null);
         }
-      }
-    };
+    });
 
     const generateDailyInsight = (lastActivityDate: Timestamp | null) => {
         let insight: DailyInsight;
@@ -73,8 +75,9 @@ export default function DashboardPage() {
         }
         setDailyInsight(insight);
     }
+
+    return () => unsubscribe();
     
-    fetchGamificationData();
   }, [user]);
 
   return (
