@@ -13,6 +13,7 @@ import { ArrowRight, Flame, Trophy, Award, BarChart3, Lightbulb, Heart, Leaf } f
 import { formatDistanceToNow } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { Progress } from '@/components/ui/progress';
+import { useRouter } from 'next/navigation';
 
 interface DailyInsight {
   title: string;
@@ -41,6 +42,7 @@ export default function DashboardPage() {
   const { user, userData } = useAuth();
   const [gamificationData, setGamificationData] = useState<DocumentData | null>(null);
   const [dailyInsight, setDailyInsight] = useState<DailyInsight | null>(null);
+  const router = useRouter();
 
   const generateDailyInsight = (lastActivityDate: Timestamp | null) => {
     let insight: DailyInsight;
@@ -88,18 +90,20 @@ export default function DashboardPage() {
             const data = doc.data();
             setGamificationData(data);
             generateDailyInsight(data.lastActivityDate);
-        } else {
-            // If gamification doc doesn't exist, it might be an older user.
-            // We can check for companion onboarding.
-            if(userData && !userData.companion) {
-                 generateDailyInsight(null);
+            // If gamification doc exists but no companion is selected, redirect
+            if (!data.companion) {
+              router.push('/dashboard/companion/onboarding');
             }
+        } else {
+            // This might happen for older users before the gamification doc was created.
+            // Or if the creation failed. We redirect to start the process.
+            router.push('/dashboard/companion/onboarding');
         }
     });
 
     return () => unsubscribe();
     
-  }, [user, userData]);
+  }, [user, router]);
 
   const CompanionCard = () => {
     if (!gamificationData || !gamificationData.companion) {

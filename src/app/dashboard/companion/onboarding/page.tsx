@@ -27,7 +27,6 @@ export default function CompanionOnboardingPage() {
 
     const gamificationRef = doc(db, 'gamification', user.uid);
     try {
-      // Using updateDoc since the document should already exist from registration
       await updateDoc(gamificationRef, {
         companion: {
           type: selected,
@@ -35,7 +34,10 @@ export default function CompanionOnboardingPage() {
         }
       });
       toast({ title: "Harika seçim!", description: "Yolculuğun başlıyor." });
+      
       router.push('/dashboard');
+      router.refresh(); // Force a refresh to reflect changes on the dashboard
+
     } catch (error) {
       console.error("Error selecting companion: ", error);
       toast({ title: "Hata", description: "Yoldaşın seçilemedi, lütfen tekrar dene.", variant: "destructive" });
