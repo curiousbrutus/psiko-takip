@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase/config';
-import { collection, addDoc, serverTimestamp, query, where, getDocs, limit, doc, updateDoc, getDoc, increment } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, limit, doc, updateDoc, getDoc, increment, runTransaction } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,8 @@ const moodOptions = [
   { name: 'Üzgün', icon: Frown },
   { name: 'Endişeli', icon: HeartPulse },
 ];
+
+const getXpToNextLevel = (level: number) => 100 + (level - 1) * 50;
 
 export default function DailyJourneyPage() {
   const { user, userData } = useAuth();
@@ -73,22 +75,43 @@ export default function DailyJourneyPage() {
   }, [user]);
 
   const updateGamificationStats = async (xp: number) => {
-      if (!user) return;
-      
-      const gamificationRef = doc(db, 'gamification', user.uid);
-      
-      try {
-        const docSnap = await getDoc(gamificationRef);
-        if (docSnap.exists()) {
-             await updateDoc(gamificationRef, {
-                xp: increment(xp),
+    if (!user) return;
+
+    const gamificationRef = doc(db, 'gamification', user.uid);
+
+    try {
+        await runTransaction(db, async (transaction) => {
+            const gamificationDoc = await transaction.get(gamificationRef);
+            if (!gamificationDoc.exists()) {
+                console.error("Gamification document does not exist!");
+                return;
+            }
+
+            let data = gamificationDoc.data();
+            let newXp = (data.xp || 0) + xp;
+            let newLevel = data.level || 1;
+            let xpToNextLevel = getXpToNextLevel(newLevel);
+
+            while (newXp >= xpToNextLevel) {
+                newXp -= xpToNextLevel;
+                newLevel++;
+                xpToNextLevel = getXpToNextLevel(newLevel);
+            }
+            
+            // TODO: Add streak logic here
+            
+            transaction.update(gamificationRef, {
+                xp: newXp,
+                level: newLevel,
                 lastActivityDate: serverTimestamp(),
             });
-        }
-      } catch (e) {
+        });
+        toast({ title: "Harika!", description: `Yoldaşın +${xp} Enerji kazandı!` });
+    } catch (e) {
         console.error("Error updating gamification stats:", e);
-      }
-  };
+        toast({ title: "Hata", description: "İlerlemeniz kaydedilemedi.", variant: "destructive" });
+    }
+};
 
   const completeTask = async (task: 'morning' | 'evening') => {
     if (!user) {
@@ -159,7 +182,6 @@ export default function DailyJourneyPage() {
         
         await updateGamificationStats(xpGained);
 
-        toast({ title: "Kaydedildi!", description: `Günün bu bölümünü başarıyla tamamladın. +${xpGained} XP kazandın!` });
         setTasksCompleted(prev => ({...prev, [task]: true}));
 
     } catch (error) {
@@ -185,7 +207,7 @@ export default function DailyJourneyPage() {
                 <div className="flex items-center gap-4">
                   <Sunrise className="h-6 w-6 text-primary" />
                   <div>
-                    <CardTitle className="text-xl text-left">Sabah Başlangıcı (+10 XP)</CardTitle>
+                    <CardTitle className="text-xl text-left">Sabah Başlangıcı (+10 Enerji)</CardTitle>
                     <p className="text-sm text-muted-foreground font-normal">Güne bilinçli bir başlangıç yap.</p>
                   </div>
                 </div>
@@ -229,7 +251,7 @@ export default function DailyJourneyPage() {
                 <div className="flex items-center gap-4">
                   <Sunset className="h-6 w-6 text-primary" />
                   <div>
-                    <CardTitle className="text-xl text-left">Akşam Değerlendirmesi (+15 XP)</CardTitle>
+                    <CardTitle className="text-xl text-left">Akşam Değerlendirmesi (+15 Enerji)</CardTitle>
                     <p className="text-sm text-muted-foreground font-normal">Günü yansıt ve zihnini dinlendir.</p>
                   </div>
                 </div>

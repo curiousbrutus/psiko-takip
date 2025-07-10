@@ -4,14 +4,15 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase/config';
-import { doc, getDoc, collection, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import type { DocumentData, Timestamp } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowRight, Flame, Trophy, Award, BarChart3, Lightbulb } from 'lucide-react';
+import { ArrowRight, Flame, Trophy, Award, BarChart3, Lightbulb, Heart, Leaf } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { tr } from 'date-fns/locale';
+import { Progress } from '@/components/ui/progress';
 
 interface DailyInsight {
   title: string;
@@ -20,9 +21,11 @@ interface DailyInsight {
   linkText: string;
 }
 
+const getXpToNextLevel = (level: number) => 100 + (level - 1) * 50;
+
 export default function DashboardPage() {
   const { user, userData } = useAuth();
-  const [streak, setStreak] = useState(0);
+  const [gamificationData, setGamificationData] = useState<DocumentData | null>(null);
   const [dailyInsight, setDailyInsight] = useState<DailyInsight | null>(null);
 
   const generateDailyInsight = (lastActivityDate: Timestamp | null) => {
@@ -69,7 +72,7 @@ export default function DashboardPage() {
     const unsubscribe = onSnapshot(gamificationRef, (doc) => {
         if (doc.exists()) {
             const data = doc.data();
-            setStreak(data.currentStreak || 0);
+            setGamificationData(data);
             generateDailyInsight(data.lastActivityDate);
         } else {
             generateDailyInsight(null);
@@ -80,37 +83,93 @@ export default function DashboardPage() {
     
   }, [user]);
 
+  const CompanionCard = () => {
+    if (!gamificationData) {
+      return (
+        <Card className="bg-muted/30">
+          <CardHeader>
+            <CardTitle>Ruhsal Yoldaş</CardTitle>
+            <CardDescription>Yolculuğuna başlamak için bir yoldaş seç.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href="/dashboard/companion/onboarding">Yoldaşını Seç</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      );
+    }
+    
+    const { companion, level, xp } = gamificationData;
+    const xpToNextLevel = getXpToNextLevel(level);
+    const progressPercentage = (xp / xpToNextLevel) * 100;
+
+    return (
+       <Card className="bg-muted/30">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            {companion.type === 'plant' ? <Leaf className="text-primary"/> : <Heart className="text-primary"/>}
+            Ruhsal Yoldaşın
+          </CardTitle>
+          <CardDescription>Seviye {level}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+            <div className="flex justify-center items-center h-24 bg-background rounded-md">
+                <span className="text-5xl">
+                    {companion.type === 'plant' ? '🌱' : '🥚'}
+                </span>
+            </div>
+            <div>
+              <div className="flex justify-between items-center text-sm mb-1">
+                <span className="text-muted-foreground">Enerji</span>
+                <span className="font-semibold">{xp} / {xpToNextLevel}</span>
+              </div>
+              <Progress value={progressPercentage} className="h-2" />
+            </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold font-headline">Tekrar hoş geldiniz, {userData?.displayName?.split(' ')[0] || ''}!</h1>
-          <p className="text-muted-foreground">Zihinsel sağlık yolculuğun seni bekliyor.</p>
-        </div>
-        <div className="flex items-center gap-2 bg-card p-3 rounded-lg shadow-sm border">
-          <Flame className="h-6 w-6 text-primary" />
-          <div className="flex flex-col">
-            <span className="text-xl font-bold leading-none">{streak}</span>
-            <span className="text-xs text-muted-foreground">Günlük Seri</span>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        
+        <div className="lg:col-span-2 space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold font-headline">Tekrar hoş geldiniz, {userData?.displayName?.split(' ')[0] || ''}!</h1>
+            <p className="text-muted-foreground">Zihinsel sağlık yolculuğun seni bekliyor.</p>
           </div>
-        </div>
-      </div>
 
-      {dailyInsight && (
-        <Card className="bg-primary/10 border-primary/20">
-            <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                    <CardTitle className="flex items-center gap-2"><Lightbulb className="h-5 w-5 text-primary" /> {dailyInsight.title}</CardTitle>
-                    <CardDescription className="mt-2">{dailyInsight.description}</CardDescription>
-                </div>
-                <Button asChild>
-                    <Link href={dailyInsight.link}>
-                        {dailyInsight.linkText} <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                </Button>
-            </CardHeader>
-        </Card>
-      )}
+          {dailyInsight && (
+            <Card className="bg-primary/10 border-primary/20">
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                        <CardTitle className="flex items-center gap-2"><Lightbulb className="h-5 w-5 text-primary" /> {dailyInsight.title}</CardTitle>
+                        <CardDescription className="mt-2">{dailyInsight.description}</CardDescription>
+                    </div>
+                    <Button asChild>
+                        <Link href={dailyInsight.link}>
+                            {dailyInsight.linkText} <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                    </Button>
+                </CardHeader>
+            </Card>
+          )}
+        </div>
+
+        <div className="lg:col-span-1 space-y-6">
+             <div className="flex items-center gap-2 bg-card p-3 rounded-lg shadow-sm border justify-center">
+              <Flame className="h-6 w-6 text-primary" />
+              <div className="flex flex-col">
+                <span className="text-xl font-bold leading-none">{gamificationData?.currentStreak || 0}</span>
+                <span className="text-xs text-muted-foreground">Günlük Seri</span>
+              </div>
+            </div>
+            <CompanionCard />
+        </div>
+
+      </div>
       
       <div className="space-y-4">
         <h2 className="text-2xl font-bold font-headline">İlerleme Paneli</h2>
