@@ -121,14 +121,14 @@ export default function LoginPage() {
     let email = formData.get("email") as string
     let password = formData.get("password") as string
 
-    if (email.toLowerCase() === 'admin' && password === 'admin') {
+    if (email.toLowerCase() === 'terapist' && password === 'terapist') {
       toast({ title: "Demo Girişi", description: "Terapist paneline yönlendiriliyorsunuz..." });
       router.push('/therapist/dashboard');
       setLoading(false);
       return;
     }
     
-    if (email.toLowerCase() === 'mehmet.ozturk@example.com' && password === 'admin') {
+    if (email.toLowerCase() === 'danisan' && password === 'danisan') {
       toast({ title: "Demo Girişi", description: "Danışan paneline yönlendiriliyorsunuz..." });
       router.push('/dashboard');
       setLoading(false);
