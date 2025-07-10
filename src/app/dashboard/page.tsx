@@ -23,6 +23,20 @@ interface DailyInsight {
 
 const getXpToNextLevel = (level: number) => 100 + (level - 1) * 50;
 
+const getCompanionVisual = (companion: { type: 'plant' | 'animal' }, level: number): string => {
+  if (companion.type === 'plant') {
+    if (level >= 10) return '🌸'; // Flowering Plant
+    if (level >= 5) return '🌳'; // Tree
+    return '🌱'; // Sprout
+  }
+  if (companion.type === 'animal') {
+    if (level >= 10) return '🦊'; // Fox
+    if (level >= 5) return '🐾'; // Hatched
+    return '🥚'; // Egg
+  }
+  return '❓';
+}
+
 export default function DashboardPage() {
   const { user, userData } = useAuth();
   const [gamificationData, setGamificationData] = useState<DocumentData | null>(null);
@@ -84,7 +98,7 @@ export default function DashboardPage() {
   }, [user]);
 
   const CompanionCard = () => {
-    if (!gamificationData) {
+    if (!gamificationData || !gamificationData.companion) {
       return (
         <Card className="bg-muted/30">
           <CardHeader>
@@ -115,8 +129,8 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent className="space-y-4">
             <div className="flex justify-center items-center h-24 bg-background rounded-md">
-                <span className="text-5xl">
-                    {companion.type === 'plant' ? '🌱' : '🥚'}
+                <span className="text-6xl transition-all duration-500">
+                    {getCompanionVisual(companion, level)}
                 </span>
             </div>
             <div>
@@ -209,3 +223,5 @@ export default function DashboardPage() {
     </div>
   )
 }
+
+    
