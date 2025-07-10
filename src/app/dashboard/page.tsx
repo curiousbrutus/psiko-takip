@@ -89,13 +89,17 @@ export default function DashboardPage() {
             setGamificationData(data);
             generateDailyInsight(data.lastActivityDate);
         } else {
-            generateDailyInsight(null);
+            // If gamification doc doesn't exist, it might be an older user.
+            // We can check for companion onboarding.
+            if(userData && !userData.companion) {
+                 generateDailyInsight(null);
+            }
         }
     });
 
     return () => unsubscribe();
     
-  }, [user]);
+  }, [user, userData]);
 
   const CompanionCard = () => {
     if (!gamificationData || !gamificationData.companion) {
@@ -129,9 +133,11 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent className="space-y-4">
             <div className="flex justify-center items-center h-24 bg-background rounded-md">
-                <span className="text-6xl transition-all duration-500">
-                    {getCompanionVisual(companion, level)}
-                </span>
+                <div className="animate-pulse">
+                    <span className="text-6xl transition-all duration-500">
+                        {getCompanionVisual(companion, level)}
+                    </span>
+                </div>
             </div>
             <div>
               <div className="flex justify-between items-center text-sm mb-1">
@@ -223,5 +229,3 @@ export default function DashboardPage() {
     </div>
   )
 }
-
-    
