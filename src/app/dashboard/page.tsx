@@ -90,13 +90,13 @@ export default function DashboardPage() {
             const data = doc.data();
             setGamificationData(data);
             generateDailyInsight(data.lastActivityDate);
-            // Only redirect if the companion data is explicitly missing after the doc has been loaded.
-            if (doc.data() && !doc.data().companion) {
+            // This check now specifically looks for the 'companion' field inside the data.
+            // If the document exists but the companion hasn't been chosen, it will redirect.
+            if (!data.companion) {
               router.push('/dashboard/companion/onboarding');
             }
         } else {
-            // This case handles brand new users or errors in doc creation.
-            // Pushing them to onboarding is the correct flow.
+            // This case handles brand new users or errors. Sending them to onboarding is correct.
             router.push('/dashboard/companion/onboarding');
         }
     });
@@ -221,7 +221,7 @@ export default function DashboardPage() {
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <CardTitle className="text-sm font-medium">Ruh Hali Takvimi</CardTitle>
-                    <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                    <BarChart2 className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold">Çoğunlukla Sakin</div>

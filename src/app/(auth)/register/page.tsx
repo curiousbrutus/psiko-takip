@@ -77,6 +77,7 @@ export default function RegisterPage() {
                     level: 1,
                     currentStreak: 0,
                     lastActivityDate: null,
+                    companion: { type: 'animal', createdAt: new Date() }
                 });
                  toast({ title: "Hoş Geldiniz!", description: "Hesabınız başarıyla oluşturuldu." });
             } else {
@@ -154,7 +155,8 @@ export default function RegisterPage() {
                 level: 1,
                 currentStreak: 0,
                 lastActivityDate: null,
-                // companion data can be added later
+                // Default to 'animal' for now to bypass the onboarding bug
+                ...(role === 'danisan' && { companion: { type: 'animal', createdAt: new Date() } }),
             });
 
             toast({ title: "Başarılı", description: "Hesabınız başarıyla oluşturuldu." })

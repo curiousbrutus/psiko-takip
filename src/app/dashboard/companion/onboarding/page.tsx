@@ -35,8 +35,10 @@ export default function CompanionOnboardingPage() {
       });
       toast({ title: "Harika seçim!", description: "Yolculuğun başlıyor." });
       
+      // The onSnapshot listener on the dashboard will handle the update.
+      // No need to push or refresh here, the listener will see the change
+      // and stop redirecting to this page.
       router.push('/dashboard');
-      // router.refresh(); // Removed this line. The onSnapshot listener on dashboard will handle the update.
 
     } catch (error) {
       console.error("Error selecting companion: ", error);
