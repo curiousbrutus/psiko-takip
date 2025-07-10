@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Mail, Calendar, FileText, CheckSquare, BarChart2, Lightbulb, ShieldCheck, ClipboardList, BrainCircuit, Users, HeartPulse, Wind, MessageSquare, Star, TrendingUp, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Mail, Calendar, FileText, CheckSquare, BarChart2, Lightbulb, ShieldCheck, ClipboardList, BrainCircuit, Users, HeartPulse, Wind, MessageSquare, Star, TrendingUp, AlertTriangle, MessageCircle, Edit } from 'lucide-react';
 import Link from 'next/link';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -170,9 +170,9 @@ export default function ClientProfilePage() {
     );
 
     const renderResultsSkeleton = () => (
-        <div className="space-y-4">
-            {[...Array(2)].map((_, i) => (
-                 <Skeleton key={i} className="h-14 w-full rounded-md" />
+         <div className="space-y-4">
+            {[...Array(1)].map((_, i) => (
+                 <Skeleton key={i} className="h-24 w-full rounded-md" />
             ))}
         </div>
     );
@@ -316,21 +316,21 @@ export default function ClientProfilePage() {
                                 <CardContent className="space-y-4">
                                     <Alert>
                                         <Wind className="h-4 w-4" />
-                                        <AlertTitle className="font-semibold">Nefes Egzersizi & Ruh Hali</AlertTitle>
+                                        <AlertTitle className="font-semibold">Nefes Egzersizi &amp; Ruh Hali</AlertTitle>
                                         <AlertDescription>
                                             Danışanınız, 'Nefes Egzersizi' yaptığı günlerde ruh halini <span className="font-bold text-primary">%40 daha pozitif</span> işaretleme eğiliminde.
                                         </AlertDescription>
                                     </Alert>
                                     <Alert>
                                         <HeartPulse className="h-4 w-4" />
-                                        <AlertTitle className="font-semibold">Endişe & Günlük Yazma</AlertTitle>
+                                        <AlertTitle className="font-semibold">Endişe &amp; Günlük Yazma</AlertTitle>
                                         <AlertDescription>
                                            'Endişeli' ruh hali işaretlendiğinde, o gün serbest günlük yazma aktivitesini tamamlama olasılığı <span className="font-bold text-primary">%60 daha yüksek.</span> Bu, yazmayı bir başa çıkma mekanizması olarak kullandığını gösterebilir.
                                         </AlertDescription>
                                     </Alert>
                                      <Alert>
                                         <Users className="h-4 w-4" />
-                                        <AlertTitle className="font-semibold">Sosyal Etkileşim & Ruh Hali</AlertTitle>
+                                        <AlertTitle className="font-semibold">Sosyal Etkileşim &amp; Ruh Hali</AlertTitle>
                                         <AlertDescription>
                                            "Aile" kelimesinin geçtiği günlüklerde, "Mutlu" ruh hali işaretlenme oranı diğer günlere göre daha düşük. Bu konunun seanslarda keşfedilmesi faydalı olabilir.
                                         </AlertDescription>
@@ -361,13 +361,26 @@ export default function ClientProfilePage() {
                 <TabsContent value="assignments" className="mt-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Görevler ve Atamalar</CardTitle>
+                            <CardTitle>İnteraktif Terapötik Araçlar</CardTitle>
                             <CardDescription>
-                                Danışanınıza yeni görevler atayın ve mevcut görevlerin durumunu takip edin. Bu özellik yakında kullanıma sunulacaktır.
+                                Danışanınızla birlikte BDT formları gibi yapılandırılmış araçlar üzerinde çalışın. Bu, ödevleri daha etkileşimli ve "ortak bir proje" haline getirir.
                             </CardDescription>
                         </CardHeader>
-                        <CardContent className="text-center text-muted-foreground py-16">
-                            Bu bölüm geliştirme aşamasındadır.
+                        <CardContent className="space-y-4">
+                            <div className="flex justify-end">
+                                <Button disabled>
+                                    <PlusCircle className="mr-2 h-4 w-4" /> Yeni Görev Ata (Yakında)
+                                </Button>
+                            </div>
+                            <Card className="border-dashed">
+                                <CardHeader>
+                                    <CardTitle>Atanmış Görevler</CardTitle>
+                                </CardHeader>
+                                <CardContent className="text-center text-muted-foreground py-10">
+                                    <p>Henüz atanmış interaktif bir görev yok.</p>
+                                    <p className="text-sm">"Yeni Görev Ata" butonu ile Düşünce Kaydı gibi araçlar atayabilirsiniz.</p>
+                                </CardContent>
+                            </Card>
                         </CardContent>
                     </Card>
                 </TabsContent>
