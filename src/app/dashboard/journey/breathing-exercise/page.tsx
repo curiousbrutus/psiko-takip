@@ -49,6 +49,7 @@ export default function BreathingExercisePage() {
     if (stage !== 'exercise') return;
 
     let promptIndex = 0;
+    let timer: NodeJS.Timeout;
     
     const runCycle = () => {
       const currentPrompt = currentTechnique.prompts[promptIndex];
@@ -68,12 +69,10 @@ export default function BreathingExercisePage() {
           setCircleClass('bg-muted');
       }
 
-      const cycleTimeout = setTimeout(() => {
+      timer = setTimeout(() => {
         promptIndex = (promptIndex + 1) % currentTechnique.prompts.length;
         runCycle();
       }, currentPrompt.duration * 1000);
-      
-      return () => clearTimeout(cycleTimeout);
     };
 
     const initialTimeout = setTimeout(runCycle, 1000); // Initial delay
@@ -85,6 +84,7 @@ export default function BreathingExercisePage() {
     return () => {
       clearTimeout(initialTimeout);
       clearTimeout(mainTimeout);
+      clearTimeout(timer);
     }
   }, [stage, duration, currentTechnique]);
 

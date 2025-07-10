@@ -1,15 +1,31 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { Loader2, Plus, HelpCircle, ArrowLeft } from 'lucide-react';
+import { Loader2, Plus, HelpCircle, ArrowLeft, Wind } from 'lucide-react';
 import { addGratitudeEntry, getGratitudeEntries } from './actions';
 import { useToast } from '@/hooks/use-toast';
 import type { DocumentData } from 'firebase/firestore';
+
+const JarIcon = ({ entryCount }: { entryCount: number }) => (
+    <div className="relative w-48 h-48 my-4">
+      <svg className="w-full h-full text-amber-300/50" viewBox="0 0 120 120" fill="currentColor">
+        <path d="M96.8,40.5H23.2c-2.4,0-4.4-2-4.4-4.4V32c0-2.4,2-4.4,4.4-4.4h73.5c2.4,0,4.4,2,4.4,4.4v4.1 C101.2,38.5,99.2,40.5,96.8,40.5z"/>
+        <path d="M94.1,102.3H25.9c-2.4,0-4.5-1.7-4.8-4.1L18.8,42h82.4l-2.3,56.2C98.6,100.6,96.6,102.3,94.1,102.3z"/>
+      </svg>
+      <div className="absolute inset-0 flex flex-wrap items-end justify-center p-6 overflow-hidden">
+        {Array.from({ length: Math.min(entryCount, 30) }).map((_, i) => (
+            <div key={i} className="w-3 h-3 m-0.5 bg-gradient-to-tr from-amber-300 to-amber-500 rounded-full shadow-inner opacity-80" style={{
+                transform: `translateX(${Math.random() * 20 - 10}px)`,
+            }}/>
+        ))}
+      </div>
+    </div>
+  );
 
 export default function GratitudeJarPage() {
   const [entries, setEntries] = useState<DocumentData[]>([]);
@@ -22,19 +38,20 @@ export default function GratitudeJarPage() {
   const router = useRouter();
   const { toast } = useToast();
 
-  useEffect(() => {
-    async function fetchEntries() {
-      setIsLoading(true);
-      const result = await getGratitudeEntries();
-      if (result.success && result.data) {
-        setEntries(result.data);
-      } else if (result.error) {
-         toast({ title: 'Hata', description: result.error, variant: 'destructive' });
-      }
-      setIsLoading(false);
+  const fetchEntries = useCallback(async () => {
+    setIsLoading(true);
+    const result = await getGratitudeEntries();
+    if (result.success && result.data) {
+      setEntries(result.data);
+    } else if (result.error) {
+       toast({ title: 'Hata', description: result.error, variant: 'destructive' });
     }
-    fetchEntries();
+    setIsLoading(false);
   }, [toast]);
+
+  useEffect(() => {
+    fetchEntries();
+  }, [fetchEntries]);
   
   const handleAddEntry = async () => {
     if (!newEntry.trim()) return;
@@ -42,9 +59,7 @@ export default function GratitudeJarPage() {
     const result = await addGratitudeEntry(newEntry);
     if (result.success) {
       toast({ title: 'Başarılı!', description: 'Minnet anın kavanoza eklendi. (+15 XP)' });
-      // Manually add the new entry to the state to avoid a full refetch
-      const newEntryData = { id: result.id, content: newEntry, createdAt: new Date() };
-      setEntries(prev => [...prev, newEntryData]);
+      fetchEntries(); // Refetch to get the latest list with the new entry
       setNewEntry('');
       setIsAdding(false);
     } else {
@@ -63,25 +78,9 @@ export default function GratitudeJarPage() {
     toast({ title: 'Bir Anı Hatırladın!', description: 'İşte o güzel anlardan biri. (+5 XP)' });
   };
   
-  const JarIcon = ({ entryCount }: { entryCount: number }) => (
-    <div className="relative w-48 h-48">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-full h-full text-primary/20 absolute">
-        <path d="M5 3.75a.75.75 0 01.75-.75h12.5a.75.75 0 010 1.5H5.75a.75.75 0 01-.75-.75zM6 6a.75.75 0 01.75.75v13.5a.75.75 0 01-1.5 0V6.75A.75.75 0 016 6zM18 6a.75.75 0 01.75.75v13.5a.75.75 0 01-1.5 0V6.75A.75.75 0 0118 6zM9.97 7.22a.75.75 0 011.06 0l4.25 4.25a.75.75 0 01-1.06 1.06L10.5 8.81l-3.72 3.72a.75.75 0 11-1.06-1.06l4.25-4.25z" />
-        <path fillRule="evenodd" d="M5.22 21.78a.75.75 0 01-.72-.966l.5-2.75a.75.75 0 01.72-.514h12.56a.75.75 0 01.72.514l.5 2.75a.75.75 0 11-1.44.266l-.34-1.86H6.28l-.34 1.86a.75.75 0 01-.72.7zM7.5 7a.5.5 0 01.5.5v3.25a.5.5 0 01-1 0V7.5a.5.5 0 01.5-.5z" clipRule="evenodd" />
-      </svg>
-      {Array.from({ length: Math.min(entryCount, 15) }).map((_, i) => (
-         <div key={i} className="absolute w-4 h-2 bg-amber-200 rounded-sm" style={{
-            left: `${Math.random() * 70 + 15}%`,
-            bottom: `${Math.random() * 40 + 10}%`,
-            transform: `rotate(${Math.random() * 90 - 45}deg)`,
-          }}/>
-      ))}
-    </div>
-  );
-
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] bg-amber-50 p-4 space-y-6">
-      <Button variant="ghost" className="absolute top-20 left-6 z-30" onClick={() => router.push('/dashboard/journey')}>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-amber-50 p-4 space-y-6">
+      <Button variant="ghost" className="absolute top-6 left-6 z-30" onClick={() => router.push('/dashboard/journey')}>
         <ArrowLeft className="mr-2 h-4 w-4" /> Günlük Yolculuğa Dön
       </Button>
       
@@ -113,12 +112,12 @@ export default function GratitudeJarPage() {
 
       {shownEntry && (
           <div className="fixed inset-0 bg-black/60 z-20 flex items-center justify-center p-4" onClick={() => setShownEntry(null)}>
-            <Card className="w-full max-w-md animate-fade-in shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <Card className="w-full max-w-md animate-fade-in shadow-xl bg-amber-50" onClick={(e) => e.stopPropagation()}>
                 <CardHeader>
                     <CardTitle>İşte o güzel anlardan biri...</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-lg text-muted-foreground italic">"{shownEntry.content}"</p>
+                    <p className="text-lg text-muted-foreground italic p-4 border-l-4 border-amber-300 bg-white rounded-r-md">"{shownEntry.content}"</p>
                 </CardContent>
                 <CardFooter>
                     <Button onClick={() => setShownEntry(null)} className="w-full">Harika!</Button>
@@ -128,7 +127,7 @@ export default function GratitudeJarPage() {
       )}
 
 
-      <Card className="w-full max-w-lg text-center transition-all">
+      <Card className="w-full max-w-lg text-center transition-all shadow-lg bg-white/70 backdrop-blur-sm">
         <CardHeader>
           <CardTitle className="text-3xl font-headline">Minnet Anı Kavanozu</CardTitle>
           <CardDescription>Hayatındaki güzel anları biriktir ve dilediğinde hatırla.</CardDescription>
@@ -139,18 +138,18 @@ export default function GratitudeJarPage() {
             ) : (
               <>
                 <JarIcon entryCount={entries.length} />
-                <div className="relative z-10 text-muted-foreground font-semibold mt-2">
+                <div className="relative z-10 text-muted-foreground font-semibold -mt-4">
                     Kavanozda {entries.length} anı birikti.
                 </div>
               </>
             )}
         </CardContent>
-        <CardFooter className="grid grid-cols-2 gap-4">
+        <CardFooter className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Button onClick={() => setIsAdding(true)} size="lg">
                 <Plus className="mr-2" /> Yeni Anı Ekle
             </Button>
             <Button onClick={showRandomEntry} variant="outline" size="lg" disabled={entries.length === 0}>
-                <HelpCircle className="mr-2" /> Rastgele Anı Göster
+                <Wind className="mr-2" /> Rastgele Anı Göster
             </Button>
         </CardFooter>
       </Card>

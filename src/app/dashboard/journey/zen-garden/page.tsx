@@ -32,7 +32,8 @@ export default function ZenGardenPage() {
       pt.y = e.clientY;
     }
     
-    return pt.matrixTransform(svg.getScreenCTM()?.inverse());
+    const transformedPoint = pt.matrixTransform(svg.getScreenCTM()?.inverse());
+    return transformedPoint;
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -71,6 +72,7 @@ export default function ZenGardenPage() {
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDrawing) return;
+    e.preventDefault(); // Prevent scrolling
     const point = getCoordinates(e);
     if (point) {
       setCurrentPath(prev => `${prev} L ${point.x} ${point.y}`);
@@ -85,8 +87,8 @@ export default function ZenGardenPage() {
     setIsFinished(true);
   };
 
-  const hasSpentEnoughTime = startTime && (new Date().getTime() - startTime.getTime()) > 60000;
-  const xpGained = hasSpentEnoughTime ? 10 : 0;
+  const hasSpentEnoughTime = startTime && (new Date().getTime() - startTime.getTime()) > 30000; // 30 seconds
+  const xpGained = hasSpentEnoughTime ? 20 : 5;
 
   if (isFinished) {
      return (
@@ -95,7 +97,7 @@ export default function ZenGardenPage() {
           <Feather className="h-16 w-16 text-[#8b7e6a] mx-auto mb-4" />
           <h1 className="text-2xl font-bold">Zihnini dinlendirdin.</h1>
           <p className="mt-2">Kendine zaman ayırdığın için bu bile değerli bir adım.</p>
-          {xpGained > 0 && <p className="mt-4 font-bold text-lg text-primary">+{xpGained} XP kazandın</p>}
+          <p className="mt-4 font-bold text-lg text-primary">+{xpGained} XP kazandın</p>
           <Button className="mt-6" onClick={() => router.push('/dashboard/journey')}>
             Günlük Yolculuğa Dön
           </Button>
@@ -106,12 +108,12 @@ export default function ZenGardenPage() {
 
   return (
     <div className="flex flex-col h-screen bg-[#d7c6b2]">
-        <div className="flex-grow relative w-full h-full overflow-hidden"
+        <div className="flex-grow relative w-full h-full overflow-hidden touch-none"
           onMouseLeave={handleMouseUp}
         >
           <svg 
             ref={svgRef}
-            className="w-full h-full bg-[#eaddc7]"
+            className="w-full h-full bg-[#eaddc7] cursor-pointer"
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}

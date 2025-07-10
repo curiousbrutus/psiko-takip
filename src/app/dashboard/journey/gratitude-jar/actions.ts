@@ -41,7 +41,7 @@ export async function getGratitudeEntries(): Promise<{ success: boolean; data?: 
   }
 
   try {
-    const q = query(collection(db, "gratitudeJarEntries"), where("userId", "==", user.uid));
+    const q = query(collection(db, "gratitudeJarEntries"), where("userId", "==", user.uid), orderBy("createdAt", "desc"));
     const querySnapshot = await getDocs(q);
     const entries = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     return { success: true, data: entries };

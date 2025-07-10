@@ -58,24 +58,24 @@ export default function GroundingExercisePage() {
 
   return (
     <div
-      className="flex flex-col items-center justify-center min-h-screen bg-teal-50 text-teal-900 cursor-pointer"
+      className="flex flex-col items-center justify-center min-h-screen bg-teal-50 text-teal-900 cursor-pointer transition-colors duration-500"
       onClick={handleTap}
     >
       <div key={animationKey} className="text-center p-8 animate-fade-in">
-        <h1 className="text-3xl md:text-5xl font-bold mb-8">{currentStep.prompt}</h1>
+        <h1 className="text-3xl md:text-5xl font-bold mb-8 transition-opacity duration-300">{currentStep.prompt}</h1>
         <div className="flex justify-center gap-4">
           {Array.from({ length: currentStep.count }).map((_, i) => (
             <div
               key={i}
               className={`w-8 h-8 md:w-12 md:h-12 rounded-full border-2 border-teal-500 transition-all duration-300 ${
-                i <= taps ? 'bg-teal-500' : 'bg-transparent'
+                i <= taps ? 'bg-teal-500 scale-110' : 'bg-transparent'
               }`}
             ></div>
           ))}
         </div>
-        <p className="mt-12 text-teal-600">Devam etmek için ekrana dokun.</p>
+        <p className="mt-12 text-teal-600 animate-pulse">Devam etmek için ekrana dokun.</p>
       </div>
-       <Button variant="ghost" className="absolute bottom-8" onClick={() => router.push('/dashboard/journey')}>
+       <Button variant="ghost" className="absolute bottom-8" onClick={(e) => {e.stopPropagation(); router.push('/dashboard/journey')}}>
         Egzersizi Sonlandır
       </Button>
     </div>

@@ -4,13 +4,13 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase/config';
-import { collection, addDoc, serverTimestamp, query, where, getDocs, limit } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, limit, doc, updateDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, Sunrise, Sun, Sunset, Smile, Leaf, Meh, HeartPulse, Frown, Wind, BrainCircuit, Book, Sparkles, Loader2, Share2, Feather, Droplets } from 'lucide-react';
+import { CheckCircle2, Sunrise, Sun, Sunset, Smile, Leaf, Meh, HeartPulse, Frown, Wind, BrainCircuit, Book, Sparkles, Loader2, Share2, Feather, Droplets, Flame } from 'lucide-react';
 import Link from 'next/link';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -72,10 +72,28 @@ export default function DailyJourneyPage() {
     checkCompletionStatus();
   }, [user]);
 
+  const updateGamificationStats = async () => {
+      if (!user) return;
+      
+      const gamificationRef = doc(db, 'gamification', user.uid);
+      const today = new Date();
+      
+      try {
+        const docSnap = await getDoc(gamificationRef);
+        if (docSnap.exists()) {
+             await updateDoc(gamificationRef, {
+                lastActivityDate: serverTimestamp(),
+            });
+        }
+      } catch (e) {
+        console.error("Error updating gamification stats:", e);
+      }
+  };
+
   const completeTask = async (task: 'morning' | 'evening') => {
     if (!user) {
         toast({
-            title: "Demo Modu",
+            title: "Giriş Gerekli",
             description: "Bu özelliği kullanmak için lütfen kayıt olun veya giriş yapın.",
             variant: "destructive",
         });
@@ -136,8 +154,7 @@ export default function DailyJourneyPage() {
             });
         }
         
-        // Gamification logic (XP, streak, level) is now handled by a backend Cloud Function.
-        // The function will be triggered by the creation of the documents above.
+        await updateGamificationStats();
 
         toast({ title: "Kaydedildi!", description: "Günün bu bölümünü başarıyla tamamladın." });
         setTasksCompleted(prev => ({...prev, [task]: true}));
@@ -165,7 +182,7 @@ export default function DailyJourneyPage() {
                 <div className="flex items-center gap-4">
                   <Sunrise className="h-6 w-6 text-primary" />
                   <div>
-                    <CardTitle className="text-xl text-left">Sabah Başlangıcı</CardTitle>
+                    <CardTitle className="text-xl text-left">Sabah Başlangıcı (+10 XP)</CardTitle>
                     <p className="text-sm text-muted-foreground font-normal">Güne bilinçli bir başlangıç yap.</p>
                   </div>
                 </div>
@@ -209,7 +226,7 @@ export default function DailyJourneyPage() {
                 <div className="flex items-center gap-4">
                   <Sunset className="h-6 w-6 text-primary" />
                   <div>
-                    <CardTitle className="text-xl text-left">Akşam Değerlendirmesi</CardTitle>
+                    <CardTitle className="text-xl text-left">Akşam Değerlendirmesi (+15 XP)</CardTitle>
                     <p className="text-sm text-muted-foreground font-normal">Günü yansıt ve zihnini dinlendir.</p>
                   </div>
                 </div>
@@ -219,7 +236,7 @@ export default function DailyJourneyPage() {
             <AccordionContent className="p-6 pt-0">
                 <div className="space-y-6">
                     <div>
-                        <h3 className="font-semibold mb-2 flex items-center gap-2"><Sparkles className="h-4 w-4 text-accent" /> Bugün minnettar olduğun 3 şey nedir?</h3>
+                        <h3 className="font-semibold mb-2 flex items-center gap-2"><Flame className="h-4 w-4 text-accent" /> Bugün minnettar olduğun 3 şey nedir?</h3>
                         <Textarea placeholder="1. ..." value={minnettar} onChange={(e) => setMinnettar(e.target.value)} />
                         {userData?.connectedTherapist && (
                           <div className="flex items-center space-x-2 mt-2">
@@ -306,5 +323,3 @@ export default function DailyJourneyPage() {
     </div>
   );
 }
-
-    

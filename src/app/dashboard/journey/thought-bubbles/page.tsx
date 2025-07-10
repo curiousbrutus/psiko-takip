@@ -15,21 +15,23 @@ type Bubble = {
 export default function ThoughtBubblesPage() {
   const [thought, setThought] = useState('');
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
-  const [released, setReleased] = useState(false);
+  const [isReleased, setIsReleased] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
   const router = useRouter();
 
   const handleRelease = () => {
-    if (!thought.trim()) return;
+    if (!thought.trim() || isReleased) return;
+    setIsReleased(true);
     setBubbles([{ id: Date.now(), text: thought }]);
     setThought('');
 
     setTimeout(() => {
       setBubbles([]);
-      setReleased(true);
+      setIsCompleted(true);
     }, 4000); // Corresponds to animation duration
   };
 
-  if (released) {
+  if (isCompleted) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-sky-200 text-sky-800 animate-fade-in p-4">
         <div className="bg-white/80 backdrop-blur-sm rounded-xl p-8 text-center shadow-lg">
@@ -61,7 +63,7 @@ export default function ThoughtBubblesPage() {
         </div>
       ))}
 
-      {!bubbles.length && (
+      {!isReleased && (
         <div className="z-10 bg-white/30 backdrop-blur-sm p-8 rounded-xl shadow-lg text-center animate-fade-in">
           <h1 className="text-2xl font-bold text-slate-800">Düşünce Balonları</h1>
           <p className="text-slate-700 mt-2">Aklını meşgul eden bir düşünceyi yaz.</p>
@@ -79,6 +81,9 @@ export default function ThoughtBubblesPage() {
           </div>
         </div>
       )}
+       <Button variant="ghost" className="absolute bottom-8 text-white/80 hover:text-white bg-black/10 hover:bg-black/20" onClick={() => router.push('/dashboard/journey')}>
+        Geri Dön
+      </Button>
     </div>
   );
 }
