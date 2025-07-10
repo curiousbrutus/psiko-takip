@@ -7,7 +7,7 @@ import { db } from '@/lib/firebase/config';
 import { doc, getDoc, collection, query, where, orderBy, getDocs, DocumentData, Timestamp } from 'firebase/firestore';
 import { useParams, useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -29,35 +29,6 @@ interface SharedJournal extends DocumentData {
     prompt: string;
     createdAt: Timestamp;
 }
-
-const mockClientData = {
-    displayName: 'Mehmet Öztürk',
-    email: 'mehmet.ozturk@example.com',
-    photoURL: 'https://placehold.co/80x80.png',
-};
-
-const mockSharedJournals: SharedJournal[] = [
-    {
-        id: 'journal1',
-        prompt: 'Bugün minnettar olduğun 3 şey nedir?',
-        content: '1. Sabah kahvesinin kokusu.\n2. Uzun bir aradan sonra bir arkadaşımla konuşmak.\n3. Akşam yürüyüşündeki serin hava.',
-        createdAt: new Timestamp(Math.floor(Date.now() / 1000) - 86400, 0), // 1 day ago
-    },
-];
-
-const mockTestResults: DocumentData[] = [
-    {
-        id: 'result1',
-        testName: 'Tükenmişlik Envanteri',
-        createdAt: new Timestamp(Math.floor(Date.now() / 1000) - 86400 * 3, 0), // 3 days ago
-        analysis: {
-            severity: 'Orta Düzeyde Tükenmişlik Riski',
-            insights: 'Kullanıcı, iş yükü ve duygusal yorgunluk arasında bir denge kurmakta zorlanıyor olabilir. Özellikle kişisel başarı hissi son zamanlarda azalmış görünüyor.',
-            guidance: 'Kısa molalar vermek, iş dışında hobilere zaman ayırmak ve bir sonraki seansta bu duyguları konuşmak faydalı olabilir. Sınır koyma üzerine çalışılabilir.',
-        }
-    }
-];
-
 
 export default function ClientProfilePage() {
     const { user, userData: therapistData } = useAuth();
@@ -129,14 +100,6 @@ export default function ClientProfilePage() {
     useEffect(() => {
         if (user && therapistData) {
             fetchAllData();
-        } else if (!user && clientId === 'client2') {
-            setClientData(mockClientData);
-            setSharedJournals(mockSharedJournals);
-            setTestResults(mockTestResults);
-            setLoadingClient(false);
-            setLoadingJournals(false);
-            setLoadingResults(false);
-            setLoadingTasks(false);
         } else if (!user) {
             toast({ title: "Giriş Gerekli", description: "Danışan profilini görmek için lütfen giriş yapın.", variant: "destructive" });
             router.push('/login');
@@ -239,7 +202,7 @@ export default function ClientProfilePage() {
                 </Card>
             </div>
 
-            <Tabs defaultValue="briefing" className="w-full">
+            <Tabs defaultValue="assignments" className="w-full">
                 <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="briefing">
                         <Star className="mr-2 h-4 w-4" /> Seans Brifingi
