@@ -25,6 +25,40 @@ export default function DashboardPage() {
   const [streak, setStreak] = useState(0);
   const [dailyInsight, setDailyInsight] = useState<DailyInsight | null>(null);
 
+  const generateDailyInsight = (lastActivityDate: Timestamp | null) => {
+    let insight: DailyInsight;
+    const now = new Date();
+    
+    if (lastActivityDate) {
+        const lastActivity = lastActivityDate.toDate();
+        const hoursSinceLastActivity = (now.getTime() - lastActivity.getTime()) / (1000 * 60 * 60);
+
+        if (hoursSinceLastActivity < 24) {
+             insight = {
+                title: "Harika Gidiyorsun!",
+                description: `Dün yolculuğunu tamamladın. Serini devam ettirmek için bugünkü görevlerine göz at.`,
+                link: "/dashboard/journey",
+                linkText: "Yolculuğa Devam Et"
+            };
+        } else {
+             insight = {
+                title: "Yolculuğun Seni Bekliyor",
+                description: `${formatDistanceToNow(lastActivity, { locale: tr, addSuffix: true })} giriş yaptın. Küçük bir adımla büyük bir fark yaratabilirsin.`,
+                link: "/dashboard/journey",
+                linkText: "Yolculuğa Başla"
+            };
+        }
+    } else {
+        insight = {
+            title: "İlk Adımı Atmaya Hazır mısın?",
+            description: "Günlük yolculuk görevlerin zihinsel esenliğini desteklemek için tasarlandı. Hadi başlayalım!",
+            link: "/dashboard/journey",
+            linkText: "Yolculuğa Başla"
+        };
+    }
+    setDailyInsight(insight);
+  }
+
   useEffect(() => {
     if (!user) {
         generateDailyInsight(null);
@@ -41,40 +75,6 @@ export default function DashboardPage() {
             generateDailyInsight(null);
         }
     });
-
-    const generateDailyInsight = (lastActivityDate: Timestamp | null) => {
-        let insight: DailyInsight;
-        const now = new Date();
-        
-        if (lastActivityDate) {
-            const lastActivity = lastActivityDate.toDate();
-            const hoursSinceLastActivity = (now.getTime() - lastActivity.getTime()) / (1000 * 60 * 60);
-
-            if (hoursSinceLastActivity < 24) {
-                 insight = {
-                    title: "Harika Gidiyorsun!",
-                    description: `Dün yolculuğunu tamamladın. Serini devam ettirmek için bugünkü görevlerine göz at.`,
-                    link: "/dashboard/journey",
-                    linkText: "Yolculuğa Devam Et"
-                };
-            } else {
-                 insight = {
-                    title: "Yolculuğun Seni Bekliyor",
-                    description: `${formatDistanceToNow(lastActivity, { locale: tr, addSuffix: true })} giriş yaptın. Küçük bir adımla büyük bir fark yaratabilirsin.`,
-                    link: "/dashboard/journey",
-                    linkText: "Yolculuğa Başla"
-                };
-            }
-        } else {
-            insight = {
-                title: "İlk Adımı Atmaya Hazır mısın?",
-                description: "Günlük yolculuk görevlerin zihinsel esenliğini desteklemek için tasarlandı. Hadi başlayalım!",
-                link: "/dashboard/journey",
-                linkText: "Yolculuğa Başla"
-            };
-        }
-        setDailyInsight(insight);
-    }
 
     return () => unsubscribe();
     
