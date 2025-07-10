@@ -11,10 +11,10 @@ export default function Home() {
       </div>
       <div className="container mx-auto px-4 text-center">
         <h1 className="text-4xl md:text-6xl font-headline font-bold text-foreground mb-4">
-          Psikotakip'e Hoş Geldiniz
+          Zihinsel Sağlık Yolculuğunda Rehberin
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-          Zihinsel sağlık yolculuğunuzda size yardımcı olmak için buradayız. Başlamak için giriş yapın veya yeni bir hesap oluşturun.
+          Psikotakip, terapi sürecini destekleyen, kişisel gelişimini anlamlı kılan ve sana özel araçlar sunan dijital bir yol arkadaşıdır.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button asChild size="lg" className="font-bold">
@@ -28,10 +28,10 @@ export default function Home() {
             </Link>
           </Button>
         </div>
-         <div className="mt-6">
+         <div className="mt-8">
             <Button asChild variant="link" className="text-muted-foreground">
                 <Link href="/demo">
-                    Merak mı ediyorsunuz? Deneme turu yapın <ArrowRight className="ml-2 h-4 w-4" />
+                    Uygulamayı keşfetmek için deneme turuna katılın <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
             </Button>
         </div>

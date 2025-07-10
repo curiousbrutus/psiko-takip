@@ -1,4 +1,3 @@
-
 # Psikotakip Pazarlama Metinleri ve Stratejisi
 
 Bu döküman, Psikotakip uygulamasının farklı hedef kitlelere yönelik pazarlama ve iletişim materyallerini içermektedir.

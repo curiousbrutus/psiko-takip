@@ -1,4 +1,3 @@
-
 # Psikotakip - Teknik Mimarisi ve Proje Dökümanı
 
 Bu döküman, Psikotakip uygulamasının teknik mimarisini, temel özelliklerini ve veri akışını detaylandırmak amacıyla hazırlanmıştır.
