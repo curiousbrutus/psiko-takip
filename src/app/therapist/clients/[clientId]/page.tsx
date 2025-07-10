@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase/config';
 import { doc, getDoc, collection, query, where, orderBy, getDocs, DocumentData, Timestamp } from 'firebase/firestore';
@@ -15,13 +15,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Mail, Calendar, FileText, CheckSquare, BarChart2, Lightbulb, ShieldCheck, ClipboardList, BrainCircuit, Users, HeartPulse, Wind, MessageSquare, Star, TrendingUp, AlertTriangle, MessageCircle, Edit } from 'lucide-react';
+import { ArrowLeft, Mail, Calendar, FileText, CheckSquare, BarChart2, Lightbulb, ShieldCheck, ClipboardList, BrainCircuit, Users, HeartPulse, Wind, MessageSquare, Star, TrendingUp, AlertTriangle, MessageCircle, Edit, PlusCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { assignTaskAction } from './task-actions';
-import { PlusCircle, Loader2 } from 'lucide-react';
 
 
 interface SharedJournal extends DocumentData {
@@ -150,12 +149,12 @@ export default function ClientProfilePage() {
     }, [user, clientId, therapistData, router, toast, fetchAllData]);
 
     const handleAssignTask = async () => {
-        if (!clientData) return;
+        if (!clientData || !user) return;
         setIsAssigningTask(true);
         const result = await assignTaskAction({
             clientId: clientId,
             clientName: clientData.displayName,
-            therapistId: user!.uid,
+            therapistId: user.uid,
         });
         toast({
             title: result.success ? "Başarılı" : "Hata",
@@ -166,7 +165,7 @@ export default function ClientProfilePage() {
             await fetchAllData(); // Refresh data after assigning
         }
         setIsAssigningTask(false);
-    }
+    };
     
     const renderJournalSkeleton = () => (
         <div className="space-y-4">
@@ -461,7 +460,7 @@ export default function ClientProfilePage() {
                             <CardDescription>
                                 Danışanın tamamladığı testlerin sonuçlarını ve yapay zeka analizlerini görüntüleyin.
                             </CardDescription>
-                        </CardHeader>
+                        </Header>
                         <CardContent>
                            {loadingResults ? (
                                 renderResultsSkeleton()
@@ -507,5 +506,3 @@ export default function ClientProfilePage() {
         </div>
     );
 }
-
-    
