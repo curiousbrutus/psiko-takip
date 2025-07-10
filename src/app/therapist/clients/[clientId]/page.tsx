@@ -51,8 +51,27 @@ export default function ClientProfilePage() {
     const [loadingAssessments, setLoadingAssessments] = useState(true);
     const [isAssigningTask, setIsAssigningTask] = useState(false);
     const [isAssigningAssessment, setIsAssigningAssessment] = useState(false);
+    
+    const isDemoMode = clientId.startsWith('demo-client');
 
     const fetchAllData = useCallback(async () => {
+        if (isDemoMode) {
+             setClientData({
+                displayName: 'Ali Veli',
+                email: 'danisan@ornek.com',
+             });
+             setSharedJournals([]);
+             setTestResults([]);
+             setAssignedTasks([]);
+             setAssessmentResults([]);
+             setLoadingClient(false);
+             setLoadingJournals(false);
+             setLoadingResults(false);
+             setLoadingTasks(false);
+             setLoadingAssessments(false);
+             return;
+        }
+
         if (!user || !clientId) return;
 
         if (therapistData && therapistData.danisanlarim && !therapistData.danisanlarim.includes(clientId)) {
@@ -103,15 +122,23 @@ export default function ClientProfilePage() {
             setLoadingTasks(false);
             setLoadingAssessments(false);
         }
-    }, [user, clientId, therapistData, router, toast]);
+    }, [user, clientId, therapistData, router, toast, isDemoMode]);
 
     useEffect(() => {
+        if (isDemoMode) {
+            fetchAllData();
+            return;
+        }
         if (user && therapistData) {
             fetchAllData();
         }
-    }, [user, therapistData, fetchAllData]);
+    }, [user, therapistData, fetchAllData, isDemoMode]);
     
     const handleAssignTask = async () => {
+        if (isDemoMode) {
+             toast({ title: "Demo Modu", description: "Bu özellik için gerçek bir kullanıcı ile giriş yapmalısınız." });
+             return;
+        }
         if (!clientData || !user) return;
         setIsAssigningTask(true);
         const result = await assignTaskAction({
@@ -131,6 +158,10 @@ export default function ClientProfilePage() {
     };
 
     const handleAssignAssessment = async (testName: 'GAD-7' | 'PHQ-9' | 'TherapeuticAlliance') => {
+        if (isDemoMode) {
+             toast({ title: "Demo Modu", description: "Bu özellik için gerçek bir kullanıcı ile giriş yapmalısınız." });
+             return;
+        }
         if (!clientData || !user) return;
         setIsAssigningAssessment(true);
         const result = await assignAssessmentAction({

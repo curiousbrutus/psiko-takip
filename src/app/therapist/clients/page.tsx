@@ -63,16 +63,26 @@ export default function ClientsPage() {
     const fetchClients = useCallback(async () => {
         if (authLoading) return;
         
-        const therapistId = user ? user.uid : 'demo-therapist';
-        if (!therapistId) {
+        // If not logged in, assume demo mode
+        if (!user) {
+            setClients([
+                { 
+                    id: 'demo-client-1',
+                    displayName: 'Ali Veli',
+                    email: 'danisan@ornek.com',
+                    lastActivity: '2 saat önce',
+                    status: 'Aktif',
+                    photoURL: ''
+                }
+            ]);
             setLoading(false);
             return;
         }
 
+        const therapistId = user.uid;
+        
         setLoading(true);
         try {
-            // For demo user, we can't query Firestore, so maybe show mock data or empty state.
-            // For now, we assume a real user is logged in.
             const clientsQuery = query(collection(db, 'users'), where('connectedTherapist', '==', therapistId));
             const clientsSnapshot = await getDocs(clientsQuery);
             const clientDocs = clientsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -138,6 +148,10 @@ export default function ClientsPage() {
     }
     
     async function handleStatusChange(clientId: string, status: 'Aktif' | 'Pasif') {
+        if (!user) {
+            toast({ title: 'Demo Modu', description: 'Bu özellik için giriş yapmalısınız.', variant: 'destructive' });
+            return;
+        }
         const result = await updateClientStatusAction({ clientId, status });
         toast({
             title: result.success ? "Başarılı" : "Hata",
@@ -318,7 +332,7 @@ export default function ClientsPage() {
                                             </Button>
                                              <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon" disabled={!user}>
+                                                    <Button variant="ghost" size="icon">
                                                         <MoreHorizontal className="h-4 w-4" />
                                                     </Button>
                                                 </DropdownMenuTrigger>
