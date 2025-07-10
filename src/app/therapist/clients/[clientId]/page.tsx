@@ -15,12 +15,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Mail, Calendar, FileText, CheckSquare, BarChart2, Lightbulb, ShieldCheck, ClipboardList, BrainCircuit, Users, HeartPulse, Wind, MessageSquare, Star, TrendingUp, AlertTriangle, MessageCircle, Edit, Loader2, PlusCircle } from 'lucide-react';
+import { ArrowLeft, Mail, Calendar, FileText, CheckSquare, BarChart2, Lightbulb, ShieldCheck, ClipboardList, BrainCircuit, Users, HeartPulse, Wind, MessageSquare, Star, TrendingUp, AlertTriangle, MessageCircle, Edit, Loader2, PlusCircle, MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { assignTaskAction } from './task-actions';
+import { updateClientStatusAction } from '../actions';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 
 interface SharedJournal extends DocumentData {

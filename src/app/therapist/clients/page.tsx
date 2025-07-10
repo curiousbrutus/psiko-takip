@@ -94,7 +94,6 @@ export default function ClientsPage() {
             return;
         }
         
-        // This is a client-side fetch, in a real app, ensure you have proper security rules.
         setLoading(true);
         try {
             const clientsQuery = query(collection(db, 'users'), where('connectedTherapist', '==', user.uid));
