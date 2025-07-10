@@ -9,7 +9,7 @@ import type { DocumentData, Timestamp } from 'firebase/firestore';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowRight, Flame, Trophy, Award, BarChart3, Lightbulb, Heart, Leaf } from 'lucide-react';
+import { ArrowRight, Flame, Trophy, Award, Lightbulb, Heart, Leaf, BarChart2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { Progress } from '@/components/ui/progress';
@@ -90,13 +90,10 @@ export default function DashboardPage() {
             const data = doc.data();
             setGamificationData(data);
             generateDailyInsight(data.lastActivityDate);
-            // This check now specifically looks for the 'companion' field inside the data.
-            // If the document exists but the companion hasn't been chosen, it will redirect.
             if (!data.companion) {
               router.push('/dashboard/companion/onboarding');
             }
         } else {
-            // This case handles brand new users or errors. Sending them to onboarding is correct.
             router.push('/dashboard/companion/onboarding');
         }
     });
