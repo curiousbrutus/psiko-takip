@@ -14,6 +14,7 @@ import { CheckCircle2, Sunrise, Sun, Sunset, Smile, Leaf, Meh, HeartPulse, Frown
 import Link from 'next/link';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { getXpToNextLevel } from '@/lib/gamification';
 
 const moodOptions = [
   { name: 'Mutlu', icon: Smile },
@@ -23,7 +24,6 @@ const moodOptions = [
   { name: 'Endişeli', icon: HeartPulse },
 ];
 
-const getXpToNextLevel = (level: number) => 100 + (level - 1) * 50;
 
 export default function DailyJourneyPage() {
   const { user, userData } = useAuth();

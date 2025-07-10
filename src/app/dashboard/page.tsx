@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase/config';
 import { doc, onSnapshot } from 'firebase/firestore';
@@ -14,6 +14,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { Progress } from '@/components/ui/progress';
 import { useRouter } from 'next/navigation';
+import { getXpToNextLevel, getCompanionVisual } from '@/lib/gamification';
 
 interface DailyInsight {
   title: string;
@@ -22,27 +23,15 @@ interface DailyInsight {
   linkText: string;
 }
 
-const getXpToNextLevel = (level: number) => 100 + (level - 1) * 50;
-
-const getCompanionVisual = (companion: { type: 'plant' | 'animal' }, level: number): string => {
-  if (companion.type === 'plant') {
-    if (level >= 10) return '🌸'; // Flowering Plant
-    if (level >= 5) return '🌳'; // Tree
-    return '🌱'; // Sprout
-  }
-  if (companion.type === 'animal') {
-    if (level >= 10) return '🦊'; // Fox
-    if (level >= 5) return '🐾'; // Hatched
-    return '🥚'; // Egg
-  }
-  return '❓';
-}
 
 export default function DashboardPage() {
   const { user, userData } = useAuth();
   const [gamificationData, setGamificationData] = useState<DocumentData | null>(null);
   const [dailyInsight, setDailyInsight] = useState<DailyInsight | null>(null);
+  const [showLevelUp, setShowLevelUp] = useState(false);
   const router = useRouter();
+  
+  const prevLevel = useRef<number | null>(null);
 
   const generateDailyInsight = (lastActivityDate: Timestamp | null) => {
     let insight: DailyInsight;
@@ -88,19 +77,27 @@ export default function DashboardPage() {
     const unsubscribe = onSnapshot(gamificationRef, (doc) => {
         if (doc.exists()) {
             const data = doc.data();
+            
+            if (prevLevel.current !== null && data.level > prevLevel.current) {
+                setShowLevelUp(true);
+                setTimeout(() => setShowLevelUp(false), 3000); // Hide after 3 seconds
+            }
+            prevLevel.current = data.level;
+
             setGamificationData(data);
             generateDailyInsight(data.lastActivityDate);
             if (!data.companion) {
               router.push('/dashboard/companion/onboarding');
             }
-        } else {
-            router.push('/dashboard/companion/onboarding');
+        } else if(userData) {
+           // If gamification doc doesn't exist but user is logged in, they need onboarding.
+           router.push('/dashboard/companion/onboarding');
         }
     });
 
     return () => unsubscribe();
     
-  }, [user, router]);
+  }, [user, userData, router]);
 
   const CompanionCard = () => {
     if (!gamificationData || !gamificationData.companion) {
@@ -124,7 +121,15 @@ export default function DashboardPage() {
     const progressPercentage = (xp / xpToNextLevel) * 100;
 
     return (
-       <Card className="bg-muted/30">
+       <Card className="bg-muted/30 relative overflow-hidden">
+        {showLevelUp && (
+          <div className="absolute inset-0 bg-primary/20 flex items-center justify-center z-10 animate-level-up-fade">
+              <div className="text-center text-white">
+                  <p className="text-2xl font-bold">Seviye Atladın!</p>
+                  <p>Yeni Seviye: {level}</p>
+              </div>
+          </div>
+        )}
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             {companion.type === 'plant' ? <Leaf className="text-primary"/> : <Heart className="text-primary"/>}

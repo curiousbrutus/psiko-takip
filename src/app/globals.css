@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -78,6 +79,12 @@
     100% { transform: translateY(-100vh) scale(1.2); opacity: 0; }
 }
 
+@keyframes level-up-fade {
+    0% { opacity: 1; transform: scale(1); }
+    80% { opacity: 1; transform: scale(1.05); }
+    100% { opacity: 0; transform: scale(1.1); }
+}
+
 .animate-fade-in {
     animation: fade-in 0.5s ease-in-out;
 }
@@ -94,6 +101,9 @@
 }
 .animate-float-away {
     animation: float-away 4s ease-in forwards;
+}
+.animate-level-up-fade {
+    animation: level-up-fade 3s ease-in-out forwards;
 }
 
 .has-appointment {
