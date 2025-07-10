@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Mail, Calendar, FileText, CheckSquare, BarChart2, Lightbulb, ShieldCheck, ClipboardList } from 'lucide-react';
+import { ArrowLeft, Mail, Calendar, FileText, CheckSquare, BarChart2, Lightbulb, ShieldCheck, ClipboardList, BrainCircuit } from 'lucide-react';
 import Link from 'next/link';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -229,7 +229,10 @@ export default function ClientProfilePage() {
             </div>
 
             <Tabs defaultValue="journals" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="insights">
+                        <BrainCircuit className="mr-2 h-4 w-4" /> İçgörüler
+                    </TabsTrigger>
                     <TabsTrigger value="assignments">
                         <CheckSquare className="mr-2 h-4 w-4" /> Görevler & Atamalar
                     </TabsTrigger>
@@ -240,6 +243,21 @@ export default function ClientProfilePage() {
                         <BarChart2 className="mr-2 h-4 w-4" /> Test Sonuçları
                     </TabsTrigger>
                 </TabsList>
+                
+                <TabsContent value="insights" className="mt-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>İçgörü Paneli</CardTitle>
+                            <CardDescription>
+                                Danışanınızın verilerinden elde edilen anlamlı özetler ve korelasyonlar.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="text-center text-muted-foreground py-16">
+                            <p className="font-semibold">Bu bölüm geliştirme aşamasındadır.</p>
+                            <p className="text-sm mt-2">Yakında burada, danışanınızın ruh hali ve aktiviteleri arasındaki bağlantıları gösteren grafikler ve günlük kelime bulutları gibi akıllı analizleri görebileceksiniz.</p>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
 
                 <TabsContent value="assignments" className="mt-6">
                     <Card>
@@ -345,3 +363,5 @@ export default function ClientProfilePage() {
         </div>
     );
 }
+
+    
