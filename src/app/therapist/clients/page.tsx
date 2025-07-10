@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase/config';
 import { collection, query, where, getDocs, doc, getDoc, Timestamp, DocumentData } from 'firebase/firestore';
@@ -23,9 +23,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { ArrowRight, PlusCircle, Users, Loader2 } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { ArrowRight, PlusCircle, Users, Loader2, MoreHorizontal } from 'lucide-react';
 
-import { addClientAction } from './actions';
+import { addClientAction, updateClientStatusAction } from './actions';
 
 interface Client extends DocumentData {
     id: string;
@@ -85,86 +86,64 @@ export default function ClientsPage() {
             phone: '',
         }
     });
+    
+    const fetchClients = useCallback(async () => {
+        if (!user) {
+            setLoading(false);
+            setClients(mockClients);
+            return;
+        }
+        
+        // This is a client-side fetch, in a real app, ensure you have proper security rules.
+        setLoading(true);
+        try {
+            const clientsQuery = query(collection(db, 'users'), where('connectedTherapist', '==', user.uid));
+            const clientsSnapshot = await getDocs(clientsQuery);
+            const clientDocs = clientsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    useEffect(() => {
-        const fetchClients = async () => {
-            if (!user || !userData || !userData.danisanlarim || userData.danisanlarim.length === 0) {
-                setLoading(false);
-                setClients([]);
-                return;
-            }
-
-            try {
-                const clientsQuery = query(collection(db, 'users'), where('__name__', 'in', userData.danisanlarim));
-                const clientsSnapshot = await getDocs(clientsQuery);
-                const clientDocs = clientsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-                const clientsWithDetails = await Promise.all(
-                    clientDocs.map(async (clientDoc) => {
-                        if (clientDoc.status === 'invited') {
-                            return {
-                                id: clientDoc.id,
-                                displayName: clientDoc.displayName,
-                                email: clientDoc.email,
-                                photoURL: clientDoc.photoURL,
-                                lastActivity: 'Davet bekleniyor',
-                                status: 'Davet Edildi'
-                            };
-                        }
-
+            const clientsWithDetails = await Promise.all(
+                clientDocs.map(async (clientDoc) => {
+                    let lastActivity = 'Aktivite yok';
+                    if (clientDoc.status !== 'Davet Edildi') {
                         const gamificationRef = doc(db, 'gamification', clientDoc.id);
                         const gamificationSnap = await getDoc(gamificationRef);
-                        
-                        let lastActivity = 'Aktivite yok';
-                        let status: 'Aktif' | 'Pasif' = 'Pasif';
-
                         if (gamificationSnap.exists()) {
                             const gamificationData = gamificationSnap.data();
                             const lastActivityDate = gamificationData.lastActivityDate as Timestamp;
                             if (lastActivityDate) {
                                 lastActivity = formatDistanceToNow(lastActivityDate.toDate(), { addSuffix: true, locale: tr });
-                                
-                                const oneWeekAgo = new Date();
-                                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-                                if(lastActivityDate.toDate() > oneWeekAgo) {
-                                    status = 'Aktif';
-                                }
                             }
                         }
-                        
-                        return {
-                            id: clientDoc.id,
-                            displayName: clientDoc.displayName,
-                            email: clientDoc.email,
-                            photoURL: clientDoc.photoURL,
-                            lastActivity,
-                            status
-                        };
-                    })
-                );
+                    } else {
+                        lastActivity = 'Davet bekleniyor';
+                    }
+                    
+                    return {
+                        id: clientDoc.id,
+                        displayName: clientDoc.displayName,
+                        email: clientDoc.email,
+                        photoURL: clientDoc.photoURL,
+                        lastActivity,
+                        status: clientDoc.status || 'Pasif'
+                    };
+                })
+            );
 
-                setClients(clientsWithDetails);
+            setClients(clientsWithDetails);
 
-            } catch (error) {
-                console.error("Error fetching clients:", error);
-                toast({ title: "Hata", description: "Danışanlar getirilemedi.", variant: "destructive" });
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (authLoading) {
-            return;
-        }
-
-        if (user) {
-            fetchClients();
-        } else {
-            // Demo modu
-            setClients(mockClients);
+        } catch (error) {
+            console.error("Error fetching clients:", error);
+            toast({ title: "Hata", description: "Danışanlar getirilemedi.", variant: "destructive" });
+        } finally {
             setLoading(false);
         }
-    }, [user, userData, authLoading, toast]);
+    }, [user, toast]);
+
+    useEffect(() => {
+        if (!authLoading) {
+            fetchClients();
+        }
+    }, [authLoading, fetchClients]);
 
     async function onSubmit(values: AddClientFormValues) {
         if (!user) {
@@ -183,74 +162,21 @@ export default function ClientsPage() {
         if (result.success) {
             setIsDialogOpen(false);
             form.reset();
-            setLoading(true); // show skeleton while refetching
-            
-            // Refetch clients by re-running the effect logic for a real user
-            const fetchClients = async () => {
-                 if (!user || !userData || !userData.danisanlarim) {
-                    setClients([]);
-                    setLoading(false);
-                    return;
-                }
-                 const danisanlarimWithNew = [...(userData.danisanlarim || [])];
-                 // We don't have the new client's ID here, so we have to refetch all.
-                 // In a real app, the action might return the new client ID.
-
-                try {
-                    const clientsQuery = query(collection(db, 'users'), where('connectedTherapist', '==', user.uid));
-                    const clientsSnapshot = await getDocs(clientsQuery);
-                    const clientDocs = clientsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-                    const clientsWithDetails = await Promise.all(
-                        clientDocs.map(async (clientDoc) => {
-                             if (clientDoc.status === 'invited') {
-                                return {
-                                    id: clientDoc.id,
-                                    displayName: clientDoc.displayName,
-                                    email: clientDoc.email,
-                                    photoURL: clientDoc.photoURL,
-                                    lastActivity: 'Davet bekleniyor',
-                                    status: 'Davet Edildi'
-                                };
-                            }
-                            const gamificationRef = doc(db, 'gamification', clientDoc.id);
-                            const gamificationSnap = await getDoc(gamificationRef);
-                            let lastActivity = 'Aktivite yok';
-                            let status: 'Aktif' | 'Pasif' = 'Pasif';
-
-                            if (gamificationSnap.exists()) {
-                                const gamificationData = gamificationSnap.data();
-                                if (gamificationData.lastActivityDate) {
-                                    const lastActivityDate = (gamificationData.lastActivityDate as Timestamp).toDate();
-                                    lastActivity = formatDistanceToNow(lastActivityDate, { addSuffix: true, locale: tr });
-                                    const oneWeekAgo = new Date();
-                                    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-                                    if(lastActivityDate > oneWeekAgo) {
-                                        status = 'Aktif';
-                                    }
-                                }
-                            }
-                             return {
-                                id: clientDoc.id,
-                                displayName: clientDoc.displayName,
-                                email: clientDoc.email,
-                                photoURL: clientDoc.photoURL,
-                                lastActivity,
-                                status
-                            };
-                        })
-                    );
-                    setClients(clientsWithDetails);
-                } catch (e) {
-                     toast({ title: "Hata", description: "Danışan listesi güncellenemedi.", variant: "destructive" });
-                } finally {
-                    setLoading(false);
-                }
-            };
-            await fetchClients();
+            fetchClients();
         }
     }
-
+    
+    async function handleStatusChange(clientId: string, status: 'Aktif' | 'Pasif') {
+        const result = await updateClientStatusAction({ clientId, status });
+        toast({
+            title: result.success ? "Başarılı" : "Hata",
+            description: result.message,
+            variant: result.success ? "default" : "destructive",
+        });
+        if (result.success) {
+            fetchClients();
+        }
+    }
 
     const renderSkeleton = () => (
         [...Array(3)].map((_, i) => (
@@ -413,11 +339,24 @@ export default function ClientsPage() {
                                         <Badge variant={getBadgeVariant(client.status)}>{client.status}</Badge>
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        <Button asChild variant="outline" size="sm" disabled={!user || client.status === 'Davet Edildi'}>
-                                            <Link href={`/therapist/clients/${client.id}`}>
-                                                Profili Görüntüle <ArrowRight className="ml-2 h-4 w-4" />
-                                            </Link>
-                                        </Button>
+                                        <div className="flex items-center justify-end gap-2">
+                                            <Button asChild variant="outline" size="sm" disabled={client.status === 'Davet Edildi'}>
+                                                <Link href={`/therapist/clients/${client.id}`}>
+                                                    Profili Görüntüle <ArrowRight className="ml-2 h-4 w-4" />
+                                                </Link>
+                                            </Button>
+                                             <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon">
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem onClick={() => handleStatusChange(client.id, 'Aktif')}>Aktif Yap</DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleStatusChange(client.id, 'Pasif')}>Pasif Yap</DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -428,3 +367,5 @@ export default function ClientsPage() {
         </div>
     );
 }
+
+    

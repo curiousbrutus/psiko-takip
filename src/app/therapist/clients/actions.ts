@@ -1,7 +1,8 @@
+
 'use server';
 
 import { db } from '@/lib/firebase/config';
-import { collection, doc, writeBatch, serverTimestamp, arrayUnion, query, where, getDocs } from 'firebase/firestore';
+import { collection, doc, writeBatch, serverTimestamp, arrayUnion, query, where, getDocs, updateDoc } from 'firebase/firestore';
 import { z } from 'zod';
 
 const AddClientSchema = z.object({
@@ -22,7 +23,6 @@ export async function addClientAction(input: AddClientInput): Promise<{ success:
   const { fullName, email, phone, therapistId } = validation.data;
 
   try {
-    // Check if a user with this email already exists
     const existingUserQuery = query(collection(db, 'users'), where('email', '==', email));
     const existingUserSnapshot = await getDocs(existingUserQuery);
     if (!existingUserSnapshot.empty) {
@@ -31,38 +31,29 @@ export async function addClientAction(input: AddClientInput): Promise<{ success:
     
     const batch = writeBatch(db);
     
-    // 1. Create a new document reference for the client to get a UID
     const newClientRef = doc(collection(db, 'users'));
     
-    // 2. Define the new client's data
     const newClientData = {
         uid: newClientRef.id,
         displayName: fullName,
         email,
         ...(phone && { phone }),
         role: 'danisan',
-        status: 'invited', // New status for pending registrations
+        status: 'Davet Edildi', 
         createdAt: serverTimestamp(),
         connectedTherapist: therapistId,
-        organizationId: null, // Assuming individual therapist for now
+        organizationId: null, 
         subscription: { status: 'free', expires: null },
     };
 
-    // 3. Add the new client document to the batch
     batch.set(newClientRef, newClientData);
 
-    // 4. Update the therapist's document to include the new client
     const therapistRef = doc(db, 'users', therapistId);
     batch.update(therapistRef, {
         danisanlarim: arrayUnion(newClientRef.id)
     });
 
-    // 5. Commit the batch
     await batch.commit();
-
-    // In a real application, you would now trigger an email to the user
-    // with a link to complete their registration and set a password.
-    // e.g., using a Cloud Function and an email service like SendGrid.
 
     return { success: true, message: `${fullName} başarıyla davet edildi. Kaydı tamamlamaları için bilgilendirme yapabilirsiniz.` };
 
@@ -71,3 +62,28 @@ export async function addClientAction(input: AddClientInput): Promise<{ success:
     return { success: false, message: 'Danışan eklenirken bir hata oluştu. Lütfen tekrar deneyin.' };
   }
 }
+
+const UpdateClientStatusSchema = z.object({
+  clientId: z.string().min(1),
+  status: z.enum(['Aktif', 'Pasif']),
+});
+
+export async function updateClientStatusAction(input: z.infer<typeof UpdateClientStatusSchema>): Promise<{ success: boolean; message: string }> {
+    const validation = UpdateClientStatusSchema.safeParse(input);
+    if (!validation.success) {
+        return { success: false, message: "Geçersiz veri." };
+    }
+    
+    const { clientId, status } = validation.data;
+    
+    try {
+        const clientRef = doc(db, 'users', clientId);
+        await updateDoc(clientRef, { status: status });
+        return { success: true, message: "Danışan durumu güncellendi." };
+    } catch (error) {
+        console.error('Error updating client status:', error);
+        return { success: false, message: 'Durum güncellenirken bir hata oluştu.' };
+    }
+}
+
+    

@@ -15,11 +15,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Mail, Calendar, FileText, CheckSquare, BarChart2, Lightbulb, ShieldCheck, ClipboardList, BrainCircuit, Users, HeartPulse, Wind, MessageSquare, Star, TrendingUp, AlertTriangle, MessageCircle, Edit, PlusCircle } from 'lucide-react';
+import { ArrowLeft, Mail, Calendar, FileText, CheckSquare, BarChart2, Lightbulb, ShieldCheck, ClipboardList, BrainCircuit, Users, HeartPulse, Wind, MessageSquare, Star, TrendingUp, AlertTriangle, MessageCircle, Edit } from 'lucide-react';
 import Link from 'next/link';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { assignTaskAction } from './task-actions';
+import { PlusCircle, Loader2 } from 'lucide-react';
 
 
 interface SharedJournal extends DocumentData {
@@ -29,7 +31,6 @@ interface SharedJournal extends DocumentData {
     createdAt: Timestamp;
 }
 
-// Mock data for demo mode
 const mockClientData = {
     displayName: 'Mehmet Öztürk',
     email: 'mehmet.ozturk@example.com',
@@ -70,86 +71,103 @@ export default function ClientProfilePage() {
     const [clientData, setClientData] = useState<DocumentData | null>(null);
     const [sharedJournals, setSharedJournals] = useState<SharedJournal[]>([]);
     const [testResults, setTestResults] = useState<DocumentData[]>([]);
+    const [assignedTasks, setAssignedTasks] = useState<DocumentData[]>([]);
     
     const [loadingClient, setLoadingClient] = useState(true);
     const [loadingJournals, setLoadingJournals] = useState(true);
     const [loadingResults, setLoadingResults] = useState(true);
+    const [loadingTasks, setLoadingTasks] = useState(true);
+    const [isAssigningTask, setIsAssigningTask] = useState(false);
 
-    useEffect(() => {
-        const fetchAllData = async () => {
-            if (!user || !clientId) return;
+    const fetchAllData = useCallback(async () => {
+        if (!user || !clientId) return;
 
-            if (therapistData && (!therapistData.danisanlarim || !therapistData.danisanlarim.includes(clientId))) {
-                toast({ title: "Yetkisiz Erişim", description: "Bu danışanın profilini görüntüleme yetkiniz yok.", variant: "destructive" });
-                router.push('/therapist/dashboard');
+        // Simplified check, real one should be done via security rules
+        if (therapistData && therapistData.danisanlarim && !therapistData.danisanlarim.includes(clientId)) {
+            toast({ title: "Yetkisiz Erişim", description: "Bu danışanın profilini görüntüleme yetkiniz yok.", variant: "destructive" });
+            router.push('/therapist/dashboard');
+            return;
+        }
+
+        setLoadingClient(true);
+        setLoadingJournals(true);
+        setLoadingResults(true);
+        setLoadingTasks(true);
+
+        try {
+            // Fetch client data
+            const clientDocRef = doc(db, 'users', clientId);
+            const clientDocSnap = await getDoc(clientDocRef);
+            if (clientDocSnap.exists()) {
+                setClientData(clientDocSnap.data());
+            } else {
+                toast({ title: "Hata", description: "Danışan bulunamadı.", variant: "destructive" });
+                router.push('/therapist/clients');
                 return;
             }
 
-            try {
-                // Fetch client data
-                setLoadingClient(true);
-                const clientDocRef = doc(db, 'users', clientId);
-                const clientDocSnap = await getDoc(clientDocRef);
+            // Fetch shared journals
+            const journalsQuery = query(collection(db, 'journalEntries'), where('userId', '==', clientId), where('isShared', '==', true), orderBy('createdAt', 'desc'));
+            const journalsSnapshot = await getDocs(journalsQuery);
+            setSharedJournals(journalsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SharedJournal)));
 
-                if (clientDocSnap.exists()) {
-                    setClientData(clientDocSnap.data());
-                } else {
-                    toast({ title: "Hata", description: "Danışan bulunamadı.", variant: "destructive" });
-                    router.push('/therapist/clients');
-                    return; 
-                }
-                setLoadingClient(false);
+            // Fetch test results
+            const resultsQuery = query(collection(db, 'testSubmissions'), where('userId', '==', clientId), orderBy('createdAt', 'desc'));
+            const resultsSnapshot = await getDocs(resultsQuery);
+            setTestResults(resultsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+            
+            // Fetch assigned tasks
+            const tasksQuery = query(collection(db, 'collaborativeTasks'), where('clientId', '==', clientId), orderBy('assignedAt', 'desc'));
+            const tasksSnapshot = await getDocs(tasksQuery);
+            setAssignedTasks(tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 
-                // Fetch shared journals
-                setLoadingJournals(true);
-                const journalsQuery = query(
-                    collection(db, 'journalEntries'),
-                    where('userId', '==', clientId),
-                    where('isShared', '==', true),
-                    orderBy('createdAt', 'desc')
-                );
-                const journalsSnapshot = await getDocs(journalsQuery);
-                const journals = journalsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SharedJournal));
-                setSharedJournals(journals);
-                setLoadingJournals(false);
+        } catch (error) {
+            console.error("Error fetching client data:", error);
+            toast({ title: "Hata", description: "Veriler alınırken bir hata oluştu.", variant: "destructive" });
+        } finally {
+            setLoadingClient(false);
+            setLoadingJournals(false);
+            setLoadingResults(false);
+            setLoadingTasks(false);
+        }
+    }, [user, clientId, therapistData, router, toast]);
 
-                // Fetch test results
-                setLoadingResults(true);
-                const resultsQuery = query(
-                    collection(db, 'testSubmissions'),
-                    where('userId', '==', clientId),
-                    orderBy('createdAt', 'desc')
-                );
-                const resultsSnapshot = await getDocs(resultsQuery);
-                const results = resultsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                setTestResults(results);
-                setLoadingResults(false);
-
-            } catch (error) {
-                console.error("Error fetching client data:", error);
-                toast({ title: "Hata", description: "Veriler alınırken bir hata oluştu.", variant: "destructive" });
-                 setLoadingClient(false);
-                 setLoadingJournals(false);
-                 setLoadingResults(false);
-            }
-        };
-
+    useEffect(() => {
         if (user && therapistData) {
             fetchAllData();
         } else if (!user && clientId === 'client2') {
-            // Demo mode for Mehmet Öztürk
             setClientData(mockClientData);
             setSharedJournals(mockSharedJournals);
             setTestResults(mockTestResults);
             setLoadingClient(false);
             setLoadingJournals(false);
             setLoadingResults(false);
+            setLoadingTasks(false);
         } else if (!user) {
             toast({ title: "Giriş Gerekli", description: "Danışan profilini görmek için lütfen giriş yapın.", variant: "destructive" });
             router.push('/login');
         }
-    }, [user, clientId, therapistData, router, toast]);
+    }, [user, clientId, therapistData, router, toast, fetchAllData]);
 
+    const handleAssignTask = async () => {
+        if (!clientData) return;
+        setIsAssigningTask(true);
+        const result = await assignTaskAction({
+            clientId: clientId,
+            clientName: clientData.displayName,
+            therapistId: user!.uid,
+        });
+        toast({
+            title: result.success ? "Başarılı" : "Hata",
+            description: result.message,
+            variant: result.success ? "default" : "destructive",
+        });
+        if (result.success) {
+            await fetchAllData(); // Refresh data after assigning
+        }
+        setIsAssigningTask(false);
+    }
+    
     const renderJournalSkeleton = () => (
         <div className="space-y-4">
             {[...Array(2)].map((_, i) => (
@@ -171,9 +189,7 @@ export default function ClientProfilePage() {
 
     const renderResultsSkeleton = () => (
          <div className="space-y-4">
-            {[...Array(1)].map((_, i) => (
-                 <Skeleton key={i} className="h-24 w-full rounded-md" />
-            ))}
+            <Skeleton className="h-24 w-full rounded-md" />
         </div>
     );
     
@@ -251,7 +267,7 @@ export default function ClientProfilePage() {
                 <TabsContent value="briefing" className="mt-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="text-2xl">Mehmet Öztürk ile Yaklaşan Seans Brifingi</CardTitle>
+                            <CardTitle className="text-2xl">{clientData.displayName} ile Yaklaşan Seans Brifingi</CardTitle>
                             <CardDescription>
                                 Tarih: {format(new Date(), "d MMMM yyyy, EEEE", { locale: tr })}. Bu özet, seansa hazırlanmanıza yardımcı olmak için oluşturulmuştur.
                             </CardDescription>
@@ -368,17 +384,33 @@ export default function ClientProfilePage() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="flex justify-end">
-                                <Button disabled>
-                                    <PlusCircle className="mr-2 h-4 w-4" /> Yeni Görev Ata (Yakında)
+                                <Button onClick={handleAssignTask} disabled={isAssigningTask}>
+                                    {isAssigningTask ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4" />}
+                                    Yeni Düşünce Kaydı Ata
                                 </Button>
                             </div>
-                            <Card className="border-dashed">
+                            <Card className="border">
                                 <CardHeader>
                                     <CardTitle>Atanmış Görevler</CardTitle>
                                 </CardHeader>
-                                <CardContent className="text-center text-muted-foreground py-10">
-                                    <p>Henüz atanmış interaktif bir görev yok.</p>
-                                    <p className="text-sm">"Yeni Görev Ata" butonu ile Düşünce Kaydı gibi araçlar atayabilirsiniz.</p>
+                                <CardContent>
+                                    {loadingTasks ? <p>Görevler yükleniyor...</p> : 
+                                    assignedTasks.length > 0 ? (
+                                        <div className="space-y-2">
+                                            {assignedTasks.map(task => (
+                                                <Link href={`/dashboard/tasks/${task.id}`} key={task.id}>
+                                                    <div className="p-3 border rounded-md hover:bg-muted/50 transition-colors flex justify-between items-center">
+                                                        <p className="font-semibold">{task.title}</p>
+                                                        <Badge variant={task.status === 'completed' ? 'default' : 'secondary'}>{task.status}</Badge>
+                                                    </div>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center text-muted-foreground py-10">
+                                            <p>Henüz atanmış interaktif bir görev yok.</p>
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
                         </CardContent>
@@ -475,3 +507,5 @@ export default function ClientProfilePage() {
         </div>
     );
 }
+
+    

@@ -4,17 +4,18 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase/config';
-import { collection, addDoc, serverTimestamp, query, where, getDocs, limit, doc, updateDoc, getDoc, increment, runTransaction } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, query, where, getDocs, limit, doc, updateDoc, getDoc, increment, runTransaction, DocumentData } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, Sunrise, Sun, Sunset, Smile, Leaf, Meh, HeartPulse, Frown, Wind, BrainCircuit, Book, Sparkles, Loader2, Share2, Feather, Droplets, Flame, Waves } from 'lucide-react';
+import { CheckCircle2, Sunrise, Sun, Sunset, Smile, Leaf, Meh, HeartPulse, Frown, Wind, BrainCircuit, Book, Sparkles, Loader2, Share2, Feather, Droplets, Flame, Waves, ClipboardCheck } from 'lucide-react';
 import Link from 'next/link';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { getXpToNextLevel } from '@/lib/gamification';
+import { getAssignedTasks } from './task-actions';
 
 const moodOptions = [
   { name: 'Mutlu', icon: Smile },
@@ -34,6 +35,7 @@ export default function DailyJourneyPage() {
   const [eveningMood, setEveningMood] = useState<string | null>(null);
   const [minnettar, setMinnettar] = useState("");
   const [gunluk, setGunluk] = useState("");
+  const [assignedTasks, setAssignedTasks] = useState<DocumentData[]>([]);
   
   const [isMinnettarShared, setIsMinnettarShared] = useState(false);
   const [isGunlukShared, setIsGunlukShared] = useState(false);
@@ -43,7 +45,7 @@ export default function DailyJourneyPage() {
     evening: false,
   });
 
-  const [loading, setLoading] = useState({ morning: false, evening: false });
+  const [loading, setLoading] = useState({ morning: false, evening: false, tasks: true });
 
   // Function to check if a task was completed today
   const checkIfTaskCompletedToday = async (taskName: string) => {
@@ -65,10 +67,16 @@ export default function DailyJourneyPage() {
   useEffect(() => {
     const checkCompletionStatus = async () => {
         if (user) {
+            setLoading(prev => ({...prev, tasks: true }));
             const morningDone = await checkIfTaskCompletedToday("Günün Niyeti");
-            // This is a simplified check. A full implementation would check all evening tasks.
             const eveningDone = await checkIfTaskCompletedToday("Serbest Günlük"); 
             setTasksCompleted({ morning: morningDone, evening: eveningDone });
+            
+            const tasksResult = await getAssignedTasks();
+            if (tasksResult.success && tasksResult.data) {
+                setAssignedTasks(tasksResult.data);
+            }
+            setLoading(prev => ({...prev, tasks: false}));
         }
     };
     checkCompletionStatus();
@@ -198,6 +206,41 @@ export default function DailyJourneyPage() {
         <h1 className="text-3xl font-bold font-headline">Günlük Yolculuk</h1>
         <p className="text-muted-foreground">Her gün küçük bir adım atarak zihinsel sağlığını güçlendir.</p>
       </div>
+
+       {userData?.connectedTherapist && (
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-xl flex items-center gap-3">
+                        <ClipboardCheck className="h-6 w-6 text-primary" /> Terapistinden Gelen Görevler
+                    </CardTitle>
+                    <CardDescription>Terapistinin senin için atadığı interaktif görevleri buradan takip edebilirsin.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {loading.tasks ? (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span>Görevler yükleniyor...</span>
+                        </div>
+                    ) : assignedTasks.length > 0 ? (
+                        <div className="space-y-2">
+                            {assignedTasks.map(task => (
+                                <Link key={task.id} href={`/dashboard/tasks/${task.id}`} className="block">
+                                    <div className="p-3 border rounded-md hover:bg-muted/50 transition-colors flex justify-between items-center">
+                                        <div>
+                                            <p className="font-semibold">{task.title}</p>
+                                            <p className="text-sm text-muted-foreground">Atanma tarihi: {task.assignedAt.toDate().toLocaleDateString('tr-TR')}</p>
+                                        </div>
+                                        <Button variant="ghost" size="sm">Görevi Aç</Button>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="text-sm text-muted-foreground text-center py-4">Henüz atanmış bir görevin yok.</p>
+                    )}
+                </CardContent>
+            </Card>
+        )}
 
       <Accordion type="multiple" defaultValue={["item-1"]} className="w-full space-y-4">
         <AccordionItem value="item-1" className="border-none">
@@ -355,3 +398,5 @@ export default function DailyJourneyPage() {
     </div>
   );
 }
+
+    
