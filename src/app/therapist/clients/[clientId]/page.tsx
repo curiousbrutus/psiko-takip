@@ -81,7 +81,6 @@ export default function ClientProfilePage() {
     const fetchAllData = useCallback(async () => {
         if (!user || !clientId) return;
 
-        // Simplified check, real one should be done via security rules
         if (therapistData && therapistData.danisanlarim && !therapistData.danisanlarim.includes(clientId)) {
             toast({ title: "Yetkisiz Erişim", description: "Bu danışanın profilini görüntüleme yetkiniz yok.", variant: "destructive" });
             router.push('/therapist/dashboard');
@@ -94,7 +93,6 @@ export default function ClientProfilePage() {
         setLoadingTasks(true);
 
         try {
-            // Fetch client data
             const clientDocRef = doc(db, 'users', clientId);
             const clientDocSnap = await getDoc(clientDocRef);
             if (clientDocSnap.exists()) {
@@ -105,17 +103,14 @@ export default function ClientProfilePage() {
                 return;
             }
 
-            // Fetch shared journals
             const journalsQuery = query(collection(db, 'journalEntries'), where('userId', '==', clientId), where('isShared', '==', true), orderBy('createdAt', 'desc'));
             const journalsSnapshot = await getDocs(journalsQuery);
             setSharedJournals(journalsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as SharedJournal)));
 
-            // Fetch test results
             const resultsQuery = query(collection(db, 'testSubmissions'), where('userId', '==', clientId), orderBy('createdAt', 'desc'));
             const resultsSnapshot = await getDocs(resultsQuery);
             setTestResults(resultsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
             
-            // Fetch assigned tasks
             const tasksQuery = query(collection(db, 'collaborativeTasks'), where('clientId', '==', clientId), orderBy('assignedAt', 'desc'));
             const tasksSnapshot = await getDocs(tasksQuery);
             setAssignedTasks(tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
@@ -162,7 +157,7 @@ export default function ClientProfilePage() {
             variant: result.success ? "default" : "destructive",
         });
         if (result.success) {
-            await fetchAllData(); // Refresh data after assigning
+            await fetchAllData(); 
         }
         setIsAssigningTask(false);
     };
@@ -187,7 +182,7 @@ export default function ClientProfilePage() {
     );
 
     const renderResultsSkeleton = () => (
-         <div className="space-y-4">
+        <div className="space-y-4">
             <Skeleton className="h-24 w-full rounded-md" />
         </div>
     );
