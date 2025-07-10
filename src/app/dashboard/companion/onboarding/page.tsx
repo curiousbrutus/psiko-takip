@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase/config';
-import { doc, updateDoc, setDoc } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -28,7 +28,6 @@ export default function CompanionOnboardingPage() {
     const gamificationRef = doc(db, 'gamification', user.uid);
     try {
       // Using updateDoc since the document should already exist from registration
-      // If it might not exist, setDoc with merge:true is safer
       await updateDoc(gamificationRef, {
         companion: {
           type: selected,
