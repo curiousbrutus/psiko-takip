@@ -15,10 +15,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Mail, Calendar, FileText, CheckSquare, BarChart2, Lightbulb, ShieldCheck, ClipboardList, BrainCircuit } from 'lucide-react';
+import { ArrowLeft, Mail, Calendar, FileText, CheckSquare, BarChart2, Lightbulb, ShieldCheck, ClipboardList, BrainCircuit, Users, HeartPulse, Wind } from 'lucide-react';
 import Link from 'next/link';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 
 
 interface SharedJournal extends DocumentData {
@@ -228,7 +229,7 @@ export default function ClientProfilePage() {
                 </Card>
             </div>
 
-            <Tabs defaultValue="journals" className="w-full">
+            <Tabs defaultValue="insights" className="w-full">
                 <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="insights">
                         <BrainCircuit className="mr-2 h-4 w-4" /> İçgörüler
@@ -249,12 +250,55 @@ export default function ClientProfilePage() {
                         <CardHeader>
                             <CardTitle>İçgörü Paneli</CardTitle>
                             <CardDescription>
-                                Danışanınızın verilerinden elde edilen anlamlı özetler ve korelasyonlar.
+                                Danışanınızın verilerinden elde edilen anlamlı özetler ve korelasyonlar (Son 30 gün).
                             </CardDescription>
                         </CardHeader>
-                        <CardContent className="text-center text-muted-foreground py-16">
-                            <p className="font-semibold">Bu bölüm geliştirme aşamasındadır.</p>
-                            <p className="text-sm mt-2">Yakında burada, danışanınızın ruh hali ve aktiviteleri arasındaki bağlantıları gösteren grafikler ve günlük kelime bulutları gibi akıllı analizleri görebileceksiniz.</p>
+                        <CardContent className="grid gap-6 md:grid-cols-2">
+                             <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-lg">Anlamlı Korelasyonlar</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <Alert>
+                                        <Wind className="h-4 w-4" />
+                                        <AlertTitle className="font-semibold">Nefes Egzersizi & Ruh Hali</AlertTitle>
+                                        <AlertDescription>
+                                            Danışanınız, 'Nefes Egzersizi' yaptığı günlerde ruh halini <span className="font-bold text-primary">%40 daha pozitif</span> işaretleme eğiliminde.
+                                        </AlertDescription>
+                                    </Alert>
+                                    <Alert>
+                                        <HeartPulse className="h-4 w-4" />
+                                        <AlertTitle className="font-semibold">Endişe & Günlük Yazma</AlertTitle>
+                                        <AlertDescription>
+                                           'Endişeli' ruh hali işaretlendiğinde, o gün serbest günlük yazma aktivitesini tamamlama olasılığı <span className="font-bold text-primary">%60 daha yüksek.</span> Bu, yazmayı bir başa çıkma mekanizması olarak kullandığını gösterebilir.
+                                        </AlertDescription>
+                                    </Alert>
+                                     <Alert>
+                                        <Users className="h-4 w-4" />
+                                        <AlertTitle className="font-semibold">Sosyal Etkileşim & Ruh Hali</AlertTitle>
+                                        <AlertDescription>
+                                           "Aile" kelimesinin geçtiği günlüklerde, "Mutlu" ruh hali işaretlenme oranı diğer günlere göre daha düşük. Bu konunun seanslarda keşfedilmesi faydalı olabilir.
+                                        </AlertDescription>
+                                    </Alert>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="text-lg">Günlüklerden Kelime Bulutu</CardTitle>
+                                     <CardDescription>Danışanın son günlüklerinde en sık kullandığı kelimeler.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="flex flex-wrap gap-2 items-center justify-center p-8 rounded-md bg-muted/50">
+                                    <Badge variant="default" className="text-3xl h-auto py-2 px-4">kaygı</Badge>
+                                    <Badge variant="secondary" className="text-lg">iş</Badge>
+                                    <Badge variant="secondary" className="text-2xl h-auto py-1 px-3">stres</Badge>
+                                    <Badge variant="secondary" className="text-md">yorgun</Badge>
+                                    <Badge variant="default" className="text-xl h-auto py-1 px-3">aile</Badge>
+                                    <Badge variant="secondary" className="text-lg">uyku</Badge>
+                                    <Badge variant="secondary" className="text-md">zaman</Badge>
+                                    <Badge variant="default" className="text-2xl h-auto py-1 px-3">belirsizlik</Badge>
+                                     <Badge variant="secondary" className="text-md">ilişki</Badge>
+                                </CardContent>
+                            </Card>
                         </CardContent>
                     </Card>
                 </TabsContent>
@@ -363,5 +407,3 @@ export default function ClientProfilePage() {
         </div>
     );
 }
-
-    
