@@ -56,6 +56,37 @@
   }
   body {
     @apply bg-background text-foreground;
+    /* Enhanced typography for Turkish characters */
+    font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Better focus indicators for accessibility */
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+  
+  /* Smooth transitions for better UX */
+  button, a, [role="button"] {
+    transition: all 0.2s ease-in-out;
+  }
+  
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .card {
+      @apply border-2;
+    }
+  }
+  
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
@@ -130,6 +161,61 @@
 }
 .animate-level-up-fade {
   animation: level-up-fade 3s ease-in-out forwards;
+}
+
+/* Turkish mental health app specific animations */
+@keyframes gentle-pulse {
+  0%, 100% { 
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+@keyframes slide-up-gentle {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes breath {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+.animate-gentle-pulse {
+  animation: gentle-pulse 2s ease-in-out infinite;
+}
+
+.animate-slide-up-gentle {
+  animation: slide-up-gentle 0.6s ease-out;
+}
+
+.animate-breath {
+  animation: breath 3s ease-in-out infinite;
+}
+
+/* Card hover effects for better engagement */
+.card-hover-lift {
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.card-hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Progress indicators with Turkish colors */
+.progress-turkish {
+  background: linear-gradient(90deg, #5DB075 0%, #80CBC4 100%);
 }
 
 .has-appointment {

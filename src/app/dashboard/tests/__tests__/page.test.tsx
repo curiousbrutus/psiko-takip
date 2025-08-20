@@ -28,19 +28,17 @@ describe('TestsPage', () => {
   it('renders all available tests', () => {
     render(<TestsPage />);
 
-    // Check for Beck Depression Inventory
-    expect(
-      screen.getByText('Beck Depresyon Envanteri (BDE-II)')
-    ).toBeInTheDocument();
+    // Check for Beck Depression Inventory (now shows short title)
+    expect(screen.getByText('Beck Depresyon')).toBeInTheDocument();
 
     // Check for Burnout Inventory
-    expect(screen.getByText('Tükenmişlik Envanteri')).toBeInTheDocument();
+    expect(screen.getByText('Tükenmişlik')).toBeInTheDocument();
 
     // Check for Young Schema Questionnaire (disabled)
-    expect(screen.getByText('Young Şema Ölçeği (YŞÖ)')).toBeInTheDocument();
+    expect(screen.getByText('Young Şema')).toBeInTheDocument();
 
     // Check for MMPI Short Form (disabled)
-    expect(screen.getByText('MMPI Kısa Formu')).toBeInTheDocument();
+    expect(screen.getByText('MMPI')).toBeInTheDocument();
   });
 
   it('shows enabled and disabled test buttons', () => {
@@ -65,9 +63,9 @@ describe('TestsPage', () => {
   it('has proper accessibility structure', () => {
     render(<TestsPage />);
 
-    // Check for proper heading structure
+    // Check for proper heading structure (updated title)
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
-      'Mevcut Testler'
+      'Psikolojik Değerlendirmeler'
     );
 
     // Check for proper button roles
@@ -100,11 +98,11 @@ describe('TestsPage', () => {
   it('renders correct test categories and structure', () => {
     render(<TestsPage />);
 
-    // Check the main content container exists
-    const container = screen.getByText('Mevcut Testler').closest('div');
+    // Check the main content container exists  
+    const container = screen.getByText('Psikolojik Değerlendirmeler').closest('div');
     expect(container).toBeInTheDocument();
 
-    // Should contain the main test types
+    // Should contain the main test types (checking short titles)
     expect(screen.getByText(/Beck Depresyon/)).toBeInTheDocument();
     expect(screen.getByText(/Tükenmişlik/)).toBeInTheDocument();
     expect(screen.getByText(/Young Şema/)).toBeInTheDocument();

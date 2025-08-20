@@ -130,42 +130,58 @@ export default function DashboardPage() {
     const progressPercentage = (xp / xpToNextLevel) * 100;
 
     return (
-      <Card className="bg-muted/30 relative overflow-hidden">
+      <Card className="bg-gradient-to-br from-muted/30 to-muted/10 card-hover-lift relative overflow-hidden">
         {showLevelUp && (
-          <div className="absolute inset-0 bg-primary/20 flex items-center justify-center z-10 animate-level-up-fade">
-            <div className="text-center text-white">
-              <p className="text-2xl font-bold">Seviye Atladın!</p>
-              <p>Yeni Seviye: {level}</p>
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 flex items-center justify-center z-10 animate-level-up-fade">
+            <div className="text-center text-primary">
+              <p className="text-2xl font-bold">🎉 Seviye Atladın!</p>
+              <p className="text-lg">Yeni Seviye: {level}</p>
+              <p className="text-sm opacity-80">Tebrikler! Harika bir gelişim! 🌟</p>
             </div>
           </div>
         )}
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            {companion.type === 'plant' ? (
-              <Leaf className="text-primary" />
-            ) : (
-              <Heart className="text-primary" />
-            )}
+            <div className="animate-gentle-pulse">
+              {companion.type === 'plant' ? (
+                <Leaf className="text-primary" />
+              ) : (
+                <Heart className="text-primary" />
+              )}
+            </div>
             Ruhsal Yoldaşın
+            <span className="text-sm bg-primary/10 px-2 py-1 rounded-full">
+              Seviye {level}
+            </span>
           </CardTitle>
-          <CardDescription>Seviye {level}</CardDescription>
+          <CardDescription className="flex items-center gap-2">
+            <span>🌸 Birlikte büyüyoruz</span>
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex justify-center items-center h-24 bg-background rounded-md">
-            <div className="animate-pulse">
-              <span className="text-6xl transition-all duration-500">
+          <div className="flex justify-center items-center h-28 bg-gradient-to-br from-background to-muted/50 rounded-xl border">
+            <div className="animate-breath">
+              <span className="text-7xl transition-all duration-500 drop-shadow-sm">
                 {getCompanionVisual(companion, level)}
               </span>
             </div>
           </div>
-          <div>
-            <div className="flex justify-between items-center text-sm mb-1">
-              <span className="text-muted-foreground">Enerji</span>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-muted-foreground flex items-center gap-1">
+                ⚡ Enerji
+              </span>
               <span className="font-semibold">
                 {xp} / {xpToNextLevel}
               </span>
             </div>
-            <Progress value={progressPercentage} className="h-2" />
+            <div className="relative">
+              <Progress value={progressPercentage} className="h-3 progress-turkish" />
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-full animate-pulse" />
+            </div>
+            <p className="text-xs text-center text-muted-foreground italic">
+              💪 Her küçük adım, büyük değişimlerin başlangıcı
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -176,28 +192,40 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         <div className="lg:col-span-2 space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold font-headline">
-              Tekrar hoş geldiniz, {userData?.displayName?.split(' ')[0] || ''}!
+          <div className="space-y-3">
+            <h1 className="text-4xl font-bold font-headline bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent animate-slide-up-gentle">
+              Hoş geldin, {userData?.displayName?.split(' ')[0] || 'Değerli'}! 🌟
             </h1>
-            <p className="text-muted-foreground">
-              Zihinsel sağlık yolculuğun seni bekliyor.
-            </p>
+            <div className="space-y-1">
+              <p className="text-muted-foreground text-lg">
+                Zihinsel sağlık yolculuğun seni bekliyor.
+              </p>
+              <p className="text-sm text-primary font-medium flex items-center gap-2">
+                <span>🌱</span>
+                <span>Her gün biraz daha güçlü, biraz daha huzurlu.</span>
+              </p>
+            </div>
           </div>
 
           {dailyInsight && (
-            <Card className="bg-primary/10 border-primary/20">
+            <Card className="bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20 card-hover-lift">
               <CardHeader className="flex flex-row items-center justify-between">
-                <div>
+                <div className="space-y-2">
                   <CardTitle className="flex items-center gap-2">
-                    <Lightbulb className="h-5 w-5 text-primary" />{' '}
+                    <div className="animate-gentle-pulse">
+                      <Lightbulb className="h-5 w-5 text-primary" />
+                    </div>
                     {dailyInsight.title}
                   </CardTitle>
-                  <CardDescription className="mt-2">
+                  <CardDescription className="mt-2 text-base leading-relaxed">
                     {dailyInsight.description}
                   </CardDescription>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span>💝</span>
+                    <span className="italic">Günlük motivasyon desteğiniz</span>
+                  </div>
                 </div>
-                <Button asChild>
+                <Button asChild className="animate-breath">
                   <Link href={dailyInsight.link}>
                     {dailyInsight.linkText}{' '}
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -209,13 +237,18 @@ export default function DashboardPage() {
         </div>
 
         <div className="lg:col-span-1 space-y-6">
-          <div className="flex items-center gap-2 bg-card p-3 rounded-lg shadow-sm border justify-center">
-            <Flame className="h-6 w-6 text-primary" />
+          <div className="flex items-center gap-2 bg-gradient-to-r from-card to-card/80 p-4 rounded-xl shadow-sm border justify-center card-hover-lift">
+            <div className="animate-gentle-pulse">
+              <Flame className="h-6 w-6 text-primary" />
+            </div>
             <div className="flex flex-col">
               <span className="text-xl font-bold leading-none">
                 {gamificationData?.currentStreak || 0}
               </span>
               <span className="text-xs text-muted-foreground">Günlük Seri</span>
+              <span className="text-xs text-primary font-medium">
+                🎯 Harika gidiyorsun!
+              </span>
             </div>
           </div>
           <CompanionCard />
