@@ -1,5 +1,4 @@
-
-"use client";
+'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -7,11 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Check } from 'lucide-react';
 
 const steps = [
-  { count: 5, prompt: "Etrafında Gördüğün 5 Şey" },
-  { count: 4, prompt: "Bedeninde Hissettiğin 4 Şey" },
-  { count: 3, prompt: "Duyduğun 3 Ses" },
-  { count: 2, prompt: "Koku Aldığın 2 Şey" },
-  { count: 1, prompt: "Tadabildiğin 1 Şey" },
+  { count: 5, prompt: 'Etrafında Gördüğün 5 Şey' },
+  { count: 4, prompt: 'Bedeninde Hissettiğin 4 Şey' },
+  { count: 3, prompt: 'Duyduğun 3 Ses' },
+  { count: 2, prompt: 'Koku Aldığın 2 Şey' },
+  { count: 1, prompt: 'Tadabildiğin 1 Şey' },
 ];
 
 export default function GroundingExercisePage() {
@@ -36,7 +35,7 @@ export default function GroundingExercisePage() {
       }
     }
   };
-  
+
   // Use a key to force re-render on step change for animation
   const animationKey = `step-${currentStepIndex}`;
 
@@ -48,7 +47,10 @@ export default function GroundingExercisePage() {
           <h1 className="text-2xl font-bold">Şimdi ve buradasın.</h1>
           <p className="mt-2">Harika bir iş çıkardın.</p>
           <p className="mt-4 font-bold text-lg text-primary">+20 XP kazandın</p>
-          <Button className="mt-6" onClick={() => router.push('/dashboard/journey')}>
+          <Button
+            className="mt-6"
+            onClick={() => router.push('/dashboard/journey')}
+          >
             Günlük Yolculuğa Dön
           </Button>
         </div>
@@ -62,7 +64,9 @@ export default function GroundingExercisePage() {
       onClick={handleTap}
     >
       <div key={animationKey} className="text-center p-8 animate-fade-in">
-        <h1 className="text-3xl md:text-5xl font-bold mb-8 transition-opacity duration-300">{currentStep.prompt}</h1>
+        <h1 className="text-3xl md:text-5xl font-bold mb-8 transition-opacity duration-300">
+          {currentStep.prompt}
+        </h1>
         <div className="flex justify-center gap-4">
           {Array.from({ length: currentStep.count }).map((_, i) => (
             <div
@@ -73,9 +77,18 @@ export default function GroundingExercisePage() {
             ></div>
           ))}
         </div>
-        <p className="mt-12 text-teal-600 animate-pulse">Devam etmek için ekrana dokun.</p>
+        <p className="mt-12 text-teal-600 animate-pulse">
+          Devam etmek için ekrana dokun.
+        </p>
       </div>
-       <Button variant="ghost" className="absolute bottom-8" onClick={(e) => {e.stopPropagation(); router.push('/dashboard/journey')}}>
+      <Button
+        variant="ghost"
+        className="absolute bottom-8"
+        onClick={e => {
+          e.stopPropagation();
+          router.push('/dashboard/journey');
+        }}
+      >
         Egzersizi Sonlandır
       </Button>
     </div>

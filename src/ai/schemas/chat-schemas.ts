@@ -13,9 +13,20 @@ export const ChatInputSchema = z.object({
     .describe('The previous messages in the conversation.'),
   userContext: z
     .object({
-      demographics: z.string().optional().describe('Kullanıcı hakkında yaş, cinsiyet gibi temel demografik bilgiler.'),
-      moodTrend: z.string().optional().describe('Son bir haftadaki ruh hali trendi.'),
-      testResults: z.string().optional().describe('Yakın zamanda tamamlanmış testlerin özet sonuçları.'),
+      demographics: z
+        .string()
+        .optional()
+        .describe(
+          'Kullanıcı hakkında yaş, cinsiyet gibi temel demografik bilgiler.'
+        ),
+      moodTrend: z
+        .string()
+        .optional()
+        .describe('Son bir haftadaki ruh hali trendi.'),
+      testResults: z
+        .string()
+        .optional()
+        .describe('Yakın zamanda tamamlanmış testlerin özet sonuçları.'),
     })
     .optional()
     .describe('Kullanıcı hakkında ek bağlamsal bilgiler.'),
@@ -24,11 +35,15 @@ export const ChatInputSchema = z.object({
 export type ChatInput = z.infer<typeof ChatInputSchema>;
 
 export const ChatOutputSchema = z.object({
-  isCrisis: z.boolean().describe(
-    "Kullanıcının kendine zarar verme, intihar veya şiddet gibi konularda net bir niyet belirtmesi durumunda bu değeri 'true' yap. Genel üzüntü, kaygı veya depresyon ifadeleri için 'false' olarak bırak."
-  ),
-  response: z.string().describe(
-    "Terapötik ilkelere dayalı, yardımcı ve empatik yanıtın. Eğer isCrisis true ise, bu alana terapötik olmayan, standart bir kriz yönlendirme mesajı yazmalısın."
-  ),
+  isCrisis: z
+    .boolean()
+    .describe(
+      "Kullanıcının kendine zarar verme, intihar veya şiddet gibi konularda net bir niyet belirtmesi durumunda bu değeri 'true' yap. Genel üzüntü, kaygı veya depresyon ifadeleri için 'false' olarak bırak."
+    ),
+  response: z
+    .string()
+    .describe(
+      'Terapötik ilkelere dayalı, yardımcı ve empatik yanıtın. Eğer isCrisis true ise, bu alana terapötik olmayan, standart bir kriz yönlendirme mesajı yazmalısın.'
+    ),
 });
 export type ChatOutput = z.infer<typeof ChatOutputSchema>;

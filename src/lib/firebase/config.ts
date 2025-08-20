@@ -1,7 +1,7 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -14,9 +14,10 @@ const firebaseConfig = {
 
 // Check if the API key is provided
 if (!firebaseConfig.apiKey) {
-    console.error("Firebase API Key is missing. Please add your Firebase credentials to the .env file.");
+  console.error(
+    'Firebase API Key is missing. Please add your Firebase credentials to the .env file.'
+  );
 }
-
 
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();

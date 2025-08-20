@@ -10,33 +10,50 @@
 
 'use server';
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 
 const AnalyzeTestResultsInputSchema = z.object({
   testName: z.string().describe('Psikolojik testin adı.'),
-  testResults: z.record(z.any()).describe('JSON nesnesi olarak psikolojik testin sonuçları.'),
-  userInformation: z.string().optional().describe('Kullanıcı hakkında yaş, cinsiyet ve geçmiş gibi ek bilgiler.'),
+  testResults: z
+    .record(z.any())
+    .describe('JSON nesnesi olarak psikolojik testin sonuçları.'),
+  userInformation: z
+    .string()
+    .optional()
+    .describe('Kullanıcı hakkında yaş, cinsiyet ve geçmiş gibi ek bilgiler.'),
 });
 
-export type AnalyzeTestResultsInput = z.infer<typeof AnalyzeTestResultsInputSchema>;
+export type AnalyzeTestResultsInput = z.infer<
+  typeof AnalyzeTestResultsInputSchema
+>;
 
 const AnalyzeTestResultsOutputSchema = z.object({
-  insights: z.string().describe('Test sonuçlarına dayalı kişiselleştirilmiş içgörüler.'),
-  severity: z.string().describe('Test sonuçlarına dayalı potansiyel sorunların ciddiyeti.'),
-  guidance: z.string().describe('Test sonuçlarına dayalı kişiselleştirilmiş rehberlik.'),
+  insights: z
+    .string()
+    .describe('Test sonuçlarına dayalı kişiselleştirilmiş içgörüler.'),
+  severity: z
+    .string()
+    .describe('Test sonuçlarına dayalı potansiyel sorunların ciddiyeti.'),
+  guidance: z
+    .string()
+    .describe('Test sonuçlarına dayalı kişiselleştirilmiş rehberlik.'),
 });
 
-export type AnalyzeTestResultsOutput = z.infer<typeof AnalyzeTestResultsOutputSchema>;
+export type AnalyzeTestResultsOutput = z.infer<
+  typeof AnalyzeTestResultsOutputSchema
+>;
 
-export async function analyzeTestResults(input: AnalyzeTestResultsInput): Promise<AnalyzeTestResultsOutput> {
+export async function analyzeTestResults(
+  input: AnalyzeTestResultsInput
+): Promise<AnalyzeTestResultsOutput> {
   return analyzeTestResultsFlow(input);
 }
 
 const prompt = ai.definePrompt({
   name: 'analyzeTestResultsPrompt',
-  input: {schema: AnalyzeTestResultsInputSchema},
-  output: {schema: AnalyzeTestResultsOutputSchema},
+  input: { schema: AnalyzeTestResultsInputSchema },
+  output: { schema: AnalyzeTestResultsOutputSchema },
   prompt: `Siz psikolojik test sonuçlarını analiz etme konusunda uzmanlaşmış bir yapay zeka asistanısınız.
 
   Sağlanan test sonuçlarına dayanarak, kişiselleştirilmiş içgörüler oluşturacak, potansiyel sorunların ciddiyetini belirleyecek ve kullanıcıya kişiselleştirilmiş rehberlik sunacaksınız.
@@ -61,7 +78,7 @@ const analyzeTestResultsFlow = ai.defineFlow(
     outputSchema: AnalyzeTestResultsOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const { output } = await prompt(input);
     return output!;
   }
 );

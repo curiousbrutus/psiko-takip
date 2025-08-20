@@ -37,16 +37,19 @@ Hemen indir, içsel yolculuğuna bugün başla ve Ruhsal Yoldaşınla tanış!
 ### Sosyal Medya Gönderi Fikirleri (Instagram/Twitter)
 
 **Gönderi 1: Ruhsal Yoldaş Tanıtımı**
-*   **Görsel:** Bir telefon ekranında, sevimli "Filiz" veya "Töz" karakterinin evrim aşamalarını gösteren bir karusel.
-*   **Metin:** "Tanıştırayım, bu senin Ruhsal Yoldaşın! 🌱 O, sadece bir karakter değil, senin içsel gücünün bir sembolü. Attığın her adım, tamamladığın her görev, ona enerji veriyor ve seninle birlikte büyümesini sağlıyor. Kendi yolculuğunun kahramanı olmaya hazır mısın? #PsikoTakip #RuhsalYoldaş #ZihinselSağlık #Motivasyon"
+
+- **Görsel:** Bir telefon ekranında, sevimli "Filiz" veya "Töz" karakterinin evrim aşamalarını gösteren bir karusel.
+- **Metin:** "Tanıştırayım, bu senin Ruhsal Yoldaşın! 🌱 O, sadece bir karakter değil, senin içsel gücünün bir sembolü. Attığın her adım, tamamladığın her görev, ona enerji veriyor ve seninle birlikte büyümesini sağlıyor. Kendi yolculuğunun kahramanı olmaya hazır mısın? #PsikoTakip #RuhsalYoldaş #ZihinselSağlık #Motivasyon"
 
 **Gönderi 2: Düşünce Balonları Özelliği**
-*   **Görsel/Video:** Düşüncelerin yazıldığı ve sonra gökyüzüne doğru uçup giden balonları gösteren kısa, animasyonlu bir video.
-*   **Metin:** "Aklını kurcalayan bir düşünce mi var? Onu bir balona yaz ve gökyüzüne bırak. ☁️ Psikotakip'in 'Düşünce Balonları' egzersizi, zihnini meşgul eden düşünceleri gözlemlemeyi ve sakince gitmelerine izin vermeyi öğretir. Bir nefes al ve bırak gitsin. #DüşünceBalonları #Farkındalık #Anksiyete #Psikoloji"
+
+- **Görsel/Video:** Düşüncelerin yazıldığı ve sonra gökyüzüne doğru uçup giden balonları gösteren kısa, animasyonlu bir video.
+- **Metin:** "Aklını kurcalayan bir düşünce mi var? Onu bir balona yaz ve gökyüzüne bırak. ☁️ Psikotakip'in 'Düşünce Balonları' egzersizi, zihnini meşgul eden düşünceleri gözlemlemeyi ve sakince gitmelerine izin vermeyi öğretir. Bir nefes al ve bırak gitsin. #DüşünceBalonları #Farkındalık #Anksiyete #Psikoloji"
 
 **Gönderi 3: Terapist Desteği**
-*   **Görsel:** Bir tarafta danışanın uygulama ekranı, diğer tarafta terapistin panelini gösteren, arada kesik bir çizgiyle bağlantı kurulmuş bir görsel.
-*   **Metin:** "Terapi sadece seans odasında değildir. Psikotakip ile terapistin hep yanında. Düşüncelerini, ilerlemeni ve test sonuçlarını güvenle paylaşarak seanslarını daha verimli hale getir. Gerçek bağ, gerçek gelişim demektir. ✨ #Terapi #Psikoterapi #OnlineTerapi #Destek"
+
+- **Görsel:** Bir tarafta danışanın uygulama ekranı, diğer tarafta terapistin panelini gösteren, arada kesik bir çizgiyle bağlantı kurulmuş bir görsel.
+- **Metin:** "Terapi sadece seans odasında değildir. Psikotakip ile terapistin hep yanında. Düşüncelerini, ilerlemeni ve test sonuçlarını güvenle paylaşarak seanslarını daha verimli hale getir. Gerçek bağ, gerçek gelişim demektir. ✨ #Terapi #Psikoterapi #OnlineTerapi #Destek"
 
 ---
 
@@ -66,11 +69,11 @@ Hemen indir, içsel yolculuğuna bugün başla ve Ruhsal Yoldaşınla tanış!
 
 ### Özellikler Listesi (Fayda Odaklı)
 
-*   **İçgörü Paneli ile Veriye Dayalı Kararlar Alın:** Danışanlarınızın tamamladığı Beck, GAD-7 gibi standart ölçeklerin sonuçlarını ve ruh hali değişimlerini tek bir panelde, anlaşılır grafiklerle görün. Soyut ilerlemeyi somut verilere dökerek terapi stratejinizi en doğru şekilde belirleyin. **(Fayda: Daha etkili terapi, objektif değerlendirme)**
+- **İçgörü Paneli ile Veriye Dayalı Kararlar Alın:** Danışanlarınızın tamamladığı Beck, GAD-7 gibi standart ölçeklerin sonuçlarını ve ruh hali değişimlerini tek bir panelde, anlaşılır grafiklerle görün. Soyut ilerlemeyi somut verilere dökerek terapi stratejinizi en doğru şekilde belirleyin. **(Fayda: Daha etkili terapi, objektif değerlendirme)**
 
-*   **Otomatik Seans Öncesi Brifingleri ile Zamandan Kazanın:** Her seans öncesi, danışanınızın son haftadaki ruh hali trendlerini, paylaştığı önemli günlükleri ve gündeme getirmek istediği konuları içeren otomatik bir özet alın. Seanslara %100 hazırlıklı başlayarak değerli zamanınızı en iyi şekilde kullanın. **(Fayda: Zaman tasarrufu, seans verimliliği)**
+- **Otomatik Seans Öncesi Brifingleri ile Zamandan Kazanın:** Her seans öncesi, danışanınızın son haftadaki ruh hali trendlerini, paylaştığı önemli günlükleri ve gündeme getirmek istediği konuları içeren otomatik bir özet alın. Seanslara %100 hazırlıklı başlayarak değerli zamanınızı en iyi şekilde kullanın. **(Fayda: Zaman tasarrufu, seans verimliliği)**
 
-*   **İnteraktif Görev Atamaları ile Bağı Güçlendirin:** Danışanlarınıza tek bir tıkla BDT temelli "Düşünce Kaydı" gibi interaktif görevler atayın. Süreci birlikte, ortak bir dijital çalışma alanında takip ederek terapötik ittifakı güçlendirin ve ödev takibini kolaylaştırın. **(Fayda: Artan danışan bağlılığı, kolay takip)**
+- **İnteraktif Görev Atamaları ile Bağı Güçlendirin:** Danışanlarınıza tek bir tıkla BDT temelli "Düşünce Kaydı" gibi interaktif görevler atayın. Süreci birlikte, ortak bir dijital çalışma alanında takip ederek terapötik ittifakı güçlendirin ve ödev takibini kolaylaştırın. **(Fayda: Artan danışan bağlılığı, kolay takip)**
 
 ---
 

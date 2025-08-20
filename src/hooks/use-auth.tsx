@@ -1,6 +1,12 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, getDoc, DocumentData } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase/config';
@@ -25,7 +31,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async user => {
       if (user) {
         setUser(user);
         const userDocRef = doc(db, 'users', user.uid);
@@ -47,14 +53,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   if (loading) {
     return (
-       <div className="flex min-h-screen w-full flex-col items-center justify-center bg-background">
-            <Logo />
-            <div className="mt-8 flex flex-col items-center gap-2">
-                <Skeleton className="h-4 w-48" />
-                <Skeleton className="h-4 w-32" />
-            </div>
-       </div>
-    )
+      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-background">
+        <Logo />
+        <div className="mt-8 flex flex-col items-center gap-2">
+          <Skeleton className="h-4 w-48" />
+          <Skeleton className="h-4 w-32" />
+        </div>
+      </div>
+    );
   }
 
   return (

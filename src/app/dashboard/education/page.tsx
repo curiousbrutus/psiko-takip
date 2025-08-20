@@ -1,7 +1,13 @@
-
 import Link from 'next/link';
 import { educationModules } from '@/lib/education-content';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, BookText } from 'lucide-react';
 
@@ -9,13 +15,15 @@ export default function EducationPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold font-headline">Psikoeğitim Modülleri</h1>
+        <h1 className="text-3xl font-bold font-headline">
+          Psikoeğitim Modülleri
+        </h1>
         <p className="text-muted-foreground">
           Ruh sağlığınızı güçlendirecek konular hakkında bilgi edinin.
         </p>
       </div>
       <div className="grid gap-6 md:grid-cols-2">
-        {educationModules.map((module) => (
+        {educationModules.map(module => (
           <Card key={module.slug} className="flex flex-col">
             <CardHeader>
               <div className="flex items-start gap-4">

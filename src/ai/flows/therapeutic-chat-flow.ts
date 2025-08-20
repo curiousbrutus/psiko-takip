@@ -9,15 +9,18 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { ChatInputSchema, ChatOutputSchema, type ChatInput, type ChatOutput } from '@/ai/schemas/chat-schemas';
+import {
+  ChatInputSchema,
+  ChatOutputSchema,
+  type ChatInput,
+  type ChatOutput,
+} from '@/ai/schemas/chat-schemas';
 
 export type { ChatInput, ChatOutput };
-
 
 export async function getChatResponse(input: ChatInput): Promise<ChatOutput> {
   return chatFlow(input);
 }
-
 
 const chatFlow = ai.defineFlow(
   {
@@ -25,7 +28,7 @@ const chatFlow = ai.defineFlow(
     inputSchema: ChatInputSchema,
     outputSchema: ChatOutputSchema,
   },
-  async (input) => {
+  async input => {
     const prompt = ai.definePrompt({
       name: 'therapeuticChatPrompt',
       input: { schema: ChatInputSchema },
@@ -106,7 +109,7 @@ const chatFlow = ai.defineFlow(
         {{{message}}}
       `,
     });
-    
+
     const { output } = await prompt(input);
 
     if (output?.isCrisis) {
