@@ -296,60 +296,227 @@ export default function DemoPage() {
 
           {/* Tests Section */}
           <section id="tests" className="space-y-6 mt-12 scroll-mt-20">
-            <div>
-              <h1 className="text-3xl font-bold font-headline">
-                Mevcut Testler
+            <div className="text-center space-y-4">
+              <h1 className="text-4xl font-bold font-headline bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                Psikolojik Değerlendirmeler
               </h1>
-              <p className="text-muted-foreground">
-                Kendi kendine değerlendirmenize başlamak için aşağıdan bir test
-                seçin.
+              <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+                Aşağıdaki testleri tamamladıktan sonra sonuçlarınız doğrudan
+                terapistinizle paylaşılacaktır. Terapistiniz sonuçları sizinle
+                birlikte değerlendirecektir.
               </p>
+              <div className="flex justify-center items-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <span className="text-primary">🔒</span>
+                  <span>Kişisel ve Güvenli</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-primary">⭐</span>
+                  <span>Uzman Onaylı</span>
+                </div>
+              </div>
             </div>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              <Card className="flex flex-col">
-                <CardHeader>
-                  <div className="flex items-center gap-4">
-                    <div className="bg-primary/10 p-3 rounded-lg">
-                      <BrainCircuit className="h-6 w-6 text-primary" />
+
+            {/* Available Tests */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-semibold">Mevcut Testler</h2>
+                <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-primary/10 text-primary">
+                  2 Test Mevcut
+                </div>
+              </div>
+              
+              <div className="grid gap-6 md:grid-cols-2">
+                <Card className="group flex flex-col hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-l-4 border-l-primary animate-fade-in">
+                  <CardHeader className="pb-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="bg-primary/10 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                          <BrainCircuit className="h-6 w-6 text-primary" />
+                        </div>
+                        <div>
+                          <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:bg-primary/80 bg-blue-500/10 text-blue-700 border-blue-200 mb-2">
+                            Ruh Hali
+                          </div>
+                          <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                            Beck Depresyon
+                          </CardTitle>
+                        </div>
+                      </div>
                     </div>
-                    <CardTitle>Beck Depresyon Envanteri (BDE-II)</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent className="flex-1">
-                  <CardDescription>
-                    Depresyonun şiddetini ölçmek için en yaygın kullanılan
-                    psikometrik testlerden biri olan 21 soruluk çoktan seçmeli
-                    bir öz bildirim envanteri.
-                  </CardDescription>
-                </CardContent>
-                <CardFooter>
-                  <Button className="w-full" disabled>
-                    Teste Başla <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </CardFooter>
-              </Card>
-              <Card className="flex flex-col opacity-60">
-                <CardHeader>
-                  <div className="flex items-center gap-4">
-                    <div className="bg-primary/10 p-3 rounded-lg">
-                      <BrainCircuit className="h-6 w-6 text-primary" />
+                  </CardHeader>
+                  
+                  <CardContent className="flex-1 space-y-4">
+                    <CardDescription className="text-base leading-relaxed">
+                      Depresyonun şiddetini ölçmek için en yaygın kullanılan psikometrik testlerden biri olan 21 soruluk çoktan seçmeli bir öz bildirim envanteri.
+                    </CardDescription>
+                    
+                    <div className="p-3 bg-muted/50 rounded-lg border border-muted">
+                      <p className="text-sm text-muted-foreground italic">
+                        💡 Türk toplumuna uyarlanmış geçerli bir araçtır.
+                      </p>
                     </div>
-                    <CardTitle>Young Şema Ölçeği (YŞÖ)</CardTitle>
+                    
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div className="text-center">
+                        <span className="block h-4 w-4 mx-auto mb-1 text-muted-foreground">⏰</span>
+                        <div className="font-medium">10-15 dakika</div>
+                        <div className="text-muted-foreground">Süre</div>
+                      </div>
+                      <div className="text-center">
+                        <BrainCircuit className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
+                        <div className="font-medium">21</div>
+                        <div className="text-muted-foreground">Soru</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="inline-flex h-4 w-4 rounded-full mx-auto mb-1 bg-green-500" />
+                        <div className="font-medium">Kolay</div>
+                        <div className="text-muted-foreground">Zorluk</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                  
+                  <CardFooter className="pt-4">
+                    <Button 
+                      className="w-full group-hover:bg-primary/90 transition-colors"
+                      size="lg"
+                      disabled
+                    >
+                      Teste Başla
+                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </CardFooter>
+                </Card>
+
+                <Card className="group flex flex-col hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-l-4 border-l-primary animate-fade-in" style={{ animationDelay: '100ms' }}>
+                  <CardHeader className="pb-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="bg-primary/10 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                          <Flame className="h-6 w-6 text-primary" />
+                        </div>
+                        <div>
+                          <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:bg-primary/80 bg-orange-500/10 text-orange-700 border-orange-200 mb-2">
+                            İş Yaşamı
+                          </div>
+                          <CardTitle className="text-xl group-hover:text-primary transition-colors">
+                            Tükenmişlik
+                          </CardTitle>
+                        </div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  
+                  <CardContent className="flex-1 space-y-4">
+                    <CardDescription className="text-base leading-relaxed">
+                      İşle ilgili stresi, duygusal tükenmeyi ve mesleki doyumu değerlendirmek için tasarlanmış bir öz bildirim envanteri.
+                    </CardDescription>
+                    
+                    <div className="p-3 bg-muted/50 rounded-lg border border-muted">
+                      <p className="text-sm text-muted-foreground italic">
+                        💡 Türk çalışma kültürüne göre uyarlanmıştır.
+                      </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-4 text-sm">
+                      <div className="text-center">
+                        <span className="block h-4 w-4 mx-auto mb-1 text-muted-foreground">⏰</span>
+                        <div className="font-medium">8-12 dakika</div>
+                        <div className="text-muted-foreground">Süre</div>
+                      </div>
+                      <div className="text-center">
+                        <BrainCircuit className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
+                        <div className="font-medium">22</div>
+                        <div className="text-muted-foreground">Soru</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="inline-flex h-4 w-4 rounded-full mx-auto mb-1 bg-yellow-500" />
+                        <div className="font-medium">Orta</div>
+                        <div className="text-muted-foreground">Zorluk</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                  
+                  <CardFooter className="pt-4">
+                    <Button 
+                      className="w-full group-hover:bg-primary/90 transition-colors"
+                      size="lg"
+                      disabled
+                    >
+                      Teste Başla
+                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </div>
+            </div>
+
+            {/* Coming Soon Tests */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-semibold">Yakında Gelecek Testler</h2>
+                <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-muted-foreground/20 text-muted-foreground bg-muted/20">
+                  Geliştirme Aşamasında
+                </div>
+              </div>
+              
+              <div className="grid gap-4 md:grid-cols-2">
+                <Card className="flex flex-col opacity-75 relative overflow-hidden animate-fade-in" style={{ animationDelay: '200ms' }}>
+                  <div className="absolute top-0 right-0 bg-amber-500 text-white px-3 py-1 text-xs font-medium rounded-bl-lg">
+                    Yakında
                   </div>
-                </CardHeader>
-                <CardContent className="flex-1">
-                  <CardDescription>
-                    Gelişimimizin erken dönemlerinde başlayan, kendi kendini
-                    baltalayan duygusal ve bilişsel kalıplar olan Erken Dönem
-                    Uyumsuz Şemaları tanımlar.
-                  </CardDescription>
-                </CardContent>
-                <CardFooter>
-                  <Button className="w-full" disabled>
-                    Yakında <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </CardFooter>
-              </Card>
+                  
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center gap-4">
+                      <div className="bg-muted p-3 rounded-xl">
+                        <BrainCircuit className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                      <div>
+                        <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:bg-primary/80 bg-purple-500/10 text-purple-700 border-purple-200 mb-2 opacity-50">
+                          Kişilik
+                        </div>
+                        <CardTitle className="text-xl text-muted-foreground">
+                          Young Şema
+                        </CardTitle>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  
+                  <CardContent className="flex-1 space-y-4">
+                    <CardDescription className="text-base leading-relaxed">
+                      Gelişimimizin erken dönemlerinde başlayan, kendi kendini baltalayan duygusal ve bilişsel kalıplar olan Erken Dönem Uyumsuz Şemaları tanımlar.
+                    </CardDescription>
+                    
+                    <div className="grid grid-cols-3 gap-4 text-sm opacity-60">
+                      <div className="text-center">
+                        <span className="block h-4 w-4 mx-auto mb-1 text-muted-foreground">⏰</span>
+                        <div className="font-medium">25-30 dakika</div>
+                        <div className="text-muted-foreground">Süre</div>
+                      </div>
+                      <div className="text-center">
+                        <BrainCircuit className="h-4 w-4 mx-auto mb-1 text-muted-foreground" />
+                        <div className="font-medium">90</div>
+                        <div className="text-muted-foreground">Soru</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="inline-flex h-4 w-4 rounded-full mx-auto mb-1 bg-muted" />
+                        <div className="font-medium">Zor</div>
+                        <div className="text-muted-foreground">Zorluk</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                  
+                  <CardFooter className="pt-4">
+                    <Button 
+                      disabled 
+                      className="w-full"
+                      size="lg"
+                    >
+                      Yakında Gelecek
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </div>
             </div>
           </section>
         </main>
