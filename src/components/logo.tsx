@@ -3,7 +3,7 @@ import Link from 'next/link';
 export function Logo({ inSidebar = false }: { inSidebar?: boolean }) {
   return (
     <Link href="/" className="flex items-center gap-2 group">
-       <div className="p-1.5 bg-primary/20 rounded-lg group-hover:bg-primary/30 transition-colors">
+      <div className="p-1.5 bg-primary/20 rounded-lg group-hover:bg-primary/30 transition-colors">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -24,7 +24,11 @@ export function Logo({ inSidebar = false }: { inSidebar?: boolean }) {
           <path d="M12 19h.01" />
         </svg>
       </div>
-      <span className={`text-xl font-bold ${inSidebar ? 'text-foreground' : 'text-foreground'}`}>PsikoTakip</span>
+      <span
+        className={`text-xl font-bold ${inSidebar ? 'text-foreground' : 'text-foreground'}`}
+      >
+        PsikoTakip
+      </span>
     </Link>
   );
 }

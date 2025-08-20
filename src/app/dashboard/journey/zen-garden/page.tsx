@@ -1,5 +1,4 @@
-
-"use client";
+'use client';
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -31,10 +30,10 @@ export default function ZenGardenPage() {
       pt.x = e.clientX;
       pt.y = e.clientY;
     }
-    
+
     const ctm = svg.getScreenCTM();
     if (ctm) {
-        return pt.matrixTransform(ctm.inverse());
+      return pt.matrixTransform(ctm.inverse());
     }
     return null;
   };
@@ -63,7 +62,7 @@ export default function ZenGardenPage() {
     }
     setCurrentPath('');
   };
-  
+
   // Touch events for mobile
   const handleTouchStart = (e: React.TouchEvent) => {
     setIsDrawing(true);
@@ -97,18 +96,26 @@ export default function ZenGardenPage() {
     // }
   };
 
-  const hasSpentEnoughTime = startTime && (new Date().getTime() - startTime.getTime()) > 30000; // 30 seconds
+  const hasSpentEnoughTime =
+    startTime && new Date().getTime() - startTime.getTime() > 30000; // 30 seconds
   const xpGained = hasSpentEnoughTime ? 20 : 5;
 
   if (isFinished) {
-     return (
+    return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#eaddc7] text-[#5c4b37] animate-fade-in p-4">
         <div className="bg-white/80 backdrop-blur-sm rounded-xl p-8 text-center shadow-lg">
           <Feather className="h-16 w-16 text-[#8b7e6a] mx-auto mb-4" />
           <h1 className="text-2xl font-bold">Zihnini dinlendirdin.</h1>
-          <p className="mt-2">Kendine zaman ayırdığın için bu bile değerli bir adım.</p>
-          <p className="mt-4 font-bold text-lg text-primary">+{xpGained} XP kazandın</p>
-          <Button className="mt-6" onClick={() => router.push('/dashboard/journey')}>
+          <p className="mt-2">
+            Kendine zaman ayırdığın için bu bile değerli bir adım.
+          </p>
+          <p className="mt-4 font-bold text-lg text-primary">
+            +{xpGained} XP kazandın
+          </p>
+          <Button
+            className="mt-6"
+            onClick={() => router.push('/dashboard/journey')}
+          >
             Günlük Yolculuğa Dön
           </Button>
         </div>
@@ -118,42 +125,87 @@ export default function ZenGardenPage() {
 
   return (
     <div className="flex flex-col h-screen bg-[#d7c6b2]">
-        <div className="flex-grow relative w-full h-full overflow-hidden touch-none"
-          onMouseLeave={handleMouseUp}
+      <div
+        className="flex-grow relative w-full h-full overflow-hidden touch-none"
+        onMouseLeave={handleMouseUp}
+      >
+        <svg
+          ref={svgRef}
+          className="w-full h-full bg-[#eaddc7] cursor-pointer"
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
-          <svg 
-            ref={svgRef}
-            className="w-full h-full bg-[#eaddc7] cursor-pointer"
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
-          >
-             <defs>
-              <filter id="sand-texture" x="0" y="0" width="200%" height="200%">
-                  <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" result="turbulence"/>
-                  <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="3" xChannelSelector="R" yChannelSelector="G"/>
-              </filter>
-            </defs>
-            <rect width="100%" height="100%" fill="#d7c6b2" filter="url(#sand-texture)" />
+          <defs>
+            <filter id="sand-texture" x="0" y="0" width="200%" height="200%">
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.8"
+                numOctaves="4"
+                result="turbulence"
+              />
+              <feDisplacementMap
+                in="SourceGraphic"
+                in2="turbulence"
+                scale="3"
+                xChannelSelector="R"
+                yChannelSelector="G"
+              />
+            </filter>
+          </defs>
+          <rect
+            width="100%"
+            height="100%"
+            fill="#d7c6b2"
+            filter="url(#sand-texture)"
+          />
 
-            {paths.map((path, i) => (
-                <path key={i} d={path} stroke="#5c4b37" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.2" />
-            ))}
-            {currentPath && <path d={currentPath} stroke="#5c4b37" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.3" />}
-          </svg>
+          {paths.map((path, i) => (
+            <path
+              key={i}
+              d={path}
+              stroke="#5c4b37"
+              strokeWidth="4"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.2"
+            />
+          ))}
+          {currentPath && (
+            <path
+              d={currentPath}
+              stroke="#5c4b37"
+              strokeWidth="4"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.3"
+            />
+          )}
+        </svg>
+      </div>
+      <div className="flex-shrink-0 bg-white/30 backdrop-blur-sm p-4 flex justify-between items-center">
+        <p className="text-sm text-[#5c4b37]">
+          Parmağını kumda gezdirerek desenler çiz.
+        </p>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => {
+              setPaths([]);
+              setCurrentPath('');
+            }}
+          >
+            <Eraser />
+          </Button>
+          <Button onClick={handleFinish}>Bitir</Button>
         </div>
-        <div className="flex-shrink-0 bg-white/30 backdrop-blur-sm p-4 flex justify-between items-center">
-          <p className="text-sm text-[#5c4b37]">Parmağını kumda gezdirerek desenler çiz.</p>
-          <div className="flex gap-2">
-            <Button variant="outline" size="icon" onClick={() => { setPaths([]); setCurrentPath('')}}>
-              <Eraser />
-            </Button>
-             <Button onClick={handleFinish}>Bitir</Button>
-          </div>
-        </div>
+      </div>
     </div>
   );
 }

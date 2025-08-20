@@ -1,5 +1,12 @@
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from '@/components/ui/card';
 import { Phone, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 
@@ -20,7 +27,8 @@ export default function EmergencySupportPage() {
         </CardHeader>
         <CardContent className="space-y-6">
           <p className="text-center text-muted-foreground">
-            Zor bir zamandan geçtiğini anlıyoruz. Lütfen aşağıdaki kaynaklardan biriyle hemen iletişime geç. Konuşacak birileri her zaman var.
+            Zor bir zamandan geçtiğini anlıyoruz. Lütfen aşağıdaki kaynaklardan
+            biriyle hemen iletişime geç. Konuşacak birileri her zaman var.
           </p>
           <div className="space-y-4">
             <a href="tel:112" className="block w-full">
@@ -29,20 +37,28 @@ export default function EmergencySupportPage() {
                 112 Acil Çağrı Merkezi'ni Ara
               </Button>
             </a>
-            <a href="https://www.psikolog.org.tr/acil-durum" target="_blank" rel="noopener noreferrer" className="block w-full">
-                <Button variant="outline" size="lg" className="w-full">
-                    Türkiye Psikologlar Derneği Acil Durum
-                </Button>
+            <a
+              href="https://www.psikolog.org.tr/acil-durum"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full"
+            >
+              <Button variant="outline" size="lg" className="w-full">
+                Türkiye Psikologlar Derneği Acil Durum
+              </Button>
             </a>
-             <p className="text-xs text-center text-muted-foreground pt-4">
-                Not: Kurumsal bir hesaba bağlıysanız, kurumunuzun yetkili birimine de bir kriz durumu sinyali (kimliğiniz gizli tutularak) iletilmiş olabilir. Lütfen kurumunuzun acil durum prosedürlerini de takip edin.
+            <p className="text-xs text-center text-muted-foreground pt-4">
+              Not: Kurumsal bir hesaba bağlıysanız, kurumunuzun yetkili birimine
+              de bir kriz durumu sinyali (kimliğiniz gizli tutularak) iletilmiş
+              olabilir. Lütfen kurumunuzun acil durum prosedürlerini de takip
+              edin.
             </p>
           </div>
         </CardContent>
         <CardFooter>
-            <Button variant="ghost" className="w-full" asChild>
-                <Link href="/dashboard">Kontrol Paneline Dön</Link>
-            </Button>
+          <Button variant="ghost" className="w-full" asChild>
+            <Link href="/dashboard">Kontrol Paneline Dön</Link>
+          </Button>
         </CardFooter>
       </Card>
     </div>

@@ -1,0 +1,9 @@
+node_modules/
+.next/
+out/
+build/
+dist/
+*.lock
+*.log
+public/sw.js
+public/workbox-*.js

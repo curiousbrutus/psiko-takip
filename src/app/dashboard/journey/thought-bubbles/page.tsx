@@ -1,5 +1,4 @@
-
-"use client";
+'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -39,7 +38,10 @@ export default function ThoughtBubblesPage() {
           <h1 className="text-2xl font-bold">Harika!</h1>
           <p className="mt-2">Bir düşüncenin sakince uzaklaşmasını izledin.</p>
           <p className="mt-4 font-bold text-lg text-primary">+15 XP kazandın</p>
-          <Button className="mt-6" onClick={() => router.push('/dashboard/journey')}>
+          <Button
+            className="mt-6"
+            onClick={() => router.push('/dashboard/journey')}
+          >
             Günlük Yolculuğa Dön
           </Button>
         </div>
@@ -65,23 +67,35 @@ export default function ThoughtBubblesPage() {
 
       {!isReleased && (
         <div className="z-10 bg-white/30 backdrop-blur-sm p-8 rounded-xl shadow-lg text-center animate-fade-in">
-          <h1 className="text-2xl font-bold text-slate-800">Düşünce Balonları</h1>
-          <p className="text-slate-700 mt-2">Aklını meşgul eden bir düşünceyi yaz.</p>
+          <h1 className="text-2xl font-bold text-slate-800">
+            Düşünce Balonları
+          </h1>
+          <p className="text-slate-700 mt-2">
+            Aklını meşgul eden bir düşünceyi yaz.
+          </p>
           <div className="flex w-full max-w-sm items-center space-x-2 mt-6">
             <Input
               type="text"
               placeholder="Aklımdaki düşünce..."
               value={thought}
-              onChange={(e) => setThought(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleRelease()}
+              onChange={e => setThought(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleRelease()}
             />
-            <Button type="submit" onClick={handleRelease} disabled={!thought.trim()}>
+            <Button
+              type="submit"
+              onClick={handleRelease}
+              disabled={!thought.trim()}
+            >
               <Send className="h-4 w-4" />
             </Button>
           </div>
         </div>
       )}
-       <Button variant="ghost" className="absolute bottom-8 text-white/80 hover:text-white bg-black/10 hover:bg-black/20" onClick={() => router.push('/dashboard/journey')}>
+      <Button
+        variant="ghost"
+        className="absolute bottom-8 text-white/80 hover:text-white bg-black/10 hover:bg-black/20"
+        onClick={() => router.push('/dashboard/journey')}
+      >
         Geri Dön
       </Button>
     </div>

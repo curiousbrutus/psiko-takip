@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -61,49 +60,76 @@
 }
 
 @keyframes fade-in {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 @keyframes scale-up {
-    from { transform: scale(0.8); }
-    to { transform: scale(1); }
+  from {
+    transform: scale(0.8);
+  }
+  to {
+    transform: scale(1);
+  }
 }
 @keyframes scale-down {
-    from { transform: scale(1); }
-    to { transform: scale(0.8); }
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(0.8);
+  }
 }
 
 @keyframes float-away {
-    0% { transform: translateY(0) scale(1); opacity: 1; }
-    100% { transform: translateY(-100vh) scale(1.2); opacity: 0; }
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100vh) scale(1.2);
+    opacity: 0;
+  }
 }
 
 @keyframes level-up-fade {
-    0% { opacity: 1; transform: scale(1); }
-    80% { opacity: 1; transform: scale(1.05); }
-    100% { opacity: 0; transform: scale(1.1); }
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  80% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.1);
+  }
 }
 
 .animate-fade-in {
-    animation: fade-in 0.5s ease-in-out;
+  animation: fade-in 0.5s ease-in-out;
 }
 
 .animate-scale-up {
-    animation-name: scale-up;
-    animation-timing-function: ease-in-out;
-    animation-fill-mode: forwards;
+  animation-name: scale-up;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: forwards;
 }
 .animate-scale-down {
-    animation-name: scale-down;
-    animation-timing-function: ease-in-out;
-    animation-fill-mode: forwards;
+  animation-name: scale-down;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: forwards;
 }
 .animate-float-away {
-    animation: float-away 4s ease-in forwards;
+  animation: float-away 4s ease-in forwards;
 }
 .animate-level-up-fade {
-    animation: level-up-fade 3s ease-in-out forwards;
+  animation: level-up-fade 3s ease-in-out forwards;
 }
 
 .has-appointment {
@@ -112,7 +138,7 @@
 .day-today.has-appointment::after {
   background-color: hsl(var(--accent-foreground));
 }
-.has-appointment:not([aria-selected=true]):not(.day-today)::after {
+.has-appointment:not([aria-selected='true']):not(.day-today)::after {
   content: '';
   position: absolute;
   bottom: 8px;

@@ -1,4 +1,3 @@
-
 'use server';
 
 import { db, auth } from '@/lib/firebase/config';
@@ -20,7 +19,7 @@ export async function assignTaskAction(
   }
 
   const { clientId, clientName, therapistId } = validation.data;
-  
+
   const newTask = {
     clientId,
     clientName,
@@ -58,14 +57,12 @@ export async function assignTaskAction(
   }
 }
 
-
 const assignAssessmentSchema = z.object({
   clientId: z.string(),
   clientName: z.string(),
   therapistId: z.string(),
   testName: z.enum(['GAD-7', 'PHQ-9', 'TherapeuticAlliance']),
 });
-
 
 export async function assignAssessmentAction(
   input: z.infer<typeof assignAssessmentSchema>
@@ -76,7 +73,7 @@ export async function assignAssessmentAction(
   }
 
   const { clientId, clientName, therapistId, testName } = validation.data;
-  
+
   const newAssessment = {
     clientId,
     clientName,
@@ -93,7 +90,10 @@ export async function assignAssessmentAction(
     return { success: true, message: 'Değerlendirme başarıyla atandı.' };
   } catch (error) {
     console.error('Error assigning assessment:', error);
-    return { success: false, message: 'Değerlendirme atanırken bir hata oluştu.' };
+    return {
+      success: false,
+      message: 'Değerlendirme atanırken bir hata oluştu.',
+    };
   }
 }
 
@@ -106,43 +106,47 @@ const submitAssessmentSchema = z.object({
   score: z.number(),
 });
 
-
 export async function submitAssessmentAction(
-    input: z.infer<typeof submitAssessmentSchema>
+  input: z.infer<typeof submitAssessmentSchema>
 ): Promise<{ success: boolean; error?: string }> {
-    const validation = submitAssessmentSchema.safeParse(input);
+  const validation = submitAssessmentSchema.safeParse(input);
 
-    if (!validation.success) {
-        return { success: false, error: 'Geçersiz form verisi.' };
-    }
+  if (!validation.success) {
+    return { success: false, error: 'Geçersiz form verisi.' };
+  }
 
-    const { taskId, userId, testName, answers, score, allianceScore } = validation.data;
+  const { taskId, userId, testName, answers, score, allianceScore } =
+    validation.data;
 
-    try {
-        const userDocRef = doc(db, 'users', userId);
-        const userDocSnap = await getDoc(userDocRef);
-        const therapistId = userDocSnap.exists() ? userDocSnap.data().connectedTherapist : null;
+  try {
+    const userDocRef = doc(db, 'users', userId);
+    const userDocSnap = await getDoc(userDocRef);
+    const therapistId = userDocSnap.exists()
+      ? userDocSnap.data().connectedTherapist
+      : null;
 
-        await addDoc(collection(db, 'assessmentResults'), {
-            userId,
-            therapistId,
-            testName,
-            answers,
-            score,
-            ...(allianceScore && { allianceScore }),
-            completedAt: serverTimestamp(),
-        });
+    await addDoc(collection(db, 'assessmentResults'), {
+      userId,
+      therapistId,
+      testName,
+      answers,
+      score,
+      ...(allianceScore && { allianceScore }),
+      completedAt: serverTimestamp(),
+    });
 
-        const taskRef = doc(db, 'assessmentTasks', taskId);
-        await updateDoc(taskRef, {
-            status: 'completed',
-            completedAt: serverTimestamp(),
-        });
-        
-        return { success: true };
+    const taskRef = doc(db, 'assessmentTasks', taskId);
+    await updateDoc(taskRef, {
+      status: 'completed',
+      completedAt: serverTimestamp(),
+    });
 
-    } catch (error) {
-        console.error("Error submitting assessment:", error);
-        return { success: false, error: 'Değerlendirme gönderilirken bir hata oluştu.' };
-    }
+    return { success: true };
+  } catch (error) {
+    console.error('Error submitting assessment:', error);
+    return {
+      success: false,
+      error: 'Değerlendirme gönderilirken bir hata oluştu.',
+    };
+  }
 }

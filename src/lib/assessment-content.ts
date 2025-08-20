@@ -1,4 +1,3 @@
-
 export type AssessmentQuestion = {
   id: string;
   text: string;
@@ -19,7 +18,8 @@ export const assessments: Assessment[] = [
   {
     name: 'GAD-7',
     title: 'Yaygın Anksiyete Bozukluğu-7 (GAD-7)',
-    description: 'Son 2 hafta içinde, aşağıdaki sorunlar tarafından ne sıklıkla rahatsız edildiniz?',
+    description:
+      'Son 2 hafta içinde, aşağıdaki sorunlar tarafından ne sıklıkla rahatsız edildiniz?',
     questions: [
       {
         id: 'q1',
@@ -41,7 +41,7 @@ export const assessments: Assessment[] = [
           { text: 'Neredeyse her gün', score: 3 },
         ],
       },
-       {
+      {
         id: 'q3',
         text: 'Farklı şeyler hakkında çok fazla endişelenme',
         options: [
@@ -51,7 +51,7 @@ export const assessments: Assessment[] = [
           { text: 'Neredeyse her gün', score: 3 },
         ],
       },
-       {
+      {
         id: 'q4',
         text: 'Rahatlamada zorluk çekme',
         options: [
@@ -61,7 +61,7 @@ export const assessments: Assessment[] = [
           { text: 'Neredeyse her gün', score: 3 },
         ],
       },
-       {
+      {
         id: 'q5',
         text: 'O kadar huzursuz olma ki yerinde durmak zor',
         options: [
@@ -71,7 +71,7 @@ export const assessments: Assessment[] = [
           { text: 'Neredeyse her gün', score: 3 },
         ],
       },
-       {
+      {
         id: 'q6',
         text: 'Kolayca sinirlenme veya alıngan olma',
         options: [
@@ -81,7 +81,7 @@ export const assessments: Assessment[] = [
           { text: 'Neredeyse her gün', score: 3 },
         ],
       },
-       {
+      {
         id: 'q7',
         text: 'Kötü bir şey olacakmış gibi korkma hissi',
         options: [
@@ -96,7 +96,8 @@ export const assessments: Assessment[] = [
   {
     name: 'PHQ-9',
     title: 'Hasta Sağlık Anketi-9 (PHQ-9)',
-    description: 'Son 2 hafta içinde, aşağıdaki sorunlar tarafından ne sıklıkla rahatsız edildiniz?',
+    description:
+      'Son 2 hafta içinde, aşağıdaki sorunlar tarafından ne sıklıkla rahatsız edildiniz?',
     questions: [
       {
         id: 'q1',
@@ -118,7 +119,7 @@ export const assessments: Assessment[] = [
           { text: 'Neredeyse her gün', score: 3 },
         ],
       },
-       {
+      {
         id: 'q3',
         text: 'Uykuya dalmada veya uykuda kalmada güçlük, ya da çok fazla uyuma',
         options: [
@@ -128,7 +129,7 @@ export const assessments: Assessment[] = [
           { text: 'Neredeyse her gün', score: 3 },
         ],
       },
-       {
+      {
         id: 'q4',
         text: 'Yorgun veya az enerjili hissetme',
         options: [
@@ -138,7 +139,7 @@ export const assessments: Assessment[] = [
           { text: 'Neredeyse her gün', score: 3 },
         ],
       },
-       {
+      {
         id: 'q5',
         text: 'İştahsızlık veya aşırı yeme',
         options: [
@@ -148,7 +149,7 @@ export const assessments: Assessment[] = [
           { text: 'Neredeyse her gün', score: 3 },
         ],
       },
-       {
+      {
         id: 'q6',
         text: 'Kendiniz hakkında kötü hissetme - ya da bir başarısızlık olduğunuzu veya kendinizi ya da ailenizi hayal kırıklığına uğrattığınızı düşünme',
         options: [
@@ -158,7 +159,7 @@ export const assessments: Assessment[] = [
           { text: 'Neredeyse her gün', score: 3 },
         ],
       },
-       {
+      {
         id: 'q7',
         text: 'Bir şeyler okurken veya TV izlerken konsantre olmakta zorluk çekme',
         options: [
@@ -190,10 +191,11 @@ export const assessments: Assessment[] = [
       },
     ],
   },
-   {
+  {
     name: 'TherapeuticAlliance',
     title: 'Terapötik İttifak Anketi',
-    description: 'Lütfen terapistiniz ve seanslarınız hakkındaki düşüncelerinizi paylaşın.',
+    description:
+      'Lütfen terapistiniz ve seanslarınız hakkındaki düşüncelerinizi paylaşın.',
     questions: [
       {
         id: 'a1',
@@ -206,7 +208,7 @@ export const assessments: Assessment[] = [
           { text: 'Kesinlikle Katılıyorum', score: 5 },
         ],
       },
-       {
+      {
         id: 'a2',
         text: 'Seanslarımızın hedeflerimize yönelik ilerlediğini düşünüyorum.',
         options: [
@@ -217,7 +219,7 @@ export const assessments: Assessment[] = [
           { text: 'Kesinlikle Katılıyorum', score: 5 },
         ],
       },
-       {
+      {
         id: 'a3',
         text: 'Terapistime güvendiğimi hissediyorum.',
         options: [
