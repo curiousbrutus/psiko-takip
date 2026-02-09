@@ -1,0 +1,67 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Next.js
+.next
+out
+dist
+build
+
+# Testing
+coverage
+.nyc_output
+*.log
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Documentation (not needed in image)
+*.md
+docs
+
+# CI/CD
+.github
+
+# Firebase (legacy)
+.firebase
+firebase.json
+.firebaserc
+
+# Misc
+.prettierrc
+.eslintrc.json
+.prettierignore
+
+# Database dumps
+*.dmp
+*.sql.bak
+backups/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
