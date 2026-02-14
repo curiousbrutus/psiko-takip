@@ -2,16 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import { db } from '@/lib/firebase/config';
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  orderBy,
-  Timestamp,
-  DocumentData,
-} from 'firebase/firestore';
+import { apiGetAppointments } from '@/lib/api-client';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
@@ -30,7 +21,7 @@ import { Video, Clock, Loader2 } from 'lucide-react';
 export default function ClientCalendarPage() {
   const { user, loading: authLoading } = useAuth();
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [appointments, setAppointments] = useState<DocumentData[]>([]);
+  const [appointments, setAppointments] = useState<Record<string, any>[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -42,19 +33,15 @@ export default function ClientCalendarPage() {
 
       setLoading(true);
       try {
-        const q = query(
-          collection(db, 'appointments'),
-          where('clientId', '==', user.uid),
-          orderBy('appointmentDate', 'asc')
-        );
-        const querySnapshot = await getDocs(q);
-        const fetchedAppointments = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          // Convert Firestore Timestamp to JS Date
-          appointmentDate: (doc.data().appointmentDate as Timestamp).toDate(),
-        }));
-        setAppointments(fetchedAppointments);
+        const result = await apiGetAppointments('client');
+        if (result.success && result.data) {
+          const fetchedAppointments = result.data.map((app: any) => ({
+            ...app,
+            // Convert ISO string to JS Date
+            appointmentDate: new Date(app.appointmentDate),
+          }));
+          setAppointments(fetchedAppointments);
+        }
       } catch (error) {
         console.error('Error fetching appointments:', error);
       } finally {

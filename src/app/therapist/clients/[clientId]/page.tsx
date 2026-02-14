@@ -2,18 +2,12 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import { db } from '@/lib/firebase/config';
 import {
-  doc,
-  getDoc,
-  collection,
-  query,
-  where,
-  orderBy,
-  getDocs,
-  DocumentData,
-  Timestamp,
-} from 'firebase/firestore';
+  apiGetClientDetail,
+  apiGetCollaborativeTasks,
+  apiGetAssessmentTasks,
+  apiFetch,
+} from '@/lib/api-client';
 import { useParams, useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -65,11 +59,11 @@ import {
 import { assignTaskAction, assignAssessmentAction } from './task-actions';
 import ProgressChart from './_components/progress-chart';
 
-interface SharedJournal extends DocumentData {
+interface SharedJournal {
   id: string;
   content: string;
   prompt: string;
-  createdAt: Timestamp;
+  createdAt: string;
 }
 
 export default function ClientProfilePage() {
@@ -80,11 +74,11 @@ export default function ClientProfilePage() {
 
   const clientId = params.clientId as string;
 
-  const [clientData, setClientData] = useState<DocumentData | null>(null);
+  const [clientData, setClientData] = useState<any | null>(null);
   const [sharedJournals, setSharedJournals] = useState<SharedJournal[]>([]);
-  const [testResults, setTestResults] = useState<DocumentData[]>([]);
-  const [assignedTasks, setAssignedTasks] = useState<DocumentData[]>([]);
-  const [assessmentResults, setAssessmentResults] = useState<DocumentData[]>(
+  const [testResults, setTestResults] = useState<any[]>([]);
+  const [assignedTasks, setAssignedTasks] = useState<any[]>([]);
+  const [assessmentResults, setAssessmentResults] = useState<any[]>(
     []
   );
 
@@ -139,10 +133,10 @@ export default function ClientProfilePage() {
     setLoadingAssessments(true);
 
     try {
-      const clientDocRef = doc(db, 'users', clientId);
-      const clientDocSnap = await getDoc(clientDocRef);
-      if (clientDocSnap.exists()) {
-        setClientData(clientDocSnap.data());
+      // Fetch client detail
+      const clientResponse = await apiGetClientDetail(clientId);
+      if (clientResponse.success && clientResponse.data) {
+        setClientData(clientResponse.data);
       } else {
         toast({
           title: 'Hata',
@@ -152,53 +146,56 @@ export default function ClientProfilePage() {
         router.push('/therapist/clients');
         return;
       }
+      setLoadingClient(false);
 
-      const journalsQuery = query(
-        collection(db, 'journalEntries'),
-        where('userId', '==', clientId),
-        where('isShared', '==', true),
-        orderBy('createdAt', 'desc')
-      );
-      const journalsSnapshot = await getDocs(journalsQuery);
-      setSharedJournals(
-        journalsSnapshot.docs.map(
-          doc => ({ id: doc.id, ...doc.data() }) as SharedJournal
-        )
-      );
+      // Fetch shared journals
+      try {
+        const journalsResponse = await apiFetch(`/journal-entries?userId=${clientId}&isShared=true`);
+        if (journalsResponse.success && journalsResponse.data) {
+          setSharedJournals(journalsResponse.data);
+        }
+      } catch {
+        console.error('Error fetching journals');
+      }
+      setLoadingJournals(false);
 
-      const resultsQuery = query(
-        collection(db, 'testSubmissions'),
-        where('userId', '==', clientId),
-        orderBy('createdAt', 'desc')
-      );
-      const resultsSnapshot = await getDocs(resultsQuery);
-      setTestResults(
-        resultsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-      );
+      // Fetch test results
+      try {
+        const resultsResponse = await apiFetch(`/test-submissions?userId=${clientId}`);
+        if (resultsResponse.success && resultsResponse.data) {
+          setTestResults(resultsResponse.data);
+        }
+      } catch {
+        console.error('Error fetching test results');
+      }
+      setLoadingResults(false);
 
-      const tasksQuery = query(
-        collection(db, 'collaborativeTasks'),
-        where('clientId', '==', clientId),
-        orderBy('assignedAt', 'desc')
-      );
-      const tasksSnapshot = await getDocs(tasksQuery);
-      setAssignedTasks(
-        tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-      );
+      // Fetch collaborative tasks
+      try {
+        const tasksResponse = await apiGetCollaborativeTasks(clientId);
+        if (tasksResponse.success && tasksResponse.data) {
+          setAssignedTasks(tasksResponse.data);
+        }
+      } catch {
+        console.error('Error fetching tasks');
+      }
+      setLoadingTasks(false);
 
-      const assessmentsQuery = query(
-        collection(db, 'assessmentResults'),
-        where('userId', '==', clientId),
-        orderBy('completedAt', 'asc')
-      );
-      const assessmentsSnapshot = await getDocs(assessmentsQuery);
-      setAssessmentResults(
-        assessmentsSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          completedAt: doc.data().completedAt.toDate(),
-        }))
-      );
+      // Fetch assessment results
+      try {
+        const assessmentsResponse = await apiFetch(`/assessment-results?userId=${clientId}`);
+        if (assessmentsResponse.success && assessmentsResponse.data) {
+          setAssessmentResults(
+            assessmentsResponse.data.map((item: any) => ({
+              ...item,
+              completedAt: item.completedAt ? new Date(item.completedAt) : null,
+            }))
+          );
+        }
+      } catch {
+        console.error('Error fetching assessments');
+      }
+      setLoadingAssessments(false);
     } catch (error) {
       console.error('Error fetching client data:', error);
       toast({
@@ -206,7 +203,6 @@ export default function ClientProfilePage() {
         description: 'Veriler alınırken bir hata oluştu.',
         variant: 'destructive',
       });
-    } finally {
       setLoadingClient(false);
       setLoadingJournals(false);
       setLoadingResults(false);
@@ -612,7 +608,7 @@ export default function ClientProfilePage() {
                         </CardTitle>
                         <CardDescription>
                           {format(
-                            journal.createdAt.toDate(),
+                            new Date(journal.createdAt),
                             'd MMMM yyyy, HH:mm',
                             { locale: tr }
                           )}
@@ -668,7 +664,7 @@ export default function ClientProfilePage() {
                             {result.testName}
                           </span>
                           <span className="text-muted-foreground text-sm">
-                            {format(result.createdAt.toDate(), 'd MMMM yyyy', {
+                            {format(new Date(result.createdAt), 'd MMMM yyyy', {
                               locale: tr,
                             })}
                           </span>

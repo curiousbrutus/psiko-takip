@@ -43,3 +43,32 @@ next-env.d.ts
 # firebase
 firebase-debug.log
 firestore-debug.log
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# logs
+*.log
+logs/
+
+# trash folder (old/unused files)
+_trash/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+nul
+
+# Claude temp files
+tmpclaude-*
+
+# Debug scripts
+scripts/debug/
+
+# Misc binaries
+*.exe

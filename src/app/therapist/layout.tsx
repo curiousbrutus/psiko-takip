@@ -14,7 +14,6 @@ import {
 import { Logo } from '@/components/logo';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
-import { auth } from '@/lib/firebase/config';
 import { useRouter, usePathname } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import TherapistHeaderTitle from './_components/header-title';
@@ -56,13 +55,13 @@ export default function TherapistLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, userData } = useAuth();
+  const { user, userData, logout } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
   const handleLogout = async () => {
     try {
-      await auth.signOut();
+      await logout();
       toast({
         title: 'Çıkış Yapıldı',
         description: 'Başarıyla çıkış yaptınız.',

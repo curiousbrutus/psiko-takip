@@ -2,17 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import { db } from '@/lib/firebase/config';
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  doc,
-  getDoc,
-  Timestamp,
-  DocumentData,
-} from 'firebase/firestore';
+import { apiGetClients } from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
@@ -75,7 +65,7 @@ import {
 
 import { addClientAction, updateClientStatusAction } from './actions';
 
-interface Client extends DocumentData {
+interface Client {
   id: string;
   displayName: string;
   email: string;
@@ -128,53 +118,33 @@ export default function ClientsPage() {
       return;
     }
 
-    const therapistId = user.uid;
-
     setLoading(true);
     try {
-      const clientsQuery = query(
-        collection(db, 'users'),
-        where('connectedTherapist', '==', therapistId)
-      );
-      const clientsSnapshot = await getDocs(clientsQuery);
-      const clientDocs = clientsSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      const clientsWithDetails = await Promise.all(
-        clientDocs.map(async clientDoc => {
+      const response = await apiGetClients();
+      if (response.success && response.data) {
+        const clientsWithDetails: Client[] = response.data.map((clientDoc: any) => {
           let lastActivity = 'Aktivite yok';
-          if (clientDoc.status !== 'Davet Edildi') {
-            const gamificationRef = doc(db, 'gamification', clientDoc.id);
-            const gamificationSnap = await getDoc(gamificationRef);
-            if (gamificationSnap.exists()) {
-              const gamificationData = gamificationSnap.data();
-              const lastActivityDate =
-                gamificationData.lastActivityDate as Timestamp;
-              if (lastActivityDate) {
-                lastActivity = formatDistanceToNow(lastActivityDate.toDate(), {
-                  addSuffix: true,
-                  locale: tr,
-                });
-              }
-            }
-          } else {
+          if (clientDoc.status === 'Davet Edildi') {
             lastActivity = 'Davet bekleniyor';
+          } else if (clientDoc.lastActivityDate) {
+            lastActivity = formatDistanceToNow(new Date(clientDoc.lastActivityDate), {
+              addSuffix: true,
+              locale: tr,
+            });
           }
 
           return {
-            id: clientDoc.id,
+            id: clientDoc.userId || clientDoc.id,
             displayName: clientDoc.displayName,
             email: clientDoc.email,
             photoURL: clientDoc.photoURL,
             lastActivity,
             status: clientDoc.status || 'Pasif',
           };
-        })
-      );
+        });
 
-      setClients(clientsWithDetails);
+        setClients(clientsWithDetails);
+      }
     } catch (error) {
       console.error('Error fetching clients:', error);
       toast({

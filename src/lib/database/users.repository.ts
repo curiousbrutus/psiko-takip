@@ -156,7 +156,7 @@ export async function getTherapistClients(therapistId: string): Promise<User[]> 
   const result = await executeQuery<User>(
     `SELECT u.user_id as "userId", u.email, u.display_name as "displayName", 
             u.role, u.status, u.created_at as "createdAt", u.last_login as "lastLogin",
-            g.level, g.current_streak as "currentStreak", g.xp
+            g.user_level as "level", g.current_streak as "currentStreak", g.xp
      FROM users u
      LEFT JOIN gamification g ON u.user_id = g.user_id
      WHERE u.connected_therapist_id = :therapistId AND u.role = 'danisan'
@@ -178,7 +178,7 @@ export async function getUserStats(userId: string): Promise<any> {
         (SELECT COUNT(*) FROM test_submissions WHERE user_id = :userId) as "totalTests",
         (SELECT COUNT(*) FROM appointments WHERE client_id = :userId) as "totalAppointments",
         (SELECT xp FROM gamification WHERE user_id = :userId) as "totalXp",
-        (SELECT level FROM gamification WHERE user_id = :userId) as "currentLevel",
+        (SELECT user_level FROM gamification WHERE user_id = :userId) as "currentLevel",
         (SELECT current_streak FROM gamification WHERE user_id = :userId) as "currentStreak"
      FROM DUAL`,
     { userId }

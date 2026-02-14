@@ -1,15 +1,4 @@
-'use server';
-
-import { db, auth } from '@/lib/firebase/config';
-import {
-  collection,
-  addDoc,
-  serverTimestamp,
-  query,
-  where,
-  getDocs,
-  DocumentData,
-} from 'firebase/firestore';
+import { apiCreateAppointment, apiGetClients } from '@/lib/api-client';
 import { z } from 'zod';
 
 const AddAppointmentSchema = z.object({
@@ -39,15 +28,19 @@ export async function addAppointmentAction(
   }
 
   try {
-    await addDoc(collection(db, 'appointments'), {
+    const response = await apiCreateAppointment({
       ...validation.data,
-      createdAt: serverTimestamp(),
+      appointmentDate: validation.data.appointmentDate.toISOString(),
     });
 
-    // In a real-world app, you would trigger email/push notifications from here
-    // using a service like Firebase Cloud Functions.
+    if (response.success) {
+      return { success: true, message: 'Randevu başarıyla oluşturuldu.' };
+    }
 
-    return { success: true, message: 'Randevu başarıyla oluşturuldu.' };
+    return {
+      success: false,
+      message: response.error || 'Randevu oluşturulurken bir hata oluştu.',
+    };
   } catch (error) {
     console.error('Error adding new appointment:', error);
     return {
@@ -63,20 +56,14 @@ export async function getClientsForTherapistAction(
   if (!therapistId) return [];
 
   try {
-    const q = query(
-      collection(db, 'users'),
-      where('connectedTherapist', '==', therapistId)
-    );
-    const querySnapshot = await getDocs(q);
-
-    if (querySnapshot.empty) {
-      return [];
+    const response = await apiGetClients();
+    if (response.success && response.data) {
+      return response.data.map((client: any) => ({
+        id: client.userId || client.id,
+        displayName: client.displayName,
+      }));
     }
-
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      displayName: doc.data().displayName,
-    }));
+    return [];
   } catch (error) {
     console.error('Error fetching clients for therapist:', error);
     return [];

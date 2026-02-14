@@ -1,14 +1,4 @@
-'use server';
-
-import { analyzeTestResults } from '@/ai/flows/analyze-test-results';
-import { db, auth } from '@/lib/firebase/config';
-import {
-  collection,
-  addDoc,
-  serverTimestamp,
-  doc,
-  getDoc,
-} from 'firebase/firestore';
+import { apiCreateTestSubmission } from '@/lib/api-client';
 import { z } from 'zod';
 
 const BeckTestSchema = z.record(z.string().regex(/^[0-3]$/));
@@ -17,14 +7,6 @@ export async function analyzeBeckTest(
   formData: z.infer<typeof BeckTestSchema>
 ): Promise<{ success: boolean; error?: string }> {
   const validation = BeckTestSchema.safeParse(formData);
-  const user = auth.currentUser;
-
-  if (!user) {
-    return {
-      success: false,
-      error: 'Bu işlemi yapmak için giriş yapmalısınız.',
-    };
-  }
 
   if (!validation.success) {
     return { success: false, error: 'Geçersiz form verisi sağlandı.' };
@@ -39,43 +21,36 @@ export async function analyzeBeckTest(
       0
     );
 
-    // 2. Prepare input for AI flow
-    const testResults = {
+    // 2. Determine severity level
+    let severityLevel: string;
+    if (totalScore <= 13) {
+      severityLevel = 'minimal';
+    } else if (totalScore <= 19) {
+      severityLevel = 'mild';
+    } else if (totalScore <= 28) {
+      severityLevel = 'moderate';
+    } else {
+      severityLevel = 'severe';
+    }
+
+    // 3. Submit test via API
+    const result = await apiCreateTestSubmission(
+      'Beck Depresyon Envanteri (BDE-II)',
       totalScore,
       answers,
-    };
+      severityLevel
+    );
 
-    const input = {
-      testName: 'Beck Depresyon Envanteri (BDE-II)',
-      testResults: testResults,
-      userInformation:
-        'Kullanıcı bu testi mevcut ruh halini anlamak için yapıyor.',
-    };
-
-    // 3. Call AI Flow
-    const analysis = await analyzeTestResults(input);
-
-    // 4. Get therapist ID
-    const userDocRef = doc(db, 'users', user.uid);
-    const userDocSnap = await getDoc(userDocRef);
-    const therapistId = userDocSnap.exists()
-      ? userDocSnap.data().connectedTherapist
-      : null;
-
-    // 5. Save results to Firestore
-    await addDoc(collection(db, 'testSubmissions'), {
-      userId: user.uid,
-      therapistId,
-      testName: input.testName,
-      analysis,
-      createdAt: serverTimestamp(),
-      answers,
-      totalScore,
-    });
-
-    return { success: true };
+    if (result.success) {
+      return { success: true };
+    } else {
+      return {
+        success: false,
+        error: result.error || 'Test sonuçları kaydedilemedi. Lütfen daha sonra tekrar deneyin.',
+      };
+    }
   } catch (error) {
-    console.error('AI analysis or DB operation failed:', error);
+    console.error('Test submission failed:', error);
     return {
       success: false,
       error: 'Test sonuçları kaydedilemedi. Lütfen daha sonra tekrar deneyin.',

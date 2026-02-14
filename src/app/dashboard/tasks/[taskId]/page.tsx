@@ -3,8 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
-import { db } from '@/lib/firebase/config';
-import { doc, onSnapshot, updateDoc, DocumentData } from 'firebase/firestore';
+import { apiGetCollaborativeTask, apiUpdateCollaborativeTask } from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,7 +25,7 @@ export default function CollaborativeTaskPage() {
   const { toast } = useToast();
   const taskId = params.taskId as string;
 
-  const [taskData, setTaskData] = useState<DocumentData | null>(null);
+  const [taskData, setTaskData] = useState<Record<string, any> | null>(null);
   const [loading, setLoading] = useState(true);
   const [clientContent, setClientContent] = useState('');
   const [therapistComment, setTherapistComment] = useState('');
@@ -36,25 +35,35 @@ export default function CollaborativeTaskPage() {
   useEffect(() => {
     if (!taskId) return;
 
-    const taskRef = doc(db, 'collaborativeTasks', taskId);
-    const unsubscribe = onSnapshot(taskRef, snapshot => {
-      if (snapshot.exists()) {
-        const data = snapshot.data();
-        setTaskData(data);
-        setClientContent(data.fields.situation?.clientContent || '');
-        setTherapistComment(data.fields.situation?.therapistComment || ''); // Example for one field
-        setLoading(false);
-      } else {
+    const fetchTask = async () => {
+      try {
+        const result = await apiGetCollaborativeTask(taskId);
+        if (result.success && result.data) {
+          const data = result.data;
+          setTaskData(data);
+          setClientContent(data.fields?.situation?.clientContent || '');
+          setTherapistComment(data.fields?.situation?.therapistComment || '');
+          setLoading(false);
+        } else {
+          toast({
+            title: 'Hata',
+            description: 'Görev bulunamadı.',
+            variant: 'destructive',
+          });
+          router.push(isTherapist ? '/therapist/clients' : '/dashboard/journey');
+        }
+      } catch (error) {
+        console.error('Error fetching collaborative task:', error);
         toast({
           title: 'Hata',
-          description: 'Görev bulunamadı.',
+          description: 'Görev yüklenirken bir sorun oluştu.',
           variant: 'destructive',
         });
         router.push(isTherapist ? '/therapist/clients' : '/dashboard/journey');
       }
-    });
+    };
 
-    return () => unsubscribe();
+    fetchTask();
   }, [taskId, router, toast, isTherapist]);
 
   const handleClientContentChange = (
@@ -65,9 +74,8 @@ export default function CollaborativeTaskPage() {
 
   const handleSaveClientContent = async () => {
     if (!taskId) return;
-    const taskRef = doc(db, 'collaborativeTasks', taskId);
     try {
-      await updateDoc(taskRef, {
+      await apiUpdateCollaborativeTask(taskId, {
         'fields.situation.clientContent': clientContent,
       });
       toast({ title: 'Kaydedildi', description: 'Düşünceleriniz kaydedildi.' });

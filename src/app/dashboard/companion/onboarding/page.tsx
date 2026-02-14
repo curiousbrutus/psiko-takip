@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
-import { db } from '@/lib/firebase/config';
-import { doc, updateDoc } from 'firebase/firestore';
+import { apiSetCompanion } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -30,19 +29,10 @@ export default function CompanionOnboardingPage() {
     if (!selected || !user) return;
     setIsLoading(true);
 
-    const gamificationRef = doc(db, 'gamification', user.uid);
     try {
-      await updateDoc(gamificationRef, {
-        companion: {
-          type: selected,
-          createdAt: new Date(),
-        },
-      });
+      await apiSetCompanion(selected);
       toast({ title: 'Harika seçim!', description: 'Yolculuğun başlıyor.' });
 
-      // The onSnapshot listener on the dashboard will handle the update.
-      // No need to push or refresh here, the listener will see the change
-      // and stop redirecting to this page.
       router.push('/dashboard');
     } catch (error) {
       console.error('Error selecting companion: ', error);

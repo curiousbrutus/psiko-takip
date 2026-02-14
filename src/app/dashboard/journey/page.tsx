@@ -2,22 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import { db } from '@/lib/firebase/config';
 import {
-  collection,
-  addDoc,
-  serverTimestamp,
-  query,
-  where,
-  getDocs,
-  limit,
-  doc,
-  updateDoc,
-  getDoc,
-  increment,
-  runTransaction,
-  DocumentData,
-} from 'firebase/firestore';
+  apiCreateMoodEntry,
+  apiCreateJournalEntry,
+  apiGetJournalEntries,
+  apiUpdateGamification,
+  apiGetAssessmentTasks,
+  apiGetCollaborativeTasks,
+} from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
 import {
   Accordion,
@@ -61,7 +53,6 @@ import Link from 'next/link';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { getXpToNextLevel } from '@/lib/gamification';
-import { getAssignedTasks } from './task-actions';
 
 const moodOptions = [
   { name: 'Mutlu', icon: Smile },
@@ -80,7 +71,7 @@ export default function DailyJourneyPage() {
   const [eveningMood, setEveningMood] = useState<string | null>(null);
   const [minnettar, setMinnettar] = useState('');
   const [gunluk, setGunluk] = useState('');
-  const [assignedTasks, setAssignedTasks] = useState<DocumentData[]>([]);
+  const [assignedTasks, setAssignedTasks] = useState<Record<string, any>[]>([]);
 
   const [isMinnettarShared, setIsMinnettarShared] = useState(false);
   const [isGunlukShared, setIsGunlukShared] = useState(false);
@@ -102,15 +93,15 @@ export default function DailyJourneyPage() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const q = query(
-      collection(db, 'journalEntries'),
-      where('userId', '==', user.uid),
-      where('prompt', '==', taskName),
-      where('createdAt', '>=', today),
-      limit(1)
-    );
-    const querySnapshot = await getDocs(q);
-    return !querySnapshot.empty;
+    try {
+      const result = await apiGetJournalEntries({
+        prompt: taskName,
+        startDate: today.toISOString(),
+      });
+      return result.success && result.data && result.data.length > 0;
+    } catch {
+      return false;
+    }
   };
 
   useEffect(() => {
@@ -121,10 +112,36 @@ export default function DailyJourneyPage() {
         const eveningDone = await checkIfTaskCompletedToday('Serbest Günlük');
         setTasksCompleted({ morning: morningDone, evening: eveningDone });
 
-        const tasksResult = await getAssignedTasks();
-        if (tasksResult.success && tasksResult.data) {
-          setAssignedTasks(tasksResult.data);
+        try {
+          const [assessmentResult, collaborativeResult] = await Promise.all([
+            apiGetAssessmentTasks(),
+            apiGetCollaborativeTasks(),
+          ]);
+
+          const allTasks: Record<string, any>[] = [];
+          if (assessmentResult.success && assessmentResult.data) {
+            allTasks.push(
+              ...assessmentResult.data.map((t: any) => ({ ...t, type: 'assessment' }))
+            );
+          }
+          if (collaborativeResult.success && collaborativeResult.data) {
+            allTasks.push(
+              ...collaborativeResult.data.map((t: any) => ({ ...t, type: 'collaborative' }))
+            );
+          }
+
+          // Sort by assignedAt descending
+          allTasks.sort((a, b) => {
+            const dateA = new Date(a.assignedAt).getTime();
+            const dateB = new Date(b.assignedAt).getTime();
+            return dateB - dateA;
+          });
+
+          setAssignedTasks(allTasks);
+        } catch (error) {
+          console.error('Error fetching assigned tasks:', error);
         }
+
         setLoading(prev => ({ ...prev, tasks: false }));
       }
     };
@@ -134,35 +151,8 @@ export default function DailyJourneyPage() {
   const updateGamificationStats = async (xp: number) => {
     if (!user) return;
 
-    const gamificationRef = doc(db, 'gamification', user.uid);
-
     try {
-      await runTransaction(db, async transaction => {
-        const gamificationDoc = await transaction.get(gamificationRef);
-        if (!gamificationDoc.exists()) {
-          console.error('Gamification document does not exist!');
-          return;
-        }
-
-        let data = gamificationDoc.data();
-        let newXp = (data.xp || 0) + xp;
-        let newLevel = data.level || 1;
-        let xpToNextLevel = getXpToNextLevel(newLevel);
-
-        while (newXp >= xpToNextLevel) {
-          newXp -= xpToNextLevel;
-          newLevel++;
-          xpToNextLevel = getXpToNextLevel(newLevel);
-        }
-
-        // TODO: Add streak logic here
-
-        transaction.update(gamificationRef, {
-          xp: newXp,
-          level: newLevel,
-          lastActivityDate: serverTimestamp(),
-        });
-      });
+      await apiUpdateGamification(xp);
       toast({
         title: 'Harika!',
         description: `Yoldaşın +${xp} Enerji kazandı!`,
@@ -202,20 +192,8 @@ export default function DailyJourneyPage() {
           setLoading(prev => ({ ...prev, morning: false }));
           return;
         }
-        await addDoc(collection(db, 'moodEntries'), {
-          userId: user.uid,
-          mood: morningMood,
-          triggers: [],
-          createdAt: serverTimestamp(),
-          period: 'morning',
-        });
-        await addDoc(collection(db, 'journalEntries'), {
-          userId: user.uid,
-          content: morningNiyet,
-          prompt: 'Günün Niyeti',
-          isShared: false, // Morning intentions are private by default
-          createdAt: serverTimestamp(),
-        });
+        await apiCreateMoodEntry(morningMood, 'morning');
+        await apiCreateJournalEntry(morningNiyet, 'Günün Niyeti', false);
         xpGained = 10;
       }
 
@@ -229,27 +207,13 @@ export default function DailyJourneyPage() {
           setLoading(prev => ({ ...prev, evening: false }));
           return;
         }
-        await addDoc(collection(db, 'moodEntries'), {
-          userId: user.uid,
-          mood: eveningMood,
-          triggers: [],
-          createdAt: serverTimestamp(),
-          period: 'evening',
-        });
-        await addDoc(collection(db, 'journalEntries'), {
-          userId: user.uid,
-          content: minnettar,
-          prompt: 'Bugün minnettar olduğun 3 şey nedir?',
-          isShared: isMinnettarShared,
-          createdAt: serverTimestamp(),
-        });
-        await addDoc(collection(db, 'journalEntries'), {
-          userId: user.uid,
-          content: gunluk,
-          prompt: 'Serbest Günlük',
-          isShared: isGunlukShared,
-          createdAt: serverTimestamp(),
-        });
+        await apiCreateMoodEntry(eveningMood, 'evening');
+        await apiCreateJournalEntry(
+          minnettar,
+          'Bugün minnettar olduğun 3 şey nedir?',
+          isMinnettarShared
+        );
+        await apiCreateJournalEntry(gunluk, 'Serbest Günlük', isGunlukShared);
         xpGained = 15;
       }
 
@@ -278,7 +242,7 @@ export default function DailyJourneyPage() {
     }
   };
 
-  const getTaskLink = (task: DocumentData) => {
+  const getTaskLink = (task: Record<string, any>) => {
     if (task.type === 'assessment') {
       return `/dashboard/assessment/${task.id}`;
     }
@@ -326,9 +290,7 @@ export default function DailyJourneyPage() {
                           <p className="font-semibold">{task.title}</p>
                           <p className="text-sm text-muted-foreground">
                             Atanma tarihi:{' '}
-                            {task.assignedAt
-                              .toDate()
-                              .toLocaleDateString('tr-TR')}
+                            {new Date(task.assignedAt).toLocaleDateString('tr-TR')}
                           </p>
                         </div>
                       </div>

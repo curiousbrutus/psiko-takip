@@ -2,16 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import { db } from '@/lib/firebase/config';
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  orderBy,
-  Timestamp,
-  DocumentData,
-} from 'firebase/firestore';
+import { apiGetAppointments, apiGetClients } from '@/lib/api-client';
 import { format, setHours, setMinutes, parse } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { useForm } from 'react-hook-form';
@@ -19,7 +10,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 
-import { addAppointmentAction, getClientsForTherapistAction } from './actions';
+import { addAppointmentAction } from './actions';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -69,7 +60,7 @@ export default function CalendarPage() {
   const { user, userData, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [appointments, setAppointments] = useState<DocumentData[]>([]);
+  const [appointments, setAppointments] = useState<any[]>([]);
   const [clients, setClients] = useState<{ id: string; displayName: string }[]>(
     []
   );
@@ -84,18 +75,14 @@ export default function CalendarPage() {
     if (!user) return;
     setLoading(true);
     try {
-      const q = query(
-        collection(db, 'appointments'),
-        where('therapistId', '==', user.uid),
-        orderBy('appointmentDate', 'asc')
-      );
-      const querySnapshot = await getDocs(q);
-      const fetchedAppointments = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        appointmentDate: (doc.data().appointmentDate as Timestamp).toDate(),
-      }));
-      setAppointments(fetchedAppointments);
+      const response = await apiGetAppointments('therapist');
+      if (response.success && response.data) {
+        const fetchedAppointments = response.data.map((app: any) => ({
+          ...app,
+          appointmentDate: new Date(app.appointmentDate),
+        }));
+        setAppointments(fetchedAppointments);
+      }
     } catch (error) {
       toast({
         title: 'Hata',
@@ -107,10 +94,26 @@ export default function CalendarPage() {
     }
   };
 
+  const fetchClients = async () => {
+    try {
+      const response = await apiGetClients();
+      if (response.success && response.data) {
+        setClients(
+          response.data.map((c: any) => ({
+            id: c.userId || c.id,
+            displayName: c.displayName,
+          }))
+        );
+      }
+    } catch (error) {
+      console.error('Error fetching clients:', error);
+    }
+  };
+
   useEffect(() => {
     if (!authLoading && user) {
       fetchAppointments();
-      getClientsForTherapistAction(user.uid).then(setClients);
+      fetchClients();
     } else if (!authLoading && !user) {
       setLoading(false);
     }

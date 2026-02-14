@@ -1,17 +1,4 @@
-'use server';
-
-import { db, auth } from '@/lib/firebase/config';
-import {
-  collection,
-  doc,
-  writeBatch,
-  serverTimestamp,
-  arrayUnion,
-  query,
-  where,
-  getDocs,
-  updateDoc,
-} from 'firebase/firestore';
+import { apiFetch, apiConnectClient } from '@/lib/api-client';
 import { z } from 'zod';
 
 const AddClientSchema = z.object({
@@ -41,7 +28,6 @@ export async function addClientAction(
   // Handle Demo User Case
   if (therapistId === 'demo-therapist') {
     console.log('Demo therapist is adding a client. Simulating success.');
-    // We can't actually write to DB without a real user, so we just return success for the UI test.
     return {
       success: true,
       message: `${fullName} başarıyla davet edildi. (Demo)`,
@@ -49,47 +35,25 @@ export async function addClientAction(
   }
 
   try {
-    const existingUserQuery = query(
-      collection(db, 'users'),
-      where('email', '==', email)
-    );
-    const existingUserSnapshot = await getDocs(existingUserQuery);
-    if (!existingUserSnapshot.empty) {
+    const response = await apiFetch('/users/clients', {
+      method: 'POST',
+      body: JSON.stringify({
+        fullName,
+        email,
+        ...(phone && { phone }),
+      }),
+    });
+
+    if (response.success) {
       return {
-        success: false,
-        message: 'Bu e-posta adresine sahip bir kullanıcı zaten mevcut.',
+        success: true,
+        message: `${fullName} başarıyla davet edildi. Kaydı tamamlamaları için bilgilendirme yapabilirsiniz.`,
       };
     }
 
-    const batch = writeBatch(db);
-
-    const newClientRef = doc(collection(db, 'users'));
-
-    const newClientData = {
-      uid: newClientRef.id,
-      displayName: fullName,
-      email,
-      ...(phone && { phone }),
-      role: 'danisan',
-      status: 'Davet Edildi',
-      createdAt: serverTimestamp(),
-      connectedTherapist: therapistId,
-      organizationId: null,
-      subscription: { status: 'free', expires: null },
-    };
-
-    batch.set(newClientRef, newClientData);
-
-    const therapistRef = doc(db, 'users', therapistId);
-    batch.update(therapistRef, {
-      danisanlarim: arrayUnion(newClientRef.id),
-    });
-
-    await batch.commit();
-
     return {
-      success: true,
-      message: `${fullName} başarıyla davet edildi. Kaydı tamamlamaları için bilgilendirme yapabilirsiniz.`,
+      success: false,
+      message: response.error || 'Danışan eklenirken bir hata oluştu.',
     };
   } catch (error) {
     console.error('Error adding new client:', error);
@@ -116,9 +80,19 @@ export async function updateClientStatusAction(
   const { clientId, status } = validation.data;
 
   try {
-    const clientRef = doc(db, 'users', clientId);
-    await updateDoc(clientRef, { status: status });
-    return { success: true, message: 'Danışan durumu güncellendi.' };
+    const response = await apiFetch(`/users/clients/${clientId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    });
+
+    if (response.success) {
+      return { success: true, message: 'Danışan durumu güncellendi.' };
+    }
+
+    return {
+      success: false,
+      message: response.error || 'Durum güncellenirken bir hata oluştu.',
+    };
   } catch (error) {
     console.error('Error updating client status:', error);
     return { success: false, message: 'Durum güncellenirken bir hata oluştu.' };

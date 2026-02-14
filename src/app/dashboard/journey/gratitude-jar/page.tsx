@@ -15,7 +15,6 @@ import {
 import { Loader2, Plus, HelpCircle, ArrowLeft, Wind } from 'lucide-react';
 import { addGratitudeEntry, getGratitudeEntries } from './actions';
 import { useToast } from '@/hooks/use-toast';
-import type { DocumentData } from 'firebase/firestore';
 
 const JarIcon = ({ entryCount }: { entryCount: number }) => (
   <div className="relative w-48 h-48 my-4">
@@ -42,12 +41,12 @@ const JarIcon = ({ entryCount }: { entryCount: number }) => (
 );
 
 export default function GratitudeJarPage() {
-  const [entries, setEntries] = useState<DocumentData[]>([]);
+  const [entries, setEntries] = useState<Record<string, any>[]>([]);
   const [newEntry, setNewEntry] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [shownEntry, setShownEntry] = useState<DocumentData | null>(null);
+  const [shownEntry, setShownEntry] = useState<Record<string, any> | null>(null);
 
   const router = useRouter();
   const { toast } = useToast();

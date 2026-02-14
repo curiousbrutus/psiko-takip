@@ -1,15 +1,4 @@
-'use server';
-
-import { db, auth } from '@/lib/firebase/config';
-import {
-  collection,
-  addDoc,
-  serverTimestamp,
-  query,
-  where,
-  getDocs,
-  DocumentData,
-} from 'firebase/firestore';
+import { apiCreateGratitudeEntry, apiGetGratitudeEntries } from '@/lib/api-client';
 import { z } from 'zod';
 
 const GratitudeSchema = z.object({
@@ -20,23 +9,14 @@ const GratitudeSchema = z.object({
 });
 
 export async function addGratitudeEntry(content: string) {
-  const user = auth.currentUser;
-  if (!user) {
-    return { success: false, error: 'Giriş yapmalısınız.' };
-  }
-
   const validation = GratitudeSchema.safeParse({ content });
   if (!validation.success) {
     return { success: false, error: validation.error.errors[0].message };
   }
 
   try {
-    const docRef = await addDoc(collection(db, 'gratitudeJarEntries'), {
-      userId: user.uid,
-      content: validation.data.content,
-      createdAt: serverTimestamp(),
-    });
-    return { success: true, id: docRef.id };
+    const result = await apiCreateGratitudeEntry(validation.data.content);
+    return result;
   } catch (error) {
     console.error('Error adding gratitude entry:', error);
     return { success: false, error: 'Anı eklenirken bir hata oluştu.' };
@@ -45,26 +25,12 @@ export async function addGratitudeEntry(content: string) {
 
 export async function getGratitudeEntries(): Promise<{
   success: boolean;
-  data?: DocumentData[];
+  data?: Record<string, any>[];
   error?: string;
 }> {
-  const user = auth.currentUser;
-  if (!user) {
-    return { success: false, error: 'Giriş yapmalısınız.' };
-  }
-
   try {
-    const q = query(
-      collection(db, 'gratitudeJarEntries'),
-      where('userId', '==', user.uid),
-      orderBy('createdAt', 'desc')
-    );
-    const querySnapshot = await getDocs(q);
-    const entries = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    return { success: true, data: entries };
+    const result = await apiGetGratitudeEntries();
+    return result;
   } catch (error) {
     console.error('Error fetching gratitude entries:', error);
     return { success: false, error: 'Anılar alınırken bir hata oluştu.' };
