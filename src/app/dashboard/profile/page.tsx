@@ -2,14 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import { db, auth } from '@/lib/firebase/config';
-import { doc, updateDoc } from 'firebase/firestore';
-import {
-  updateProfile,
-  updatePassword,
-  reauthenticateWithCredential,
-  EmailAuthProvider,
-} from 'firebase/auth';
+import { apiUpdateProfile, apiChangePassword } from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -64,14 +57,7 @@ export default function ProfilePage() {
     setLoadingProfile(true);
 
     try {
-      // Update Firestore
-      const userDocRef = doc(db, 'users', user.uid);
-      await updateDoc(userDocRef, { displayName: fullName });
-
-      // Update Auth profile
-      if (auth.currentUser) {
-        await updateProfile(auth.currentUser, { displayName: fullName });
-      }
+      await apiUpdateProfile(fullName);
 
       toast({ title: 'Başarılı', description: 'Profiliniz güncellendi.' });
     } catch (error) {
@@ -107,18 +93,11 @@ export default function ProfilePage() {
     setLoadingPassword(true);
 
     try {
-      if (user.email) {
-        const credential = EmailAuthProvider.credential(
-          user.email,
-          currentPassword
-        );
-        await reauthenticateWithCredential(user, credential);
-        await updatePassword(user, newPassword);
-        toast({ title: 'Başarılı', description: 'Şifreniz değiştirildi.' });
-        setCurrentPassword('');
-        setNewPassword('');
-        setConfirmPassword('');
-      }
+      await apiChangePassword(currentPassword, newPassword);
+      toast({ title: 'Başarılı', description: 'Şifreniz değiştirildi.' });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
     } catch (error) {
       console.error(error);
       toast({

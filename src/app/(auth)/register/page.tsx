@@ -3,16 +3,8 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import {
-  createUserWithEmailAndPassword,
-  updateProfile,
-  signInWithPopup,
-  GoogleAuthProvider,
-} from 'firebase/auth';
-import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase/config';
+import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
-import { getRandomSymbol } from '@/lib/profile-symbols';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -28,114 +20,12 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Loader2 } from 'lucide-react';
 
-function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" {...props}>
-      <path
-        fill="#FFC107"
-        d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"
-      />
-      <path
-        fill="#FF3D00"
-        d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"
-      />
-      <path
-        fill="#4CAF50"
-        d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.222,0-9.657-3.467-11.303-8H6.306C9.656,39.663,16.318,44,24,44z"
-      />
-      <path
-        fill="#1976D2"
-        d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571l6.19,5.238C42.021,35.591,44,30.138,44,24C44,22.659,43.862,21.35,43.611,20.083z"
-      />
-    </svg>
-  );
-}
-
 export default function RegisterPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const { register } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const [role, setRole] = useState<'danisan' | 'terapist'>('danisan');
-
-  const handleGoogleSignIn = async () => {
-    setGoogleLoading(true);
-    const provider = new GoogleAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-
-      const userDocRef = doc(db, 'users', user.uid);
-      const userDoc = await getDoc(userDocRef);
-
-      if (!userDoc.exists()) {
-        const randomSymbol = getRandomSymbol();
-        await setDoc(userDocRef, {
-          uid: user.uid,
-          displayName: user.displayName,
-          email: user.email,
-          photoURL: user.photoURL,
-          profileSymbol: randomSymbol.emoji,
-          role: 'danisan',
-          organizationId: null,
-          createdAt: serverTimestamp(),
-          subscription: { status: 'free', expires: null },
-          connectedTherapist: null,
-        });
-        await setDoc(doc(db, 'gamification', user.uid), {
-          xp: 0,
-          level: 1,
-          currentStreak: 0,
-          lastActivityDate: null,
-          companion: { type: 'animal', createdAt: new Date() },
-        });
-        toast({
-          title: 'Hoş Geldiniz!',
-          description: 'Hesabınız başarıyla oluşturuldu.',
-        });
-      } else {
-        toast({
-          title: 'Giriş Başarılı',
-          description: `Tekrar hoş geldiniz, ${user.displayName}!`,
-        });
-      }
-
-      router.push('/dashboard');
-    } catch (error: any) {
-      console.error('Google ile giriş hatası:', error);
-      let errorMessage =
-        'Google ile giriş yapılamadı. Lütfen daha sonra tekrar deneyin.';
-      if (error.code) {
-        switch (error.code) {
-          case 'auth/popup-closed-by-user':
-            errorMessage =
-              'Giriş penceresini kapattınız. Lütfen tekrar deneyin.';
-            break;
-          case 'auth/popup-blocked':
-            errorMessage =
-              "Tarayıcınız giriş penceresini engelledi. Lütfen bu site için pop-up'lara izin verin.";
-            break;
-          case 'auth/unauthorized-domain':
-            errorMessage =
-              'Bu web sitesi, Google ile giriş için yetkilendirilmemiş. Lütfen uygulama yöneticisiyle iletişime geçin.';
-            break;
-          case 'auth/cancelled-popup-request':
-            errorMessage = 'Aynı anda birden fazla giriş penceresi açılamaz.';
-            break;
-          default:
-            // Keep the generic message for other Firebase errors
-            break;
-        }
-      }
-      toast({
-        title: 'Hata',
-        description: errorMessage,
-        variant: 'destructive',
-      });
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
 
   const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -156,67 +46,17 @@ export default function RegisterPage() {
     }
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const user = userCredential.user;
+      await register(email, password, fullName, role);
 
-      await updateProfile(user, { displayName: fullName });
-
-      const randomSymbol = getRandomSymbol();
-
-      // Determine role and status based on selection
-      const isTherapistRole = role === 'terapist';
-      const finalRole = isTherapistRole ? 'pending_therapist' : 'danisan';
-
-      await setDoc(doc(db, 'users', user.uid), {
-        uid: user.uid,
-        displayName: fullName,
-        email: user.email,
-        profileSymbol: randomSymbol.emoji,
-        role: finalRole,
-        ...(isTherapistRole && { status: 'pending' }),
-        organizationId: null,
-        createdAt: serverTimestamp(),
-        subscription: { status: 'free', expires: null },
-        ...(isTherapistRole && { danisanlarim: [] }),
-        ...(role === 'danisan' && { connectedTherapist: null }),
+      toast({
+        title: 'Başarılı',
+        description: 'Hesabınız başarıyla oluşturuldu.',
       });
-
-      // Create gamification document for 'danisan' role
-      if (role === 'danisan') {
-        await setDoc(doc(db, 'gamification', user.uid), {
-          xp: 0,
-          level: 1,
-          currentStreak: 0,
-          lastActivityDate: null,
-          companion: { type: 'animal', createdAt: new Date() },
-        });
-      }
-
-      if (isTherapistRole) {
-        toast({
-          title: 'Başvurunuz Alındı',
-          description:
-            'Terapist hesabınız inceleniyor. Onaylandığında size e-posta ile bilgi verilecektir.',
-        });
-        router.push('/login');
-      } else {
-        toast({
-          title: 'Başarılı',
-          description: 'Hesabınız başarıyla oluşturuldu.',
-        });
-        router.push('/dashboard');
-      }
+      router.push('/dashboard');
     } catch (error: any) {
-      let errorMessage = 'Bir hata oluştu. Lütfen tekrar deneyin.';
-      if (error.code === 'auth/email-already-in-use') {
+      let errorMessage = error.message || 'Bir hata oluştu. Lütfen tekrar deneyin.';
+      if (errorMessage.includes('zaten kullanılıyor')) {
         errorMessage = 'Bu e-posta adresi zaten kullanılıyor.';
-      } else if (error.code === 'auth/weak-password') {
-        errorMessage =
-          'Şifre çok zayıf. Lütfen en az 6 karakterli bir şifre seçin.';
       }
       toast({
         title: 'Kayıt Başarısız',
@@ -236,29 +76,6 @@ export default function RegisterPage() {
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
-        <Button
-          variant="outline"
-          type="button"
-          onClick={handleGoogleSignIn}
-          disabled={loading || googleLoading}
-        >
-          {googleLoading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <GoogleIcon className="mr-2 h-4 w-4" />
-          )}
-          Google ile Kaydol (Danışan)
-        </Button>
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
-              Veya e-posta ile
-            </span>
-          </div>
-        </div>
         <form onSubmit={handleRegister} className="grid gap-4">
           <div className="grid gap-2">
             <Label>Ben bir...</Label>
@@ -302,7 +119,6 @@ export default function RegisterPage() {
               id="full-name"
               placeholder="Adınız Soyadınız"
               required
-              disabled={googleLoading}
             />
           </div>
           <div className="grid gap-2">
@@ -313,7 +129,6 @@ export default function RegisterPage() {
               type="email"
               placeholder="m@example.com"
               required
-              disabled={googleLoading}
             />
           </div>
           <div className="grid gap-2">
@@ -323,13 +138,12 @@ export default function RegisterPage() {
               id="password"
               type="password"
               required
-              disabled={googleLoading}
             />
           </div>
           <Button
             className="w-full"
             type="submit"
-            disabled={loading || googleLoading}
+            disabled={loading}
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {role === 'terapist' ? 'Terapist Olarak Başvur' : 'Hesap Oluştur'}

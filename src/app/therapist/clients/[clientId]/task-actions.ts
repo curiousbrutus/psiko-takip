@@ -1,7 +1,9 @@
-'use server';
-
-import { db, auth } from '@/lib/firebase/config';
-import { collection, addDoc, serverTimestamp, doc } from 'firebase/firestore';
+import {
+  apiCreateCollaborativeTask,
+  apiCreateAssessmentTask,
+  apiCreateAssessmentResult,
+  apiFetch,
+} from '@/lib/api-client';
 import { z } from 'zod';
 
 const assignTaskSchema = z.object({
@@ -26,7 +28,6 @@ export async function assignTaskAction(
     therapistId,
     title: 'Düşünce Kaydı',
     status: 'assigned',
-    assignedAt: serverTimestamp(),
     completedAt: null,
     fields: {
       situation: {
@@ -49,8 +50,14 @@ export async function assignTaskAction(
   };
 
   try {
-    await addDoc(collection(db, 'collaborativeTasks'), newTask);
-    return { success: true, message: 'Görev başarıyla atandı.' };
+    const response = await apiCreateCollaborativeTask(newTask);
+    if (response.success) {
+      return { success: true, message: 'Görev başarıyla atandı.' };
+    }
+    return {
+      success: false,
+      message: response.error || 'Görev atanırken bir hata oluştu.',
+    };
   } catch (error) {
     console.error('Error assigning task:', error);
     return { success: false, message: 'Görev atanırken bir hata oluştu.' };
@@ -81,13 +88,18 @@ export async function assignAssessmentAction(
     testName,
     title: `${testName} Değerlendirmesi`,
     status: 'assigned',
-    assignedAt: serverTimestamp(),
     completedAt: null,
   };
 
   try {
-    await addDoc(collection(db, 'assessmentTasks'), newAssessment);
-    return { success: true, message: 'Değerlendirme başarıyla atandı.' };
+    const response = await apiCreateAssessmentTask(newAssessment);
+    if (response.success) {
+      return { success: true, message: 'Değerlendirme başarıyla atandı.' };
+    }
+    return {
+      success: false,
+      message: response.error || 'Değerlendirme atanırken bir hata oluştu.',
+    };
   } catch (error) {
     console.error('Error assigning assessment:', error);
     return {
@@ -119,26 +131,28 @@ export async function submitAssessmentAction(
     validation.data;
 
   try {
-    const userDocRef = doc(db, 'users', userId);
-    const userDocSnap = await getDoc(userDocRef);
-    const therapistId = userDocSnap.exists()
-      ? userDocSnap.data().connectedTherapist
-      : null;
-
-    await addDoc(collection(db, 'assessmentResults'), {
+    // Create the assessment result
+    const resultResponse = await apiCreateAssessmentResult({
       userId,
-      therapistId,
       testName,
       answers,
       score,
       ...(allianceScore && { allianceScore }),
-      completedAt: serverTimestamp(),
     });
 
-    const taskRef = doc(db, 'assessmentTasks', taskId);
-    await updateDoc(taskRef, {
-      status: 'completed',
-      completedAt: serverTimestamp(),
+    if (!resultResponse.success) {
+      return {
+        success: false,
+        error: resultResponse.error || 'Değerlendirme sonucu kaydedilemedi.',
+      };
+    }
+
+    // Update the assessment task status to completed
+    await apiFetch(`/assessment-tasks/${taskId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        status: 'completed',
+      }),
     });
 
     return { success: true };

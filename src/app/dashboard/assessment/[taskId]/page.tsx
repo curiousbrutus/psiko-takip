@@ -6,8 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
-import { db } from '@/lib/firebase/config';
-import { doc, getDoc, DocumentData } from 'firebase/firestore';
+import { apiGetAssessmentTask } from '@/lib/api-client';
 
 import { assessments } from '@/lib/assessment-content';
 import { Button } from '@/components/ui/button';
@@ -34,7 +33,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 
 export default function AssessmentPage() {
-  const [taskData, setTaskData] = useState<DocumentData | null>(null);
+  const [taskData, setTaskData] = useState<Record<string, any> | null>(null);
   const [assessment, setAssessment] = useState<(typeof assessments)[0] | null>(
     null
   );
@@ -68,23 +67,32 @@ export default function AssessmentPage() {
     if (!taskId) return;
 
     const fetchTask = async () => {
-      const taskRef = doc(db, 'assessmentTasks', taskId);
-      const taskSnap = await getDoc(taskRef);
-      if (taskSnap.exists()) {
-        const data = taskSnap.data();
-        if (data.status === 'completed') {
-          setIsCompleted(true);
-          return;
+      try {
+        const result = await apiGetAssessmentTask(taskId);
+        if (result.success && result.data) {
+          const data = result.data;
+          if (data.status === 'completed') {
+            setIsCompleted(true);
+            return;
+          }
+          setTaskData(data);
+          const foundAssessment = assessments.find(a => a.name === data.testName);
+          if (foundAssessment) {
+            setAssessment(foundAssessment as (typeof assessments)[0]);
+          }
+        } else {
+          toast({
+            title: 'Hata',
+            description: 'Değerlendirme bulunamadı.',
+            variant: 'destructive',
+          });
+          router.push('/dashboard/journey');
         }
-        setTaskData(data);
-        const foundAssessment = assessments.find(a => a.name === data.testName);
-        if (foundAssessment) {
-          setAssessment(foundAssessment as (typeof assessments)[0]);
-        }
-      } else {
+      } catch (error) {
+        console.error('Error fetching assessment task:', error);
         toast({
           title: 'Hata',
-          description: 'Değerlendirme bulunamadı.',
+          description: 'Değerlendirme yüklenirken bir sorun oluştu.',
           variant: 'destructive',
         });
         router.push('/dashboard/journey');

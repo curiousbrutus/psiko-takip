@@ -1,10 +1,8 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import { db } from '@/lib/firebase/config';
-import { doc, onSnapshot } from 'firebase/firestore';
-import type { DocumentData, Timestamp } from 'firebase/firestore';
+import { apiGetGamification } from '@/lib/api-client';
 import {
   Card,
   CardContent,
@@ -30,7 +28,7 @@ interface DailyInsight {
 
 export default function DashboardPage() {
   const { user, userData } = useAuth();
-  const [gamificationData, setGamificationData] = useState<DocumentData | null>(
+  const [gamificationData, setGamificationData] = useState<Record<string, any> | null>(
     null
   );
   const [dailyInsight, setDailyInsight] = useState<DailyInsight | null>(null);
@@ -39,12 +37,12 @@ export default function DashboardPage() {
 
   const prevLevel = useRef<number | null>(null);
 
-  const generateDailyInsight = (lastActivityDate: Timestamp | null) => {
+  const generateDailyInsight = useCallback((lastActivityDate: string | Date | null) => {
     let insight: DailyInsight;
     const now = new Date();
 
     if (lastActivityDate) {
-      const lastActivity = lastActivityDate.toDate();
+      const lastActivity = new Date(lastActivityDate);
       const hoursSinceLastActivity =
         (now.getTime() - lastActivity.getTime()) / (1000 * 60 * 60);
 
@@ -73,7 +71,7 @@ export default function DashboardPage() {
       };
     }
     setDailyInsight(insight);
-  };
+  }, []);
 
   useEffect(() => {
     if (!user) {
@@ -81,30 +79,36 @@ export default function DashboardPage() {
       return;
     }
 
-    const gamificationRef = doc(db, 'gamification', user.uid);
-    const unsubscribe = onSnapshot(gamificationRef, doc => {
-      if (doc.exists()) {
-        const data = doc.data();
+    const fetchGamification = async () => {
+      try {
+        const result = await apiGetGamification();
+        if (result.success && result.data) {
+          const data = result.data;
 
-        if (prevLevel.current !== null && data.level > prevLevel.current) {
-          setShowLevelUp(true);
-          setTimeout(() => setShowLevelUp(false), 3000); // Hide after 3 seconds
-        }
-        prevLevel.current = data.level;
+          if (prevLevel.current !== null && data.level > prevLevel.current) {
+            setShowLevelUp(true);
+            setTimeout(() => setShowLevelUp(false), 3000);
+          }
+          prevLevel.current = data.level;
 
-        setGamificationData(data);
-        generateDailyInsight(data.lastActivityDate);
-        if (!data.companion) {
+          setGamificationData(data);
+          generateDailyInsight(data.lastActivityDate);
+          if (!data.companion) {
+            router.push('/dashboard/companion/onboarding');
+          }
+        } else if (userData) {
           router.push('/dashboard/companion/onboarding');
         }
-      } else if (userData) {
-        // If gamification doc doesn't exist but user is logged in, they need onboarding.
-        router.push('/dashboard/companion/onboarding');
+      } catch (error) {
+        console.error('Error fetching gamification data:', error);
+        if (userData) {
+          router.push('/dashboard/companion/onboarding');
+        }
       }
-    });
+    };
 
-    return () => unsubscribe();
-  }, [user, userData, router]);
+    fetchGamification();
+  }, [user, userData, router, generateDailyInsight]);
 
   const CompanionCard = () => {
     if (!gamificationData || !gamificationData.companion) {
