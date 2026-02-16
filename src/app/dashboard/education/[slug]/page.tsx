@@ -2,10 +2,7 @@
 
 import { useState } from 'react';
 import { notFound, useRouter } from 'next/navigation';
-import {
-  educationModules,
-  type EducationModule,
-} from '@/lib/education-content';
+import { educationModules } from '@/lib/education-content';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -82,9 +79,9 @@ export default function EducationModulePage({
   const [isCompleted, setIsCompleted] = useState(false);
   const router = useRouter();
 
-  const module = educationModules.find(m => m.slug === params.slug);
+  const educationModule = educationModules.find(m => m.slug === params.slug);
 
-  if (!module) {
+  if (!educationModule) {
     notFound();
   }
 
@@ -107,14 +104,14 @@ export default function EducationModulePage({
       <Card>
         <CardHeader>
           <CardTitle className="text-3xl font-headline">
-            {module.title}
+            {educationModule.title}
           </CardTitle>
-          <CardDescription>{module.description}</CardDescription>
+          <CardDescription>{educationModule.description}</CardDescription>
         </CardHeader>
         <Separator className="my-2" />
         <CardContent className="pt-6">
           <article>
-            <ContentRenderer content={module.content} />
+            <ContentRenderer content={educationModule.content} />
           </article>
         </CardContent>
       </Card>

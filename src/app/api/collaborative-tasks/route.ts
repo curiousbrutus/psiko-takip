@@ -5,7 +5,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { authMiddleware, AuthenticatedRequest } from '@/middleware/auth.middleware';
+import {
+  authMiddleware,
+  AuthenticatedRequest,
+} from '@/middleware/auth.middleware';
 import { executeQuery, generateId } from '@/lib/database/config';
 
 async function postHandler(request: AuthenticatedRequest) {
@@ -38,10 +41,13 @@ async function postHandler(request: AuthenticatedRequest) {
       { autoCommit: true }
     );
 
-    return NextResponse.json({
-      success: true,
-      data: { taskId }
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        success: true,
+        data: { taskId },
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Create collaborative task error:', error);
     return NextResponse.json(
@@ -85,7 +91,7 @@ async function getHandler(request: AuthenticatedRequest) {
 
     return NextResponse.json({
       success: true,
-      data: result.rows || []
+      data: result.rows || [],
     });
   } catch (error) {
     console.error('Get collaborative tasks error:', error);

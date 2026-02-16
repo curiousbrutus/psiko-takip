@@ -1,4 +1,9 @@
-import { retryWithBackoff, safeAsync, logError, createUserFriendlyError } from '@/lib/error-handling';
+import {
+  retryWithBackoff,
+  safeAsync,
+  logError,
+  createUserFriendlyError,
+} from '@/lib/error-handling';
 
 describe('Error Handling Utilities', () => {
   describe('safeAsync', () => {
@@ -55,27 +60,30 @@ describe('Error Handling Utilities', () => {
     it('should succeed on first try', async () => {
       const successFn = jest.fn().mockResolvedValue('success');
       const result = await retryWithBackoff(successFn, 3, 10);
-      
+
       expect(result).toBe('success');
       expect(successFn).toHaveBeenCalledTimes(1);
     });
 
     it('should retry and eventually succeed', async () => {
-      const fn = jest.fn()
+      const fn = jest
+        .fn()
         .mockRejectedValueOnce(new Error('fail 1'))
         .mockRejectedValueOnce(new Error('fail 2'))
         .mockResolvedValueOnce('success');
-      
+
       const result = await retryWithBackoff(fn, 3, 10);
-      
+
       expect(result).toBe('success');
       expect(fn).toHaveBeenCalledTimes(3);
     });
 
     it('should throw after max retries', async () => {
       const failFn = jest.fn().mockRejectedValue(new Error('always fail'));
-      
-      await expect(retryWithBackoff(failFn, 2, 10)).rejects.toThrow('always fail');
+
+      await expect(retryWithBackoff(failFn, 2, 10)).rejects.toThrow(
+        'always fail'
+      );
       expect(failFn).toHaveBeenCalledTimes(3); // initial + 2 retries
     });
   });
@@ -95,7 +103,7 @@ describe('Error Handling Utilities', () => {
     it('should log error with context', () => {
       const error = new Error('test error');
       logError(error, 'test context');
-      
+
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Application Error:',
         expect.objectContaining({
@@ -108,7 +116,7 @@ describe('Error Handling Utilities', () => {
 
     it('should handle non-Error objects', () => {
       logError('string error', 'test context');
-      
+
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         'Application Error:',
         expect.objectContaining({

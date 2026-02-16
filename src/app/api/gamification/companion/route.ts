@@ -4,7 +4,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { authMiddleware, AuthenticatedRequest } from '@/middleware/auth.middleware';
+import {
+  authMiddleware,
+  AuthenticatedRequest,
+} from '@/middleware/auth.middleware';
 import { executeQuery } from '@/lib/database/config';
 
 async function putHandler(request: AuthenticatedRequest) {

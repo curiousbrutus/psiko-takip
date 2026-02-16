@@ -1,9 +1,12 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
-import { apiGetCollaborativeTask, apiUpdateCollaborativeTask } from '@/lib/api-client';
+import {
+  apiGetCollaborativeTask,
+  apiUpdateCollaborativeTask,
+} from '@/lib/api-client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,10 +19,10 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 
 export default function CollaborativeTaskPage() {
-  const { user, userData } = useAuth();
+  const { userData } = useAuth();
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
@@ -50,7 +53,9 @@ export default function CollaborativeTaskPage() {
             description: 'Görev bulunamadı.',
             variant: 'destructive',
           });
-          router.push(isTherapist ? '/therapist/clients' : '/dashboard/journey');
+          router.push(
+            isTherapist ? '/therapist/clients' : '/dashboard/journey'
+          );
         }
       } catch (error) {
         console.error('Error fetching collaborative task:', error);
@@ -79,7 +84,7 @@ export default function CollaborativeTaskPage() {
         'fields.situation.clientContent': clientContent,
       });
       toast({ title: 'Kaydedildi', description: 'Düşünceleriniz kaydedildi.' });
-    } catch (error) {
+    } catch {
       toast({
         title: 'Hata',
         description: 'Kaydedilirken bir sorun oluştu.',

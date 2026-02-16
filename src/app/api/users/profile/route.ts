@@ -4,8 +4,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { authMiddleware, AuthenticatedRequest } from '@/middleware/auth.middleware';
-import { updateUserProfile, getUserById } from '@/lib/database/users.repository';
+import {
+  authMiddleware,
+  AuthenticatedRequest,
+} from '@/middleware/auth.middleware';
+import { updateUserProfile } from '@/lib/database/users.repository';
 
 async function putHandler(request: AuthenticatedRequest) {
   try {
@@ -15,7 +18,10 @@ async function putHandler(request: AuthenticatedRequest) {
 
     if (!displayName && !phone) {
       return NextResponse.json(
-        { error: 'Guncellenecek en az bir alan gereklidir (displayName veya phone)' },
+        {
+          error:
+            'Guncellenecek en az bir alan gereklidir (displayName veya phone)',
+        },
         { status: 400 }
       );
     }
@@ -27,7 +33,7 @@ async function putHandler(request: AuthenticatedRequest) {
 
     return NextResponse.json({
       success: true,
-      user: updatedUser
+      user: updatedUser,
     });
   } catch (error) {
     console.error('Update profile error:', error);

@@ -4,7 +4,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { authMiddleware, AuthenticatedRequest } from '@/middleware/auth.middleware';
+import {
+  authMiddleware,
+  AuthenticatedRequest,
+} from '@/middleware/auth.middleware';
 import { executeQuery } from '@/lib/database/config';
 import { getUserById } from '@/lib/database/users.repository';
 
@@ -29,7 +32,8 @@ async function getHandler(request: AuthenticatedRequest, clientId: string) {
     }
 
     const clientData: any = client;
-    const connectedTherapistId = clientData.connectedTherapistId || clientData.CONNECTED_THERAPIST_ID;
+    const connectedTherapistId =
+      clientData.connectedTherapistId || clientData.CONNECTED_THERAPIST_ID;
 
     if (connectedTherapistId !== user.userId) {
       return NextResponse.json(
@@ -39,7 +43,14 @@ async function getHandler(request: AuthenticatedRequest, clientId: string) {
     }
 
     // Fetch client's data in parallel
-    const [journalResult, testResult, appointmentResult, taskResult, moodResult, gamificationResult] = await Promise.all([
+    const [
+      journalResult,
+      testResult,
+      appointmentResult,
+      taskResult,
+      moodResult,
+      gamificationResult,
+    ] = await Promise.all([
       executeQuery(
         `SELECT entry_id as "entryId", content, prompt, is_shared as "isShared", created_at as "createdAt"
          FROM journal_entries WHERE user_id = :clientId AND is_shared = 1
@@ -91,10 +102,11 @@ async function getHandler(request: AuthenticatedRequest, clientId: string) {
         appointments: appointmentResult.rows || [],
         tasks: taskResult.rows || [],
         moods: moodResult.rows || [],
-        gamification: gamificationResult.rows && gamificationResult.rows.length > 0
-          ? gamificationResult.rows[0]
-          : null,
-      }
+        gamification:
+          gamificationResult.rows && gamificationResult.rows.length > 0
+            ? gamificationResult.rows[0]
+            : null,
+      },
     });
   } catch (error) {
     console.error('Get client detail error:', error);
@@ -110,5 +122,5 @@ export async function GET(
   { params }: { params: Promise<{ clientId: string }> }
 ) {
   const { clientId } = await params;
-  return authMiddleware(request, (req) => getHandler(req, clientId));
+  return authMiddleware(request, req => getHandler(req, clientId));
 }

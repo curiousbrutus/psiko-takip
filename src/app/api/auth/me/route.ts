@@ -6,7 +6,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { authMiddleware, AuthenticatedRequest } from '@/middleware/auth.middleware';
+import {
+  authMiddleware,
+  AuthenticatedRequest,
+} from '@/middleware/auth.middleware';
 import { getUserById } from '@/lib/database/users.repository';
 
 async function handler(request: AuthenticatedRequest) {

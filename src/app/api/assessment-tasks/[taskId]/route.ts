@@ -4,7 +4,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { authMiddleware, AuthenticatedRequest } from '@/middleware/auth.middleware';
+import {
+  authMiddleware,
+  AuthenticatedRequest,
+} from '@/middleware/auth.middleware';
 import { executeQuery } from '@/lib/database/config';
 
 async function getHandler(request: AuthenticatedRequest, taskId: string) {
@@ -47,7 +50,7 @@ async function getHandler(request: AuthenticatedRequest, taskId: string) {
 
     return NextResponse.json({
       success: true,
-      data: row
+      data: row,
     });
   } catch (error) {
     console.error('Get assessment task error:', error);
@@ -63,5 +66,5 @@ export async function GET(
   { params }: { params: Promise<{ taskId: string }> }
 ) {
   const { taskId } = await params;
-  return authMiddleware(request, (req) => getHandler(req, taskId));
+  return authMiddleware(request, req => getHandler(req, taskId));
 }

@@ -5,7 +5,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { authMiddleware, AuthenticatedRequest } from '@/middleware/auth.middleware';
+import {
+  authMiddleware,
+  AuthenticatedRequest,
+} from '@/middleware/auth.middleware';
 import { executeQuery } from '@/lib/database/config';
 
 async function getHandler(request: AuthenticatedRequest) {
@@ -23,7 +26,15 @@ async function getHandler(request: AuthenticatedRequest) {
     if (!result.rows || result.rows.length === 0) {
       return NextResponse.json({
         success: true,
-        data: { xp: 0, level: 1, currentStreak: 0, longestStreak: 0, companion: null, lastActivityDate: null, totalTasksCompleted: 0 }
+        data: {
+          xp: 0,
+          level: 1,
+          currentStreak: 0,
+          longestStreak: 0,
+          companion: null,
+          lastActivityDate: null,
+          totalTasksCompleted: 0,
+        },
       });
     }
 
@@ -35,13 +46,17 @@ async function getHandler(request: AuthenticatedRequest) {
         level: row.level || row.LEVEL || 1,
         currentStreak: row.currentStreak || row.CURRENT_STREAK || 0,
         longestStreak: row.longestStreak || row.LONGEST_STREAK || 0,
-        companion: row.companion_type || row.COMPANION_TYPE ? {
-          type: row.companion_type || row.COMPANION_TYPE,
-          createdAt: row.companion_created_at || row.COMPANION_CREATED_AT
-        } : null,
+        companion:
+          row.companion_type || row.COMPANION_TYPE
+            ? {
+                type: row.companion_type || row.COMPANION_TYPE,
+                createdAt: row.companion_created_at || row.COMPANION_CREATED_AT,
+              }
+            : null,
         lastActivityDate: row.lastActivityDate || row.LAST_ACTIVITY_DATE,
-        totalTasksCompleted: row.totalTasksCompleted || row.TOTAL_TASKS_COMPLETED || 0,
-      }
+        totalTasksCompleted:
+          row.totalTasksCompleted || row.TOTAL_TASKS_COMPLETED || 0,
+      },
     });
   } catch (error) {
     console.error('Get gamification error:', error);
@@ -56,7 +71,7 @@ async function putHandler(request: AuthenticatedRequest) {
   try {
     const user = request.user!;
     const body = await request.json();
-    const { xp, activityType } = body;
+    const { xp } = body;
 
     // Check if gamification record exists
     const existing = await executeQuery(

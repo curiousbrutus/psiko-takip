@@ -1,11 +1,15 @@
 /**
  * Authentication Middleware for API Routes
- * 
+ *
  * This middleware validates JWT tokens and adds user information to the request
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAccessToken, extractTokenFromHeader, JWTPayload } from '../lib/auth/jwt';
+import {
+  verifyAccessToken,
+  extractTokenFromHeader,
+  JWTPayload,
+} from '../lib/auth/jwt';
 
 export interface AuthenticatedRequest extends NextRequest {
   user?: JWTPayload;
@@ -21,26 +25,26 @@ export async function authMiddleware(
   try {
     const authHeader = request.headers.get('authorization');
     const token = extractTokenFromHeader(authHeader);
-    
+
     if (!token) {
       return NextResponse.json(
         { error: 'Yetkilendirme başlığı eksik' },
         { status: 401 }
       );
     }
-    
+
     const user = verifyAccessToken(token);
-    
+
     if (!user) {
       return NextResponse.json(
         { error: 'Geçersiz veya süresi dolmuş token' },
         { status: 401 }
       );
     }
-    
+
     // Add user to request
     (request as AuthenticatedRequest).user = user;
-    
+
     return await handler(request as AuthenticatedRequest);
   } catch (error) {
     console.error('Authentication middleware error:', error);
@@ -60,21 +64,21 @@ export async function roleMiddleware(
   handler: (request: AuthenticatedRequest) => Promise<NextResponse>
 ): Promise<NextResponse> {
   const user = request.user;
-  
+
   if (!user) {
     return NextResponse.json(
       { error: 'Kullanıcı bilgisi bulunamadı' },
       { status: 401 }
     );
   }
-  
+
   if (!allowedRoles.includes(user.role)) {
     return NextResponse.json(
       { error: 'Bu işlem için yetkiniz yok' },
       { status: 403 }
     );
   }
-  
+
   return await handler(request);
 }
 
@@ -86,7 +90,7 @@ export async function authAndRoleMiddleware(
   allowedRoles: string[],
   handler: (request: AuthenticatedRequest) => Promise<NextResponse>
 ): Promise<NextResponse> {
-  return authMiddleware(request, async (authReq) => {
+  return authMiddleware(request, async authReq => {
     return roleMiddleware(authReq, allowedRoles, handler);
   });
 }
@@ -94,7 +98,9 @@ export async function authAndRoleMiddleware(
 /**
  * Extract user from request
  */
-export function getUserFromRequest(request: AuthenticatedRequest): JWTPayload | null {
+export function getUserFromRequest(
+  request: AuthenticatedRequest
+): JWTPayload | null {
   return request.user || null;
 }
 

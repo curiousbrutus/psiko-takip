@@ -4,12 +4,14 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { authMiddleware, AuthenticatedRequest } from '@/middleware/auth.middleware';
+import {
+  authMiddleware,
+  AuthenticatedRequest,
+} from '@/middleware/auth.middleware';
 import { searchUsers } from '@/lib/database/users.repository';
 
 async function getHandler(request: AuthenticatedRequest) {
   try {
-    const user = request.user!;
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q') || searchParams.get('query');
     const role = searchParams.get('role');
@@ -25,7 +27,7 @@ async function getHandler(request: AuthenticatedRequest) {
 
     return NextResponse.json({
       success: true,
-      data: users
+      data: users,
     });
   } catch (error) {
     console.error('Search users error:', error);

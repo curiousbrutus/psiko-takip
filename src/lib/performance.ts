@@ -43,10 +43,12 @@ export class PerformanceMonitor {
     };
 
     this.metrics.push(metric);
-    
+
     // Log slow operations (> 100ms)
     if (duration > 100) {
-      console.warn(`Slow operation detected: ${name} took ${duration.toFixed(2)}ms`);
+      console.warn(
+        `Slow operation detected: ${name} took ${duration.toFixed(2)}ms`
+      );
     }
 
     return duration;
@@ -91,8 +93,11 @@ export class PerformanceMonitor {
   static getAverageDuration(name: string): number {
     const metrics = this.getMetricsFor(name);
     if (metrics.length === 0) return 0;
-    
-    const totalDuration = metrics.reduce((sum, metric) => sum + metric.duration, 0);
+
+    const totalDuration = metrics.reduce(
+      (sum, metric) => sum + metric.duration,
+      0
+    );
     return totalDuration / metrics.length;
   }
 
@@ -137,10 +142,7 @@ export class PerformanceMonitor {
 export function measureComponentRender(componentName: string) {
   return function <T extends React.ComponentType<any>>(Component: T): T {
     const MeasuredComponent = (props: any) => {
-      const startTime = performance.now();
-      
       React.useEffect(() => {
-        const duration = performance.now() - startTime;
         PerformanceMonitor.endTimer(`${componentName}-render`, {
           component: componentName,
         });
@@ -158,11 +160,14 @@ export function measureComponentRender(componentName: string) {
 /**
  * Simple React hook for measuring render performance
  */
-export function usePerformanceMetric(name: string, dependencies: React.DependencyList = []) {
+export function usePerformanceMetric(
+  name: string,
+  dependencies: React.DependencyList = []
+) {
   React.useEffect(() => {
     const timer = `${name}-${Date.now()}`;
     PerformanceMonitor.startTimer(timer);
-    
+
     return () => {
       PerformanceMonitor.endTimer(timer);
     };

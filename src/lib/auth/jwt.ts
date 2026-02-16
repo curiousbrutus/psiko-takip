@@ -1,6 +1,6 @@
 /**
  * JWT Authentication Utilities
- * 
+ *
  * This module handles JWT token generation, verification, and validation
  * for the local authentication system replacing Firebase Auth.
  */
@@ -8,8 +8,11 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key-change-in-production';
+const JWT_SECRET =
+  process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_REFRESH_SECRET =
+  process.env.JWT_REFRESH_SECRET ||
+  'your-refresh-secret-key-change-in-production';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '15m'; // Access token expires in 15 minutes
 const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '7d'; // Refresh token expires in 7 days
 
@@ -37,7 +40,10 @@ export async function hashPassword(password: string): Promise<string> {
 /**
  * Verify a password against its hash
  */
-export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+export async function verifyPassword(
+  password: string,
+  hash: string
+): Promise<boolean> {
   return await bcrypt.compare(password, hash);
 }
 
@@ -69,11 +75,11 @@ export function generateRefreshToken(payload: JWTPayload): string {
 export function generateTokenPair(payload: JWTPayload): TokenPair {
   const accessToken = generateAccessToken(payload);
   const refreshToken = generateRefreshToken(payload);
-  
+
   // Calculate expiration time in seconds
   const expiresIn = jwt.decode(accessToken) as any;
   const expirationTime = expiresIn.exp - Math.floor(Date.now() / 1000);
-  
+
   return {
     accessToken,
     refreshToken,
@@ -128,23 +134,26 @@ export function decodeToken(token: string): any {
 /**
  * Validate password strength
  */
-export function validatePassword(password: string): { valid: boolean; message?: string } {
+export function validatePassword(password: string): {
+  valid: boolean;
+  message?: string;
+} {
   if (password.length < 8) {
     return { valid: false, message: 'Şifre en az 8 karakter olmalıdır' };
   }
-  
+
   if (!/[a-z]/.test(password)) {
     return { valid: false, message: 'Şifre en az bir küçük harf içermelidir' };
   }
-  
+
   if (!/[A-Z]/.test(password)) {
     return { valid: false, message: 'Şifre en az bir büyük harf içermelidir' };
   }
-  
+
   if (!/[0-9]/.test(password)) {
     return { valid: false, message: 'Şifre en az bir rakam içermelidir' };
   }
-  
+
   return { valid: true };
 }
 
@@ -159,16 +168,18 @@ export function validateEmail(email: string): boolean {
 /**
  * Extract token from Authorization header
  */
-export function extractTokenFromHeader(authHeader: string | null): string | null {
+export function extractTokenFromHeader(
+  authHeader: string | null
+): string | null {
   if (!authHeader) {
     return null;
   }
-  
+
   const parts = authHeader.split(' ');
   if (parts.length !== 2 || parts[0] !== 'Bearer') {
     return null;
   }
-  
+
   return parts[1];
 }
 
@@ -188,10 +199,10 @@ export function isTokenExpired(token: string): boolean {
     if (!decoded || !decoded.exp) {
       return true;
     }
-    
+
     const currentTime = Math.floor(Date.now() / 1000);
     return decoded.exp < currentTime;
-  } catch (error) {
+  } catch {
     return true;
   }
 }
@@ -203,7 +214,7 @@ export function getTokenExpiration(token: string): number | null {
   try {
     const decoded = jwt.decode(token) as any;
     return decoded?.exp || null;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

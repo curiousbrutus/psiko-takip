@@ -67,7 +67,7 @@ export default function TherapistLayout({
         description: 'Başarıyla çıkış yaptınız.',
       });
       router.push('/');
-    } catch (error) {
+    } catch {
       toast({
         title: 'Hata',
         description: 'Çıkış yapılırken bir hata oluştu.',

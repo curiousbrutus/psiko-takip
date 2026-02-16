@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { LogOut, PanelLeft } from 'lucide-react';
 import { Logo } from '@/components/logo';
-import Link from 'next/link';
 import DashboardNav from './_components/dashboard-nav';
 import HeaderTitle from './_components/header-title';
 import { useAuth } from '@/hooks/use-auth';
@@ -29,7 +28,7 @@ export default function DashboardLayout({
         description: 'Başarıyla çıkış yaptınız.',
       });
       router.push('/');
-    } catch (error) {
+    } catch {
       toast({
         title: 'Hata',
         description: 'Çıkış yapılırken bir hata oluştu.',

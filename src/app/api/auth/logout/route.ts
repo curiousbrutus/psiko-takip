@@ -4,23 +4,26 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { authMiddleware, AuthenticatedRequest } from '@/middleware/auth.middleware';
+import {
+  authMiddleware,
+  AuthenticatedRequest,
+} from '@/middleware/auth.middleware';
 
-async function logoutHandler(request: AuthenticatedRequest) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function logoutHandler(_request: AuthenticatedRequest) {
   try {
     // In a more complete implementation, you would:
     // 1. Invalidate the refresh token in the database
     // 2. Add the access token to a blacklist (if using one)
     // 3. Clear any server-side session data
-    
+
     // For now, logout is handled primarily on the client side
     // by removing the tokens from local storage
-    
+
     return NextResponse.json({
       success: true,
       message: 'Başarıyla çıkış yapıldı',
     });
-    
   } catch (error) {
     console.error('Logout error:', error);
     return NextResponse.json(

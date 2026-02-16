@@ -54,7 +54,8 @@ export default function RegisterPage() {
       });
       router.push('/dashboard');
     } catch (error: any) {
-      let errorMessage = error.message || 'Bir hata oluştu. Lütfen tekrar deneyin.';
+      let errorMessage =
+        error.message || 'Bir hata oluştu. Lütfen tekrar deneyin.';
       if (errorMessage.includes('zaten kullanılıyor')) {
         errorMessage = 'Bu e-posta adresi zaten kullanılıyor.';
       }
@@ -133,18 +134,9 @@ export default function RegisterPage() {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">Şifre</Label>
-            <Input
-              name="password"
-              id="password"
-              type="password"
-              required
-            />
+            <Input name="password" id="password" type="password" required />
           </div>
-          <Button
-            className="w-full"
-            type="submit"
-            disabled={loading}
-          >
+          <Button className="w-full" type="submit" disabled={loading}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {role === 'terapist' ? 'Terapist Olarak Başvur' : 'Hesap Oluştur'}
           </Button>

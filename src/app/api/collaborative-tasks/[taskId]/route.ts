@@ -5,7 +5,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { authMiddleware, AuthenticatedRequest } from '@/middleware/auth.middleware';
+import {
+  authMiddleware,
+  AuthenticatedRequest,
+} from '@/middleware/auth.middleware';
 import { executeQuery } from '@/lib/database/config';
 
 async function getHandler(request: AuthenticatedRequest, taskId: string) {
@@ -27,17 +30,18 @@ async function getHandler(request: AuthenticatedRequest, taskId: string) {
     );
 
     if (!result.rows || result.rows.length === 0) {
-      return NextResponse.json(
-        { error: 'Gorev bulunamadi' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Gorev bulunamadi' }, { status: 404 });
     }
 
     const row: any = result.rows[0];
 
     // Verify user has access to this task
-    if (row.therapistId !== user.userId && row.clientId !== user.userId &&
-        row.THERAPIST_ID !== user.userId && row.CLIENT_ID !== user.userId) {
+    if (
+      row.therapistId !== user.userId &&
+      row.clientId !== user.userId &&
+      row.THERAPIST_ID !== user.userId &&
+      row.CLIENT_ID !== user.userId
+    ) {
       return NextResponse.json(
         { error: 'Bu goreve erisim yetkiniz yok' },
         { status: 403 }
@@ -46,7 +50,7 @@ async function getHandler(request: AuthenticatedRequest, taskId: string) {
 
     return NextResponse.json({
       success: true,
-      data: row
+      data: row,
     });
   } catch (error) {
     console.error('Get collaborative task error:', error);
@@ -70,10 +74,7 @@ async function putHandler(request: AuthenticatedRequest, taskId: string) {
     );
 
     if (!existing.rows || existing.rows.length === 0) {
-      return NextResponse.json(
-        { error: 'Gorev bulunamadi' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Gorev bulunamadi' }, { status: 404 });
     }
 
     const row: any = existing.rows[0];
@@ -124,7 +125,7 @@ export async function GET(
   { params }: { params: Promise<{ taskId: string }> }
 ) {
   const { taskId } = await params;
-  return authMiddleware(request, (req) => getHandler(req, taskId));
+  return authMiddleware(request, req => getHandler(req, taskId));
 }
 
 export async function PUT(
@@ -132,5 +133,5 @@ export async function PUT(
   { params }: { params: Promise<{ taskId: string }> }
 ) {
   const { taskId } = await params;
-  return authMiddleware(request, (req) => putHandler(req, taskId));
+  return authMiddleware(request, req => putHandler(req, taskId));
 }

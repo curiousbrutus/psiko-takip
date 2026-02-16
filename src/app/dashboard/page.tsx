@@ -28,50 +28,54 @@ interface DailyInsight {
 
 export default function DashboardPage() {
   const { user, userData } = useAuth();
-  const [gamificationData, setGamificationData] = useState<Record<string, any> | null>(
-    null
-  );
+  const [gamificationData, setGamificationData] = useState<Record<
+    string,
+    any
+  > | null>(null);
   const [dailyInsight, setDailyInsight] = useState<DailyInsight | null>(null);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const router = useRouter();
 
   const prevLevel = useRef<number | null>(null);
 
-  const generateDailyInsight = useCallback((lastActivityDate: string | Date | null) => {
-    let insight: DailyInsight;
-    const now = new Date();
+  const generateDailyInsight = useCallback(
+    (lastActivityDate: string | Date | null) => {
+      let insight: DailyInsight;
+      const now = new Date();
 
-    if (lastActivityDate) {
-      const lastActivity = new Date(lastActivityDate);
-      const hoursSinceLastActivity =
-        (now.getTime() - lastActivity.getTime()) / (1000 * 60 * 60);
+      if (lastActivityDate) {
+        const lastActivity = new Date(lastActivityDate);
+        const hoursSinceLastActivity =
+          (now.getTime() - lastActivity.getTime()) / (1000 * 60 * 60);
 
-      if (hoursSinceLastActivity < 24) {
-        insight = {
-          title: 'Harika Gidiyorsun!',
-          description: `Dün yolculuğunu tamamladın. Serini devam ettirmek için bugünkü görevlerine göz at.`,
-          link: '/dashboard/journey',
-          linkText: 'Yolculuğa Devam Et',
-        };
+        if (hoursSinceLastActivity < 24) {
+          insight = {
+            title: 'Harika Gidiyorsun!',
+            description: `Dün yolculuğunu tamamladın. Serini devam ettirmek için bugünkü görevlerine göz at.`,
+            link: '/dashboard/journey',
+            linkText: 'Yolculuğa Devam Et',
+          };
+        } else {
+          insight = {
+            title: 'Yolculuğun Seni Bekliyor',
+            description: `${formatDistanceToNow(lastActivity, { locale: tr, addSuffix: true })} giriş yaptın. Küçük bir adımla büyük bir fark yaratabilirsin.`,
+            link: '/dashboard/journey',
+            linkText: 'Yolculuğa Başla',
+          };
+        }
       } else {
         insight = {
-          title: 'Yolculuğun Seni Bekliyor',
-          description: `${formatDistanceToNow(lastActivity, { locale: tr, addSuffix: true })} giriş yaptın. Küçük bir adımla büyük bir fark yaratabilirsin.`,
+          title: 'İlk Adımı Atmaya Hazır mısın?',
+          description:
+            'Günlük yolculuk görevlerin zihinsel esenliğini desteklemek için tasarlandı. Hadi başlayalım!',
           link: '/dashboard/journey',
           linkText: 'Yolculuğa Başla',
         };
       }
-    } else {
-      insight = {
-        title: 'İlk Adımı Atmaya Hazır mısın?',
-        description:
-          'Günlük yolculuk görevlerin zihinsel esenliğini desteklemek için tasarlandı. Hadi başlayalım!',
-        link: '/dashboard/journey',
-        linkText: 'Yolculuğa Başla',
-      };
-    }
-    setDailyInsight(insight);
-  }, []);
+      setDailyInsight(insight);
+    },
+    []
+  );
 
   useEffect(() => {
     if (!user) {
@@ -140,7 +144,9 @@ export default function DashboardPage() {
             <div className="text-center text-primary">
               <p className="text-2xl font-bold">🎉 Seviye Atladın!</p>
               <p className="text-lg">Yeni Seviye: {level}</p>
-              <p className="text-sm opacity-80">Tebrikler! Harika bir gelişim! 🌟</p>
+              <p className="text-sm opacity-80">
+                Tebrikler! Harika bir gelişim! 🌟
+              </p>
             </div>
           </div>
         )}
@@ -180,7 +186,10 @@ export default function DashboardPage() {
               </span>
             </div>
             <div className="relative">
-              <Progress value={progressPercentage} className="h-3 progress-turkish" />
+              <Progress
+                value={progressPercentage}
+                className="h-3 progress-turkish"
+              />
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-full animate-pulse" />
             </div>
             <p className="text-xs text-center text-muted-foreground italic">
@@ -198,7 +207,8 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 space-y-6">
           <div className="space-y-3">
             <h1 className="text-4xl font-bold font-headline bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent animate-slide-up-gentle">
-              Hoş geldin, {userData?.displayName?.split(' ')[0] || 'Değerli'}! 🌟
+              Hoş geldin, {userData?.displayName?.split(' ')[0] || 'Değerli'}!
+              🌟
             </h1>
             <div className="space-y-1">
               <p className="text-muted-foreground text-lg">

@@ -1,6 +1,6 @@
 /**
  * Oracle Database Connection Configuration
- * 
+ *
  * This module handles the Oracle database connection pool for the application.
  * It uses environment variables for configuration and provides a singleton
  * connection pool for efficient database access.
@@ -16,7 +16,8 @@ oracledb.autoCommit = false; // We handle commits explicitly
 const poolConfig = {
   user: process.env.ORACLE_USER || 'psikotakip_user',
   password: process.env.ORACLE_PASSWORD || '',
-  connectString: process.env.ORACLE_CONNECTION_STRING || 'localhost:1521/XEPDB1',
+  connectString:
+    process.env.ORACLE_CONNECTION_STRING || 'localhost:1521/XEPDB1',
   poolMin: parseInt(process.env.ORACLE_POOL_MIN || '2', 10),
   poolMax: parseInt(process.env.ORACLE_POOL_MAX || '10', 10),
   poolIncrement: parseInt(process.env.ORACLE_POOL_INCREMENT || '1', 10),
@@ -34,7 +35,7 @@ export async function initializePool(): Promise<void> {
     if (!pool) {
       pool = await oracledb.createPool(poolConfig);
       console.log('Oracle connection pool created successfully');
-      
+
       if (process.env.NODE_ENV === 'development') {
         const poolStats = pool.getStatistics();
         console.log('Pool statistics:', poolStats);
@@ -54,11 +55,11 @@ export async function getConnection(): Promise<oracledb.Connection> {
     if (!pool) {
       await initializePool();
     }
-    
+
     if (!pool) {
       throw new Error('Database pool is not initialized');
     }
-    
+
     return await pool.getConnection();
   } catch (err) {
     console.error('Error getting connection from pool:', err);
@@ -91,7 +92,7 @@ export async function executeQuery<T = any>(
   options: oracledb.ExecuteOptions = {}
 ): Promise<oracledb.Result<T>> {
   let connection: oracledb.Connection | null = null;
-  
+
   try {
     connection = await getConnection();
     const result = await connection.execute<T>(sql, binds, options);
@@ -118,7 +119,7 @@ export async function executeProcedure(
   binds: any = {}
 ): Promise<any> {
   let connection: oracledb.Connection | null = null;
-  
+
   try {
     connection = await getConnection();
     const result = await connection.execute(
@@ -148,7 +149,7 @@ export async function executeTransaction(
   callback: (connection: oracledb.Connection) => Promise<void>
 ): Promise<void> {
   let connection: oracledb.Connection | null = null;
-  
+
   try {
     connection = await getConnection();
     await callback(connection);

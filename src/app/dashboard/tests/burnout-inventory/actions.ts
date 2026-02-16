@@ -46,7 +46,9 @@ export async function analyzeBurnoutTest(
     } else {
       return {
         success: false,
-        error: result.error || 'Test sonuçları kaydedilemedi. Lütfen daha sonra tekrar deneyin.',
+        error:
+          result.error ||
+          'Test sonuçları kaydedilemedi. Lütfen daha sonra tekrar deneyin.',
       };
     }
   } catch (error) {

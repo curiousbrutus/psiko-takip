@@ -3,7 +3,13 @@ import TestsPage from '@/app/dashboard/tests/page';
 
 // Mock the Link component from Next.js
 jest.mock('next/link', () => {
-  const MockedLink = ({ children, href }: { children: React.ReactNode; href: string }) => {
+  const MockedLink = ({
+    children,
+    href,
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) => {
     return <a href={href}>{children}</a>;
   };
   MockedLink.displayName = 'MockedLink';
@@ -98,8 +104,10 @@ describe('TestsPage', () => {
   it('renders correct test categories and structure', () => {
     render(<TestsPage />);
 
-    // Check the main content container exists  
-    const container = screen.getByText('Psikolojik Değerlendirmeler').closest('div');
+    // Check the main content container exists
+    const container = screen
+      .getByText('Psikolojik Değerlendirmeler')
+      .closest('div');
     expect(container).toBeInTheDocument();
 
     // Should contain the main test types (checking short titles)

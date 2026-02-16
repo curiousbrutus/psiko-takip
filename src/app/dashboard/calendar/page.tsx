@@ -6,15 +6,8 @@ import { apiGetAppointments } from '@/lib/api-client';
 import { format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 
-import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Video, Clock, Loader2 } from 'lucide-react';
 

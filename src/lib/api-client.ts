@@ -72,11 +72,11 @@ export async function apiFetch<T = any>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  let token = getAccessToken();
+  const token = getAccessToken();
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...(options.headers as Record<string, string> || {}),
+    ...((options.headers as Record<string, string>) || {}),
   };
 
   if (token) {
@@ -119,7 +119,12 @@ export async function apiLogin(email: string, password: string) {
   return data;
 }
 
-export async function apiRegister(email: string, password: string, displayName: string, role: string) {
+export async function apiRegister(
+  email: string,
+  password: string,
+  displayName: string,
+  role: string
+) {
   const data = await apiFetch('/auth/register', {
     method: 'POST',
     body: JSON.stringify({ email, password, displayName, role }),
@@ -150,7 +155,10 @@ export async function apiUpdateProfile(displayName: string, phone?: string) {
   });
 }
 
-export async function apiChangePassword(currentPassword: string, newPassword: string) {
+export async function apiChangePassword(
+  currentPassword: string,
+  newPassword: string
+) {
   return apiFetch('/users/password', {
     method: 'PUT',
     body: JSON.stringify({ currentPassword, newPassword }),
@@ -177,7 +185,11 @@ export async function apiSetCompanion(companionType: string) {
 }
 
 // Mood Entries API
-export async function apiCreateMoodEntry(mood: string, period: string, notes?: string) {
+export async function apiCreateMoodEntry(
+  mood: string,
+  period: string,
+  notes?: string
+) {
   return apiFetch('/mood-entries', {
     method: 'POST',
     body: JSON.stringify({ mood, period, notes }),
@@ -190,24 +202,38 @@ export async function apiGetMoodEntries(startDate?: string) {
 }
 
 // Journal Entries API
-export async function apiCreateJournalEntry(content: string, prompt: string, isShared: boolean = false) {
+export async function apiCreateJournalEntry(
+  content: string,
+  prompt: string,
+  isShared: boolean = false
+) {
   return apiFetch('/journal-entries', {
     method: 'POST',
     body: JSON.stringify({ content, prompt, isShared }),
   });
 }
 
-export async function apiGetJournalEntries(filters?: { prompt?: string; startDate?: string; isShared?: boolean }) {
+export async function apiGetJournalEntries(filters?: {
+  prompt?: string;
+  startDate?: string;
+  isShared?: boolean;
+}) {
   const params = new URLSearchParams();
   if (filters?.prompt) params.set('prompt', filters.prompt);
   if (filters?.startDate) params.set('startDate', filters.startDate);
-  if (filters?.isShared !== undefined) params.set('isShared', String(filters.isShared));
+  if (filters?.isShared !== undefined)
+    params.set('isShared', String(filters.isShared));
   const qs = params.toString();
   return apiFetch(`/journal-entries${qs ? '?' + qs : ''}`);
 }
 
 // Test Submissions API
-export async function apiCreateTestSubmission(testName: string, totalScore: number, answers: any, severityLevel?: string) {
+export async function apiCreateTestSubmission(
+  testName: string,
+  totalScore: number,
+  answers: any,
+  severityLevel?: string
+) {
   return apiFetch('/test-submissions', {
     method: 'POST',
     body: JSON.stringify({ testName, totalScore, answers, severityLevel }),

@@ -5,7 +5,6 @@ import { useAuth } from '@/hooks/use-auth';
 import {
   apiGetClientDetail,
   apiGetCollaborativeTasks,
-  apiGetAssessmentTasks,
   apiFetch,
 } from '@/lib/api-client';
 import { useParams, useRouter } from 'next/navigation';
@@ -40,7 +39,6 @@ import {
   Star,
   Loader2,
   PlusCircle,
-  MoreHorizontal,
 } from 'lucide-react';
 import Link from 'next/link';
 import {
@@ -78,9 +76,7 @@ export default function ClientProfilePage() {
   const [sharedJournals, setSharedJournals] = useState<SharedJournal[]>([]);
   const [testResults, setTestResults] = useState<any[]>([]);
   const [assignedTasks, setAssignedTasks] = useState<any[]>([]);
-  const [assessmentResults, setAssessmentResults] = useState<any[]>(
-    []
-  );
+  const [assessmentResults, setAssessmentResults] = useState<any[]>([]);
 
   const [loadingClient, setLoadingClient] = useState(true);
   const [loadingJournals, setLoadingJournals] = useState(true);
@@ -150,7 +146,9 @@ export default function ClientProfilePage() {
 
       // Fetch shared journals
       try {
-        const journalsResponse = await apiFetch(`/journal-entries?userId=${clientId}&isShared=true`);
+        const journalsResponse = await apiFetch(
+          `/journal-entries?userId=${clientId}&isShared=true`
+        );
         if (journalsResponse.success && journalsResponse.data) {
           setSharedJournals(journalsResponse.data);
         }
@@ -161,7 +159,9 @@ export default function ClientProfilePage() {
 
       // Fetch test results
       try {
-        const resultsResponse = await apiFetch(`/test-submissions?userId=${clientId}`);
+        const resultsResponse = await apiFetch(
+          `/test-submissions?userId=${clientId}`
+        );
         if (resultsResponse.success && resultsResponse.data) {
           setTestResults(resultsResponse.data);
         }
@@ -183,7 +183,9 @@ export default function ClientProfilePage() {
 
       // Fetch assessment results
       try {
-        const assessmentsResponse = await apiFetch(`/assessment-results?userId=${clientId}`);
+        const assessmentsResponse = await apiFetch(
+          `/assessment-results?userId=${clientId}`
+        );
         if (assessmentsResponse.success && assessmentsResponse.data) {
           setAssessmentResults(
             assessmentsResponse.data.map((item: any) => ({
@@ -471,11 +473,12 @@ export default function ClientProfilePage() {
                   </AlertTitle>
                   <AlertDescription>
                     <p className="font-semibold mt-2">
-                      "Bugün minnettar olduğun 3 şey nedir?" başlıklı günlükten:
+                      &quot;Bugün minnettar olduğun 3 şey nedir?&quot; başlıklı
+                      günlükten:
                     </p>
                     <p className="italic mt-1">
-                      "Sabah kahvesinin kokusu, bir arkadaşla konuşmak ve akşam
-                      yürüyüşü..."
+                      &quot;Sabah kahvesinin kokusu, bir arkadaşla konuşmak ve
+                      akşam yürüyüşü...&quot;
                     </p>
                   </AlertDescription>
                 </Alert>
@@ -494,7 +497,8 @@ export default function ClientProfilePage() {
                       <span className="font-bold text-green-600">
                         daha stabil
                       </span>
-                      . Ayşe'nin bildirdiği 'mutlu' gün sayısı %15 arttı.
+                      . Ayşe&apos;nin bildirdiği &apos;mutlu&apos; gün sayısı
+                      %15 arttı.
                     </p>
                   </CardContent>
                 </Card>
@@ -507,8 +511,8 @@ export default function ClientProfilePage() {
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm">
-                      "İş yerindeki stresle başa çıkmak için 'hayır' deme
-                      pratiği yapmak."
+                      &quot;İş yerindeki stresle başa çıkmak için
+                      &apos;hayır&apos; deme pratiği yapmak.&quot;
                     </p>
                   </CardContent>
                 </Card>
@@ -540,8 +544,8 @@ export default function ClientProfilePage() {
               <CardTitle>İnteraktif Terapötik Araçlar</CardTitle>
               <CardDescription>
                 Danışanınızla birlikte BDT formları gibi yapılandırılmış araçlar
-                üzerinde çalışın. Bu, ödevleri daha etkileşimli ve "ortak bir
-                proje" haline getirir.
+                üzerinde çalışın. Bu, ödevleri daha etkileşimli ve &quot;ortak
+                bir proje&quot; haline getirir.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -624,9 +628,9 @@ export default function ClientProfilePage() {
                 <div className="text-center text-muted-foreground py-16">
                   <p>Danışanınız henüz sizinle bir günlük paylaşmadı.</p>
                   <p className="text-sm mt-1">
-                    Danışanınız, "Günlük Yolculuk" sayfasındaki günlük
-                    bölümlerinde "Terapistle Paylaş" seçeneğini kullanarak
-                    sizinle paylaşımlarda bulunabilir.
+                    Danışanınız, &quot;Günlük Yolculuk&quot; sayfasındaki günlük
+                    bölümlerinde &quot;Terapistle Paylaş&quot; seçeneğini
+                    kullanarak sizinle paylaşımlarda bulunabilir.
                   </p>
                 </div>
               )}

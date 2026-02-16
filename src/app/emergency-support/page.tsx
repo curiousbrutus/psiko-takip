@@ -34,7 +34,7 @@ export default function EmergencySupportPage() {
             <a href="tel:112" className="block w-full">
               <Button variant="destructive" size="lg" className="w-full">
                 <Phone className="mr-2 h-5 w-5" />
-                112 Acil Çağrı Merkezi'ni Ara
+                112 Acil Çağrı Merkezi&apos;ni Ara
               </Button>
             </a>
             <a

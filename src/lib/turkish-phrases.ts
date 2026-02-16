@@ -8,58 +8,64 @@ export interface TurkishPhrase {
 
 export const turkishPhrases: TurkishPhrase[] = [
   {
-    text: "Yavaş yavaş, ama emin adımlarla",
-    meaning: "Slowly but surely",
-    context: 'progress'
+    text: 'Yavaş yavaş, ama emin adımlarla',
+    meaning: 'Slowly but surely',
+    context: 'progress',
   },
   {
-    text: "Her yeni gün, yeni bir başlangıç",
-    meaning: "Every new day is a new beginning",
-    context: 'motivation'
+    text: 'Her yeni gün, yeni bir başlangıç',
+    meaning: 'Every new day is a new beginning',
+    context: 'motivation',
   },
   {
-    text: "Sabır, tüm kapıları açar",
-    meaning: "Patience opens all doors",
-    context: 'wisdom'
+    text: 'Sabır, tüm kapıları açar',
+    meaning: 'Patience opens all doors',
+    context: 'wisdom',
   },
   {
-    text: "Sen yalnız değilsin",
-    meaning: "You are not alone",
-    context: 'comfort'
+    text: 'Sen yalnız değilsin',
+    meaning: 'You are not alone',
+    context: 'comfort',
   },
   {
-    text: "Güçlü olmak, mükemmel olmak demek değil",
+    text: 'Güçlü olmak, mükemmel olmak demek değil',
     meaning: "Being strong doesn't mean being perfect",
-    context: 'wisdom'
+    context: 'wisdom',
   },
   {
-    text: "Her küçük adım, büyük yolculuğun parçası",
-    meaning: "Every small step is part of a great journey",
-    context: 'progress'
+    text: 'Her küçük adım, büyük yolculuğun parçası',
+    meaning: 'Every small step is part of a great journey',
+    context: 'progress',
   },
   {
-    text: "İçindeki gücü keşfetme zamanı",
-    meaning: "Time to discover your inner strength",
-    context: 'motivation'
+    text: 'İçindeki gücü keşfetme zamanı',
+    meaning: 'Time to discover your inner strength',
+    context: 'motivation',
   },
   {
-    text: "Kendi hızında ilerle, karşılaştırma yapma",
+    text: 'Kendi hızında ilerle, karşılaştırma yapma',
     meaning: "Go at your own pace, don't compare",
-    context: 'wisdom'
-  }
+    context: 'wisdom',
+  },
 ];
 
-export const getRandomPhrase = (context?: TurkishPhrase['context']): TurkishPhrase => {
-  const filtered = context ? turkishPhrases.filter(p => p.context === context) : turkishPhrases;
+export const getRandomPhrase = (
+  context?: TurkishPhrase['context']
+): TurkishPhrase => {
+  const filtered = context
+    ? turkishPhrases.filter(p => p.context === context)
+    : turkishPhrases;
   return filtered[Math.floor(Math.random() * filtered.length)];
 };
 
-export const getTurkishEmoji = (emotion: 'happy' | 'calm' | 'progress' | 'support'): string => {
+export const getTurkishEmoji = (
+  emotion: 'happy' | 'calm' | 'progress' | 'support'
+): string => {
   const emojiMap = {
     happy: '🌟',
     calm: '🌸',
     progress: '🌱',
-    support: '🤗'
+    support: '🤗',
   };
   return emojiMap[emotion];
 };
@@ -75,5 +81,5 @@ export const turkishMentalHealthTerms = {
   peace: 'Huzur',
   balance: 'Denge',
   wellness: 'Esenlik',
-  journey: 'Yolculuk'
+  journey: 'Yolculuk',
 };

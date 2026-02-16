@@ -18,7 +18,7 @@ import { useAuth } from '@/hooks/use-auth';
 export default function TherapistSettingsPage() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const { user, userData } = useAuth();
+  const { userData } = useAuth();
 
   // Placeholder states for therapist-specific settings
   const [clientCompletionEmails, setClientCompletionEmails] = useState(true);

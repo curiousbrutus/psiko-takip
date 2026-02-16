@@ -4,7 +4,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { authMiddleware, AuthenticatedRequest } from '@/middleware/auth.middleware';
+import {
+  authMiddleware,
+  AuthenticatedRequest,
+} from '@/middleware/auth.middleware';
 import { verifyPassword, validatePassword } from '@/lib/auth/jwt';
 import { updateUserPassword } from '@/lib/database/users.repository';
 import { executeQuery } from '@/lib/database/config';
@@ -48,7 +51,10 @@ async function putHandler(request: AuthenticatedRequest) {
     const passwordHash = row.passwordHash || row.PASSWORD_HASH;
 
     // Verify current password
-    const isCurrentPasswordValid = await verifyPassword(currentPassword, passwordHash);
+    const isCurrentPasswordValid = await verifyPassword(
+      currentPassword,
+      passwordHash
+    );
     if (!isCurrentPasswordValid) {
       return NextResponse.json(
         { error: 'Mevcut sifre hatali' },
@@ -61,7 +67,7 @@ async function putHandler(request: AuthenticatedRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Sifre basariyla guncellendi'
+      message: 'Sifre basariyla guncellendi',
     });
   } catch (error) {
     console.error('Change password error:', error);

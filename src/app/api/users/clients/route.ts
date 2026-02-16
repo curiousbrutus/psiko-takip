@@ -5,7 +5,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { authMiddleware, AuthenticatedRequest } from '@/middleware/auth.middleware';
+import {
+  authMiddleware,
+  AuthenticatedRequest,
+} from '@/middleware/auth.middleware';
 import {
   getTherapistClients,
   getUserByEmail,
@@ -27,7 +30,7 @@ async function getHandler(request: AuthenticatedRequest) {
 
     return NextResponse.json({
       success: true,
-      data: clients
+      data: clients,
     });
   } catch (error) {
     console.error('Get clients error:', error);
@@ -93,7 +96,7 @@ async function postHandler(request: AuthenticatedRequest) {
         clientId: client.userId,
         clientName: client.displayName,
         clientEmail: client.email,
-      }
+      },
     });
   } catch (error) {
     console.error('Connect client error:', error);

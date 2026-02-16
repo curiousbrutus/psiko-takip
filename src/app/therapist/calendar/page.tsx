@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { apiGetAppointments, apiGetClients } from '@/lib/api-client';
-import { format, setHours, setMinutes, parse } from 'date-fns';
+import { format, setHours, setMinutes } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -83,7 +83,7 @@ export default function CalendarPage() {
         }));
         setAppointments(fetchedAppointments);
       }
-    } catch (error) {
+    } catch {
       toast({
         title: 'Hata',
         description: 'Randevular alınamadı.',
@@ -184,7 +184,7 @@ export default function CalendarPage() {
         <div className="flex gap-2">
           <Button variant="outline" disabled>
             <Bot className="mr-2 h-4 w-4" />
-            Google Calendar'a Bağlan
+            Google Calendar&apos;a Bağlan
           </Button>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>

@@ -12,7 +12,7 @@ import {
   CardTitle,
   CardFooter,
 } from '@/components/ui/card';
-import { Loader2, Plus, HelpCircle, ArrowLeft, Wind } from 'lucide-react';
+import { Loader2, Plus, ArrowLeft, Wind } from 'lucide-react';
 import { addGratitudeEntry, getGratitudeEntries } from './actions';
 import { useToast } from '@/hooks/use-toast';
 
@@ -46,7 +46,9 @@ export default function GratitudeJarPage() {
   const [isAdding, setIsAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [shownEntry, setShownEntry] = useState<Record<string, any> | null>(null);
+  const [shownEntry, setShownEntry] = useState<Record<string, any> | null>(
+    null
+  );
 
   const router = useRouter();
   const { toast } = useToast();
@@ -170,7 +172,7 @@ export default function GratitudeJarPage() {
             </CardHeader>
             <CardContent>
               <p className="text-lg text-muted-foreground italic p-4 border-l-4 border-amber-300 bg-white rounded-r-md">
-                "{shownEntry.content}"
+                &quot;{shownEntry.content}&quot;
               </p>
             </CardContent>
             <CardFooter>

@@ -325,7 +325,7 @@ export default function DemoPage() {
                   2 Test Mevcut
                 </div>
               </div>
-              
+
               <div className="grid gap-6 md:grid-cols-2">
                 <Card className="group flex flex-col hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-l-4 border-l-primary animate-fade-in">
                   <CardHeader className="pb-4">
@@ -345,21 +345,25 @@ export default function DemoPage() {
                       </div>
                     </div>
                   </CardHeader>
-                  
+
                   <CardContent className="flex-1 space-y-4">
                     <CardDescription className="text-base leading-relaxed">
-                      Depresyonun şiddetini ölçmek için en yaygın kullanılan psikometrik testlerden biri olan 21 soruluk çoktan seçmeli bir öz bildirim envanteri.
+                      Depresyonun şiddetini ölçmek için en yaygın kullanılan
+                      psikometrik testlerden biri olan 21 soruluk çoktan seçmeli
+                      bir öz bildirim envanteri.
                     </CardDescription>
-                    
+
                     <div className="p-3 bg-muted/50 rounded-lg border border-muted">
                       <p className="text-sm text-muted-foreground italic">
                         💡 Türk toplumuna uyarlanmış geçerli bir araçtır.
                       </p>
                     </div>
-                    
+
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div className="text-center">
-                        <span className="block h-4 w-4 mx-auto mb-1 text-muted-foreground">⏰</span>
+                        <span className="block h-4 w-4 mx-auto mb-1 text-muted-foreground">
+                          ⏰
+                        </span>
                         <div className="font-medium">10-15 dakika</div>
                         <div className="text-muted-foreground">Süre</div>
                       </div>
@@ -375,9 +379,9 @@ export default function DemoPage() {
                       </div>
                     </div>
                   </CardContent>
-                  
+
                   <CardFooter className="pt-4">
-                    <Button 
+                    <Button
                       className="w-full group-hover:bg-primary/90 transition-colors"
                       size="lg"
                       disabled
@@ -388,7 +392,10 @@ export default function DemoPage() {
                   </CardFooter>
                 </Card>
 
-                <Card className="group flex flex-col hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-l-4 border-l-primary animate-fade-in" style={{ animationDelay: '100ms' }}>
+                <Card
+                  className="group flex flex-col hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-l-4 border-l-primary animate-fade-in"
+                  style={{ animationDelay: '100ms' }}
+                >
                   <CardHeader className="pb-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-4">
@@ -406,21 +413,24 @@ export default function DemoPage() {
                       </div>
                     </div>
                   </CardHeader>
-                  
+
                   <CardContent className="flex-1 space-y-4">
                     <CardDescription className="text-base leading-relaxed">
-                      İşle ilgili stresi, duygusal tükenmeyi ve mesleki doyumu değerlendirmek için tasarlanmış bir öz bildirim envanteri.
+                      İşle ilgili stresi, duygusal tükenmeyi ve mesleki doyumu
+                      değerlendirmek için tasarlanmış bir öz bildirim envanteri.
                     </CardDescription>
-                    
+
                     <div className="p-3 bg-muted/50 rounded-lg border border-muted">
                       <p className="text-sm text-muted-foreground italic">
                         💡 Türk çalışma kültürüne göre uyarlanmıştır.
                       </p>
                     </div>
-                    
+
                     <div className="grid grid-cols-3 gap-4 text-sm">
                       <div className="text-center">
-                        <span className="block h-4 w-4 mx-auto mb-1 text-muted-foreground">⏰</span>
+                        <span className="block h-4 w-4 mx-auto mb-1 text-muted-foreground">
+                          ⏰
+                        </span>
                         <div className="font-medium">8-12 dakika</div>
                         <div className="text-muted-foreground">Süre</div>
                       </div>
@@ -436,9 +446,9 @@ export default function DemoPage() {
                       </div>
                     </div>
                   </CardContent>
-                  
+
                   <CardFooter className="pt-4">
-                    <Button 
+                    <Button
                       className="w-full group-hover:bg-primary/90 transition-colors"
                       size="lg"
                       disabled
@@ -454,18 +464,23 @@ export default function DemoPage() {
             {/* Coming Soon Tests */}
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-semibold">Yakında Gelecek Testler</h2>
+                <h2 className="text-2xl font-semibold">
+                  Yakında Gelecek Testler
+                </h2>
                 <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-muted-foreground/20 text-muted-foreground bg-muted/20">
                   Geliştirme Aşamasında
                 </div>
               </div>
-              
+
               <div className="grid gap-4 md:grid-cols-2">
-                <Card className="flex flex-col opacity-75 relative overflow-hidden animate-fade-in" style={{ animationDelay: '200ms' }}>
+                <Card
+                  className="flex flex-col opacity-75 relative overflow-hidden animate-fade-in"
+                  style={{ animationDelay: '200ms' }}
+                >
                   <div className="absolute top-0 right-0 bg-amber-500 text-white px-3 py-1 text-xs font-medium rounded-bl-lg">
                     Yakında
                   </div>
-                  
+
                   <CardHeader className="pb-4">
                     <div className="flex items-center gap-4">
                       <div className="bg-muted p-3 rounded-xl">
@@ -481,15 +496,19 @@ export default function DemoPage() {
                       </div>
                     </div>
                   </CardHeader>
-                  
+
                   <CardContent className="flex-1 space-y-4">
                     <CardDescription className="text-base leading-relaxed">
-                      Gelişimimizin erken dönemlerinde başlayan, kendi kendini baltalayan duygusal ve bilişsel kalıplar olan Erken Dönem Uyumsuz Şemaları tanımlar.
+                      Gelişimimizin erken dönemlerinde başlayan, kendi kendini
+                      baltalayan duygusal ve bilişsel kalıplar olan Erken Dönem
+                      Uyumsuz Şemaları tanımlar.
                     </CardDescription>
-                    
+
                     <div className="grid grid-cols-3 gap-4 text-sm opacity-60">
                       <div className="text-center">
-                        <span className="block h-4 w-4 mx-auto mb-1 text-muted-foreground">⏰</span>
+                        <span className="block h-4 w-4 mx-auto mb-1 text-muted-foreground">
+                          ⏰
+                        </span>
                         <div className="font-medium">25-30 dakika</div>
                         <div className="text-muted-foreground">Süre</div>
                       </div>
@@ -505,13 +524,9 @@ export default function DemoPage() {
                       </div>
                     </div>
                   </CardContent>
-                  
+
                   <CardFooter className="pt-4">
-                    <Button 
-                      disabled 
-                      className="w-full"
-                      size="lg"
-                    >
+                    <Button disabled className="w-full" size="lg">
                       Yakında Gelecek
                     </Button>
                   </CardFooter>

@@ -1,6 +1,5 @@
 'use client';
 
-import { TrendingUp } from 'lucide-react';
 import {
   Area,
   AreaChart,
@@ -8,7 +7,6 @@ import {
   XAxis,
   Tooltip,
   YAxis,
-  ResponsiveContainer,
   ReferenceLine,
 } from 'recharts';
 import {

@@ -37,7 +37,6 @@ import {
   HeartPulse,
   Frown,
   Wind,
-  BrainCircuit,
   Book,
   Sparkles,
   Loader2,
@@ -52,7 +51,6 @@ import {
 import Link from 'next/link';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { getXpToNextLevel } from '@/lib/gamification';
 
 const moodOptions = [
   { name: 'Mutlu', icon: Smile },
@@ -121,12 +119,18 @@ export default function DailyJourneyPage() {
           const allTasks: Record<string, any>[] = [];
           if (assessmentResult.success && assessmentResult.data) {
             allTasks.push(
-              ...assessmentResult.data.map((t: any) => ({ ...t, type: 'assessment' }))
+              ...assessmentResult.data.map((t: any) => ({
+                ...t,
+                type: 'assessment',
+              }))
             );
           }
           if (collaborativeResult.success && collaborativeResult.data) {
             allTasks.push(
-              ...collaborativeResult.data.map((t: any) => ({ ...t, type: 'collaborative' }))
+              ...collaborativeResult.data.map((t: any) => ({
+                ...t,
+                type: 'collaborative',
+              }))
             );
           }
 
@@ -290,7 +294,9 @@ export default function DailyJourneyPage() {
                           <p className="font-semibold">{task.title}</p>
                           <p className="text-sm text-muted-foreground">
                             Atanma tarihi:{' '}
-                            {new Date(task.assignedAt).toLocaleDateString('tr-TR')}
+                            {new Date(task.assignedAt).toLocaleDateString(
+                              'tr-TR'
+                            )}
                           </p>
                         </div>
                       </div>

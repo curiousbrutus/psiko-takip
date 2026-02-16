@@ -1,4 +1,4 @@
-import { apiFetch, apiConnectClient } from '@/lib/api-client';
+import { apiFetch } from '@/lib/api-client';
 import { z } from 'zod';
 
 const AddClientSchema = z.object({

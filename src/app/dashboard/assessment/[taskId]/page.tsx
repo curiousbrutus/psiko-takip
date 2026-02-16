@@ -10,13 +10,7 @@ import { apiGetAssessmentTask } from '@/lib/api-client';
 
 import { assessments } from '@/lib/assessment-content';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -76,7 +70,9 @@ export default function AssessmentPage() {
             return;
           }
           setTaskData(data);
-          const foundAssessment = assessments.find(a => a.name === data.testName);
+          const foundAssessment = assessments.find(
+            a => a.name === data.testName
+          );
           if (foundAssessment) {
             setAssessment(foundAssessment as (typeof assessments)[0]);
           }

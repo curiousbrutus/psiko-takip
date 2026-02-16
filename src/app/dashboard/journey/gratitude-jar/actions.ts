@@ -1,4 +1,7 @@
-import { apiCreateGratitudeEntry, apiGetGratitudeEntries } from '@/lib/api-client';
+import {
+  apiCreateGratitudeEntry,
+  apiGetGratitudeEntries,
+} from '@/lib/api-client';
 import { z } from 'zod';
 
 const GratitudeSchema = z.object({

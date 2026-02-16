@@ -122,26 +122,31 @@ export default function ClientsPage() {
     try {
       const response = await apiGetClients();
       if (response.success && response.data) {
-        const clientsWithDetails: Client[] = response.data.map((clientDoc: any) => {
-          let lastActivity = 'Aktivite yok';
-          if (clientDoc.status === 'Davet Edildi') {
-            lastActivity = 'Davet bekleniyor';
-          } else if (clientDoc.lastActivityDate) {
-            lastActivity = formatDistanceToNow(new Date(clientDoc.lastActivityDate), {
-              addSuffix: true,
-              locale: tr,
-            });
-          }
+        const clientsWithDetails: Client[] = response.data.map(
+          (clientDoc: any) => {
+            let lastActivity = 'Aktivite yok';
+            if (clientDoc.status === 'Davet Edildi') {
+              lastActivity = 'Davet bekleniyor';
+            } else if (clientDoc.lastActivityDate) {
+              lastActivity = formatDistanceToNow(
+                new Date(clientDoc.lastActivityDate),
+                {
+                  addSuffix: true,
+                  locale: tr,
+                }
+              );
+            }
 
-          return {
-            id: clientDoc.userId || clientDoc.id,
-            displayName: clientDoc.displayName,
-            email: clientDoc.email,
-            photoURL: clientDoc.photoURL,
-            lastActivity,
-            status: clientDoc.status || 'Pasif',
-          };
-        });
+            return {
+              id: clientDoc.userId || clientDoc.id,
+              displayName: clientDoc.displayName,
+              email: clientDoc.email,
+              photoURL: clientDoc.photoURL,
+              lastActivity,
+              status: clientDoc.status || 'Pasif',
+            };
+          }
+        );
 
         setClients(clientsWithDetails);
       }

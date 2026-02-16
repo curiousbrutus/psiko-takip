@@ -33,9 +33,9 @@ export default function LoginPage() {
     setLoading(true);
     setPendingTherapist(false);
 
-    let formData = new FormData(e.currentTarget);
-    let email = formData.get('email') as string;
-    let password = formData.get('password') as string;
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
 
     if (email.toLowerCase() === 'terapist' && password === 'terapist') {
       toast({
@@ -90,7 +90,9 @@ export default function LoginPage() {
     } catch (error: any) {
       toast({
         title: 'Giriş Başarısız',
-        description: error.message || 'Giriş yapılamadı. Lütfen bilgilerinizi kontrol edin.',
+        description:
+          error.message ||
+          'Giriş yapılamadı. Lütfen bilgilerinizi kontrol edin.',
         variant: 'destructive',
       });
       setLoading(false);
@@ -136,11 +138,7 @@ export default function LoginPage() {
               disabled={loading}
             />
           </div>
-          <Button
-            className="w-full"
-            type="submit"
-            disabled={loading}
-          >
+          <Button className="w-full" type="submit" disabled={loading}>
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Giriş Yap
           </Button>
