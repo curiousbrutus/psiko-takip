@@ -1,0 +1,309 @@
+
+SQL*Plus: Release 12.1.0.2.0 Production on Per Mar 12 14:27:25 2026
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+Son Baþarýlý oturum zamaný: Per Mar 12 2026 14:27:24 +03:00
+
+Baðlantý:
+Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production
+
+
+Tablo yaratýldý.
+
+CREATE INDEX idx_users_email ON users(email)
+                                *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+CREATE INDEX idx_users_role ON users(role)
+                               *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+CREATE INDEX idx_users_therapist ON users(connected_therapist_id)
+                                    *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+
+Tablo yaratýldý.
+
+CREATE INDEX idx_sessions_user ON user_sessions(user_id)
+                                  *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+CREATE INDEX idx_sessions_token ON user_sessions(refresh_token)
+                                   *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+
+Tablo yaratýldý.
+
+
+Tablo yaratýldý.
+
+CREATE INDEX idx_mood_user ON mood_entries(user_id)
+                              *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+CREATE INDEX idx_mood_created ON mood_entries(created_at)
+                                 *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+
+Tablo yaratýldý.
+
+CREATE INDEX idx_journal_user ON journal_entries(user_id)
+                                 *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+CREATE INDEX idx_journal_shared ON journal_entries(is_shared)
+                                   *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+CREATE INDEX idx_journal_created ON journal_entries(created_at)
+                                    *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+
+Tablo yaratýldý.
+
+CREATE INDEX idx_test_user ON test_submissions(user_id)
+                              *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+CREATE INDEX idx_test_therapist ON test_submissions(therapist_id)
+                                   *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+CREATE INDEX idx_test_name ON test_submissions(test_name)
+                              *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+CREATE INDEX idx_test_submitted ON test_submissions(submitted_at)
+                                   *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+
+Tablo yaratýldý.
+
+CREATE INDEX idx_assessment_client ON assessment_tasks(client_id)
+                                      *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+CREATE INDEX idx_assessment_therapist ON assessment_tasks(therapist_id)
+                                         *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+CREATE INDEX idx_assessment_status ON assessment_tasks(status)
+                                      *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+
+Tablo yaratýldý.
+
+CREATE INDEX idx_result_task ON assessment_results(task_id)
+                                *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+CREATE INDEX idx_result_user ON assessment_results(user_id)
+                                *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+CREATE INDEX idx_result_therapist ON assessment_results(therapist_id)
+                                     *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+
+Tablo yaratýldý.
+
+CREATE INDEX idx_collab_client ON collaborative_tasks(client_id)
+                                  *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+CREATE INDEX idx_collab_therapist ON collaborative_tasks(therapist_id)
+                                     *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+CREATE INDEX idx_collab_status ON collaborative_tasks(status)
+                                  *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+
+Tablo yaratýldý.
+
+CREATE INDEX idx_appointment_client ON appointments(client_id)
+                                       *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+CREATE INDEX idx_appointment_therapist ON appointments(therapist_id)
+                                          *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+CREATE INDEX idx_appointment_date ON appointments(appointment_date)
+                                     *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+CREATE INDEX idx_appointment_status ON appointments(status)
+                                       *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+
+Tablo yaratýldý.
+
+CREATE INDEX idx_chat_user ON chat_messages(user_id)
+                              *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+CREATE INDEX idx_chat_created ON chat_messages(created_at)
+                                 *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+CREATE INDEX idx_chat_crisis ON chat_messages(is_crisis)
+                                *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+
+Tablo yaratýldý.
+
+CREATE INDEX idx_audit_user ON audit_log(user_id)
+                               *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+CREATE INDEX idx_audit_table ON audit_log(table_name)
+                                *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+CREATE INDEX idx_audit_created ON audit_log(created_at)
+                                  *
+1 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+
+Tablo yaratýldý.
+
+BEFORE UPDATE ON users
+                 *
+2 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+BEFORE UPDATE ON journal_entries
+                 *
+2 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+BEFORE UPDATE ON collaborative_tasks
+                 *
+2 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+BEFORE UPDATE ON appointments
+                 *
+2 satýrýnda HATA:
+ORA-00942: tablo veya görüntü mevcut degil
+
+
+
+Sýra yaratýldý.
+
+
+Sýra yaratýldý.
+
+
+Sýra yaratýldý.
+
+
+Sýra yaratýldý.
+
+
+Sýra yaratýldý.
+
+
+Sýra yaratýldý.
+
+
+Sýra yaratýldý.
+
+
+Sýra yaratýldý.
+
+
+Sýra yaratýldý.
+
+
+Sýra yaratýldý.
+
+
+Sýra yaratýldý.
+
+
+Kaydetme tamamlandý.
+
+Schema created successfully!
+Oracle Database 12c Standard Edition Release 12.1.0.2.0 - 64bit Production baðlantýsý kesildi

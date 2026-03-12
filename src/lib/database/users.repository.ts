@@ -43,12 +43,20 @@ export async function createUser(userData: CreateUserData): Promise<User> {
     p_role: userData.role,
   };
 
-  await executeProcedure(
+  const result = await executeProcedure(
     'sp_create_user(:p_email, :p_password_hash, :p_display_name, :p_role, :p_user_id)',
     binds
   );
 
-  return await getUserById(binds.p_user_id as string);
+  // Get the OUT parameter value
+  const userId = result.outBinds.p_user_id;
+  
+  const user = await getUserById(userId);
+  if (!user) {
+    throw new Error('Failed to retrieve created user');
+  }
+  
+  return user;
 }
 
 /**
@@ -59,7 +67,7 @@ export async function getUserById(userId: string): Promise<User | null> {
     `SELECT user_id as "userId", email, display_name as "displayName", role, 
             connected_therapist_id as "connectedTherapistId", phone, status,
             created_at as "createdAt", updated_at as "updatedAt", last_login as "lastLogin"
-     FROM users WHERE user_id = :userId`,
+     FROM psk_ebg_users WHERE user_id = :userId`,
     { userId }
   );
 
@@ -74,7 +82,7 @@ export async function getUserByEmail(email: string): Promise<User | null> {
     `SELECT user_id as "userId", email, display_name as "displayName", role,
             connected_therapist_id as "connectedTherapistId", phone, status,
             created_at as "createdAt", updated_at as "updatedAt", last_login as "lastLogin"
-     FROM users WHERE email = :email`,
+     FROM psk_ebg_users WHERE email = :email`,
     { email }
   );
 
@@ -89,10 +97,10 @@ export async function getUserWithPassword(
 ): Promise<(User & { passwordHash: string }) | null> {
   const result = await executeQuery(
     `SELECT user_id as "userId", email, password_hash as "passwordHash", 
-            display_name as "displayName", role, status,
+            display_name as "displayName", role, status as "status",
             connected_therapist_id as "connectedTherapistId", phone,
             created_at as "createdAt", updated_at as "updatedAt", last_login as "lastLogin"
-     FROM users WHERE email = :email AND status = 'active'`,
+     FROM psk_ebg_users WHERE email = :email`,
     { email }
   );
 
@@ -145,7 +153,7 @@ export async function updateUserPassword(
  */
 export async function updateLastLogin(userId: string): Promise<void> {
   await executeQuery(
-    `UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE user_id = :userId`,
+    `UPDATE psk_ebg_users SET last_login = CURRENT_TIMESTAMP WHERE user_id = :userId`,
     { userId }
   );
 }
@@ -178,8 +186,8 @@ export async function getTherapistClients(
     `SELECT u.user_id as "userId", u.email, u.display_name as "displayName", 
             u.role, u.status, u.created_at as "createdAt", u.last_login as "lastLogin",
             g.user_level as "level", g.current_streak as "currentStreak", g.xp
-     FROM users u
-     LEFT JOIN gamification g ON u.user_id = g.user_id
+     FROM psk_ebg_users u
+     LEFT JOIN psk_ebg_gamification g ON u.user_id = g.user_id
      WHERE u.connected_therapist_id = :therapistId AND u.role = 'danisan'
      ORDER BY u.display_name`,
     { therapistId }
@@ -194,13 +202,13 @@ export async function getTherapistClients(
 export async function getUserStats(userId: string): Promise<any> {
   const result = await executeQuery(
     `SELECT 
-        (SELECT COUNT(*) FROM mood_entries WHERE user_id = :userId) as "totalMoods",
-        (SELECT COUNT(*) FROM journal_entries WHERE user_id = :userId) as "totalJournals",
-        (SELECT COUNT(*) FROM test_submissions WHERE user_id = :userId) as "totalTests",
-        (SELECT COUNT(*) FROM appointments WHERE client_id = :userId) as "totalAppointments",
-        (SELECT xp FROM gamification WHERE user_id = :userId) as "totalXp",
-        (SELECT user_level FROM gamification WHERE user_id = :userId) as "currentLevel",
-        (SELECT current_streak FROM gamification WHERE user_id = :userId) as "currentStreak"
+        (SELECT COUNT(*) FROM psk_ebg_mood_entries WHERE user_id = :userId) as "totalMoods",
+        (SELECT COUNT(*) FROM psk_ebg_journal_entries WHERE user_id = :userId) as "totalJournals",
+        (SELECT COUNT(*) FROM psk_ebg_test_submissions WHERE user_id = :userId) as "totalTests",
+        (SELECT COUNT(*) FROM psk_ebg_appointments WHERE client_id = :userId) as "totalAppointments",
+        (SELECT xp FROM psk_ebg_gamification WHERE user_id = :userId) as "totalXp",
+        (SELECT user_level FROM psk_ebg_gamification WHERE user_id = :userId) as "currentLevel",
+        (SELECT current_streak FROM psk_ebg_gamification WHERE user_id = :userId) as "currentStreak"
      FROM DUAL`,
     { userId }
   );
@@ -213,7 +221,7 @@ export async function getUserStats(userId: string): Promise<any> {
  */
 export async function deactivateUser(userId: string): Promise<void> {
   await executeQuery(
-    `UPDATE users SET status = 'inactive' WHERE user_id = :userId`,
+    `UPDATE psk_ebg_users SET status = 'inactive' WHERE user_id = :userId`,
     { userId }
   );
 }
@@ -223,7 +231,7 @@ export async function deactivateUser(userId: string): Promise<void> {
  */
 export async function activateUser(userId: string): Promise<void> {
   await executeQuery(
-    `UPDATE users SET status = 'active' WHERE user_id = :userId`,
+    `UPDATE psk_ebg_users SET status = 'active' WHERE user_id = :userId`,
     { userId }
   );
 }
@@ -233,7 +241,7 @@ export async function activateUser(userId: string): Promise<void> {
  */
 export async function deleteUser(userId: string): Promise<void> {
   await executeQuery(
-    `UPDATE users SET status = 'suspended' WHERE user_id = :userId`,
+    `UPDATE psk_ebg_users SET status = 'suspended' WHERE user_id = :userId`,
     { userId }
   );
 }
@@ -249,7 +257,7 @@ export async function searchUsers(
   let sql = `
     SELECT user_id as "userId", email, display_name as "displayName", 
            role, status, created_at as "createdAt"
-    FROM users
+    FROM psk_ebg_users
     WHERE (LOWER(email) LIKE :query OR LOWER(display_name) LIKE :query)
   `;
 

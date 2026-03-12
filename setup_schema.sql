@@ -7,7 +7,7 @@ SET DEFINE OFF
 -- =====================================================
 
 -- 1. USERS TABLE
-CREATE TABLE users (
+CREATE TABLE psk_ebg_users (
     user_id VARCHAR2(128) PRIMARY KEY,
     email VARCHAR2(255) UNIQUE NOT NULL,
     password_hash VARCHAR2(255) NOT NULL,
@@ -19,7 +19,7 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_login TIMESTAMP,
-    CONSTRAINT fk_therapist FOREIGN KEY (connected_therapist_id) REFERENCES users(user_id)
+    CONSTRAINT fk_therapist FOREIGN KEY (connected_therapist_id) REFERENCES psk_ebg_users(user_id)
 );
 
 CREATE INDEX idx_users_email ON users(email);
@@ -27,7 +27,7 @@ CREATE INDEX idx_users_role ON users(role);
 CREATE INDEX idx_users_therapist ON users(connected_therapist_id);
 
 -- 2. USER SESSIONS TABLE
-CREATE TABLE user_sessions (
+CREATE TABLE psk_ebg_user_sessions (
     session_id VARCHAR2(128) PRIMARY KEY,
     user_id VARCHAR2(128) NOT NULL,
     refresh_token VARCHAR2(500) NOT NULL,
@@ -36,28 +36,28 @@ CREATE TABLE user_sessions (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     expires_at TIMESTAMP NOT NULL,
     is_active NUMBER(1) DEFAULT 1,
-    CONSTRAINT fk_session_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    CONSTRAINT fk_session_user FOREIGN KEY (user_id) REFERENCES psk_ebg_users(user_id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_sessions_user ON user_sessions(user_id);
 CREATE INDEX idx_sessions_token ON user_sessions(refresh_token);
 
 -- 3. GAMIFICATION DATA
-CREATE TABLE gamification (
+CREATE TABLE psk_ebg_gamification (
     user_id VARCHAR2(128) PRIMARY KEY,
     xp NUMBER DEFAULT 0,
-    level NUMBER DEFAULT 1,
+    user_level NUMBER DEFAULT 1,
     current_streak NUMBER DEFAULT 0,
     longest_streak NUMBER DEFAULT 0,
     companion_type VARCHAR2(50),
     companion_created_at TIMESTAMP,
     last_activity_date TIMESTAMP,
     total_tasks_completed NUMBER DEFAULT 0,
-    CONSTRAINT fk_gamification_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    CONSTRAINT fk_gamification_user FOREIGN KEY (user_id) REFERENCES psk_ebg_users(user_id) ON DELETE CASCADE
 );
 
 -- 4. MOOD ENTRIES
-CREATE TABLE mood_entries (
+CREATE TABLE psk_ebg_mood_entries (
     entry_id VARCHAR2(128) PRIMARY KEY,
     user_id VARCHAR2(128) NOT NULL,
     mood VARCHAR2(50) NOT NULL,
@@ -65,14 +65,14 @@ CREATE TABLE mood_entries (
     intensity NUMBER CHECK (intensity BETWEEN 1 AND 5),
     notes CLOB,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_mood_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    CONSTRAINT fk_mood_user FOREIGN KEY (user_id) REFERENCES psk_ebg_users(user_id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_mood_user ON mood_entries(user_id);
 CREATE INDEX idx_mood_created ON mood_entries(created_at);
 
 -- 5. JOURNAL ENTRIES
-CREATE TABLE journal_entries (
+CREATE TABLE psk_ebg_journal_entries (
     entry_id VARCHAR2(128) PRIMARY KEY,
     user_id VARCHAR2(128) NOT NULL,
     content CLOB NOT NULL,
@@ -81,7 +81,7 @@ CREATE TABLE journal_entries (
     is_shared NUMBER(1) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_journal_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    CONSTRAINT fk_journal_user FOREIGN KEY (user_id) REFERENCES psk_ebg_users(user_id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_journal_user ON journal_entries(user_id);
@@ -89,7 +89,7 @@ CREATE INDEX idx_journal_shared ON journal_entries(is_shared);
 CREATE INDEX idx_journal_created ON journal_entries(created_at);
 
 -- 6. TEST SUBMISSIONS
-CREATE TABLE test_submissions (
+CREATE TABLE psk_ebg_test_submissions (
     submission_id VARCHAR2(128) PRIMARY KEY,
     user_id VARCHAR2(128) NOT NULL,
     therapist_id VARCHAR2(128),
@@ -99,8 +99,8 @@ CREATE TABLE test_submissions (
     analysis CLOB,
     severity_level VARCHAR2(50),
     submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_test_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    CONSTRAINT fk_test_therapist FOREIGN KEY (therapist_id) REFERENCES users(user_id)
+    CONSTRAINT fk_test_user FOREIGN KEY (user_id) REFERENCES psk_ebg_users(user_id) ON DELETE CASCADE,
+    CONSTRAINT fk_test_therapist FOREIGN KEY (therapist_id) REFERENCES psk_ebg_users(user_id)
 );
 
 CREATE INDEX idx_test_user ON test_submissions(user_id);
@@ -109,7 +109,7 @@ CREATE INDEX idx_test_name ON test_submissions(test_name);
 CREATE INDEX idx_test_submitted ON test_submissions(submitted_at);
 
 -- 7. ASSESSMENT TASKS
-CREATE TABLE assessment_tasks (
+CREATE TABLE psk_ebg_assessment_tasks (
     task_id VARCHAR2(128) PRIMARY KEY,
     client_id VARCHAR2(128) NOT NULL,
     therapist_id VARCHAR2(128) NOT NULL,
@@ -118,8 +118,8 @@ CREATE TABLE assessment_tasks (
     assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     due_date TIMESTAMP,
     notes CLOB,
-    CONSTRAINT fk_assessment_client FOREIGN KEY (client_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    CONSTRAINT fk_assessment_therapist FOREIGN KEY (therapist_id) REFERENCES users(user_id)
+    CONSTRAINT fk_assessment_client FOREIGN KEY (client_id) REFERENCES psk_ebg_users(user_id) ON DELETE CASCADE,
+    CONSTRAINT fk_assessment_therapist FOREIGN KEY (therapist_id) REFERENCES psk_ebg_users(user_id)
 );
 
 CREATE INDEX idx_assessment_client ON assessment_tasks(client_id);
@@ -127,7 +127,7 @@ CREATE INDEX idx_assessment_therapist ON assessment_tasks(therapist_id);
 CREATE INDEX idx_assessment_status ON assessment_tasks(status);
 
 -- 8. ASSESSMENT RESULTS
-CREATE TABLE assessment_results (
+CREATE TABLE psk_ebg_assessment_results (
     result_id VARCHAR2(128) PRIMARY KEY,
     task_id VARCHAR2(128) NOT NULL,
     user_id VARCHAR2(128) NOT NULL,
@@ -137,9 +137,9 @@ CREATE TABLE assessment_results (
     alliance_score NUMBER,
     answers CLOB,
     completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_result_task FOREIGN KEY (task_id) REFERENCES assessment_tasks(task_id) ON DELETE CASCADE,
-    CONSTRAINT fk_result_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    CONSTRAINT fk_result_therapist FOREIGN KEY (therapist_id) REFERENCES users(user_id)
+    CONSTRAINT fk_result_task FOREIGN KEY (task_id) REFERENCES psk_ebg_assessment_tasks(task_id) ON DELETE CASCADE,
+    CONSTRAINT fk_result_user FOREIGN KEY (user_id) REFERENCES psk_ebg_users(user_id) ON DELETE CASCADE,
+    CONSTRAINT fk_result_therapist FOREIGN KEY (therapist_id) REFERENCES psk_ebg_users(user_id)
 );
 
 CREATE INDEX idx_result_task ON assessment_results(task_id);
@@ -147,7 +147,7 @@ CREATE INDEX idx_result_user ON assessment_results(user_id);
 CREATE INDEX idx_result_therapist ON assessment_results(therapist_id);
 
 -- 9. COLLABORATIVE TASKS
-CREATE TABLE collaborative_tasks (
+CREATE TABLE psk_ebg_collaborative_tasks (
     task_id VARCHAR2(128) PRIMARY KEY,
     client_id VARCHAR2(128) NOT NULL,
     therapist_id VARCHAR2(128) NOT NULL,
@@ -159,8 +159,8 @@ CREATE TABLE collaborative_tasks (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     completed_at TIMESTAMP,
-    CONSTRAINT fk_collab_client FOREIGN KEY (client_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    CONSTRAINT fk_collab_therapist FOREIGN KEY (therapist_id) REFERENCES users(user_id)
+    CONSTRAINT fk_collab_client FOREIGN KEY (client_id) REFERENCES psk_ebg_users(user_id) ON DELETE CASCADE,
+    CONSTRAINT fk_collab_therapist FOREIGN KEY (therapist_id) REFERENCES psk_ebg_users(user_id)
 );
 
 CREATE INDEX idx_collab_client ON collaborative_tasks(client_id);
@@ -168,7 +168,7 @@ CREATE INDEX idx_collab_therapist ON collaborative_tasks(therapist_id);
 CREATE INDEX idx_collab_status ON collaborative_tasks(status);
 
 -- 10. APPOINTMENTS
-CREATE TABLE appointments (
+CREATE TABLE psk_ebg_appointments (
     appointment_id VARCHAR2(128) PRIMARY KEY,
     client_id VARCHAR2(128) NOT NULL,
     therapist_id VARCHAR2(128) NOT NULL,
@@ -180,8 +180,8 @@ CREATE TABLE appointments (
     notes CLOB,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_appointment_client FOREIGN KEY (client_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    CONSTRAINT fk_appointment_therapist FOREIGN KEY (therapist_id) REFERENCES users(user_id)
+    CONSTRAINT fk_appointment_client FOREIGN KEY (client_id) REFERENCES psk_ebg_users(user_id) ON DELETE CASCADE,
+    CONSTRAINT fk_appointment_therapist FOREIGN KEY (therapist_id) REFERENCES psk_ebg_users(user_id)
 );
 
 CREATE INDEX idx_appointment_client ON appointments(client_id);
@@ -190,7 +190,7 @@ CREATE INDEX idx_appointment_date ON appointments(appointment_date);
 CREATE INDEX idx_appointment_status ON appointments(status);
 
 -- 11. CHAT MESSAGES
-CREATE TABLE chat_messages (
+CREATE TABLE psk_ebg_chat_messages (
     message_id VARCHAR2(128) PRIMARY KEY,
     user_id VARCHAR2(128) NOT NULL,
     role VARCHAR2(20) CHECK (role IN ('user', 'assistant', 'system')),
@@ -198,7 +198,7 @@ CREATE TABLE chat_messages (
     is_crisis NUMBER(1) DEFAULT 0,
     metadata CLOB,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_chat_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    CONSTRAINT fk_chat_user FOREIGN KEY (user_id) REFERENCES psk_ebg_users(user_id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_chat_user ON chat_messages(user_id);
@@ -206,7 +206,7 @@ CREATE INDEX idx_chat_created ON chat_messages(created_at);
 CREATE INDEX idx_chat_crisis ON chat_messages(is_crisis);
 
 -- 12. AUDIT LOG
-CREATE TABLE audit_log (
+CREATE TABLE psk_ebg_audit_log (
     audit_id VARCHAR2(128) PRIMARY KEY,
     user_id VARCHAR2(128),
     action VARCHAR2(100) NOT NULL,
@@ -217,7 +217,7 @@ CREATE TABLE audit_log (
     ip_address VARCHAR2(45),
     user_agent VARCHAR2(500),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_audit_user FOREIGN KEY (user_id) REFERENCES users(user_id)
+    CONSTRAINT fk_audit_user FOREIGN KEY (user_id) REFERENCES psk_ebg_users(user_id)
 );
 
 CREATE INDEX idx_audit_user ON audit_log(user_id);
@@ -225,7 +225,7 @@ CREATE INDEX idx_audit_table ON audit_log(table_name);
 CREATE INDEX idx_audit_created ON audit_log(created_at);
 
 -- 13. SYSTEM CONFIGURATION
-CREATE TABLE system_config (
+CREATE TABLE psk_ebg_system_config (
     config_key VARCHAR2(100) PRIMARY KEY,
     config_value CLOB,
     description VARCHAR2(500),

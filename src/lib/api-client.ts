@@ -2,7 +2,33 @@
  * API Client for making authenticated requests to the backend
  */
 
-const API_BASE = '/api';
+const LOCAL_API_BASE = '/api';
+const REMOTE_API_BASE = process.env.NEXT_PUBLIC_API_URL || LOCAL_API_BASE;
+
+const REMOTE_ENDPOINT_PREFIXES = [
+  '/auth/login',
+  '/auth/register',
+  '/auth/refresh',
+  '/auth/logout',
+  '/auth/me',
+  '/users/profile',
+  '/users/password',
+  '/mood-entries',
+  '/journal-entries',
+  '/gratitude-entries',
+  '/gamification',
+  '/appointments',
+  '/assessment-tasks',
+  '/assessment-results',
+  '/collaborative-tasks',
+  '/test-submissions',
+];
+
+function getApiBase(endpoint: string): string {
+  return REMOTE_ENDPOINT_PREFIXES.some(prefix => endpoint.startsWith(prefix))
+    ? REMOTE_API_BASE
+    : LOCAL_API_BASE;
+}
 
 function getAccessToken(): string | null {
   if (typeof window === 'undefined') return null;
@@ -45,7 +71,7 @@ async function refreshAccessToken(): Promise<string | null> {
   if (!refreshToken) return null;
 
   try {
-    const res = await fetch(`${API_BASE}/auth/refresh`, {
+    const res = await fetch(`${REMOTE_API_BASE}/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ refreshToken }),
@@ -72,6 +98,7 @@ export async function apiFetch<T = any>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
+  const baseUrl = getApiBase(endpoint);
   const token = getAccessToken();
 
   const headers: Record<string, string> = {
@@ -83,7 +110,7 @@ export async function apiFetch<T = any>(
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  let res = await fetch(`${API_BASE}${endpoint}`, {
+  let res = await fetch(`${baseUrl}${endpoint}`, {
     ...options,
     headers,
   });
@@ -93,7 +120,7 @@ export async function apiFetch<T = any>(
     const newToken = await refreshAccessToken();
     if (newToken) {
       headers['Authorization'] = `Bearer ${newToken}`;
-      res = await fetch(`${API_BASE}${endpoint}`, {
+      res = await fetch(`${baseUrl}${endpoint}`, {
         ...options,
         headers,
       });
@@ -150,7 +177,7 @@ export async function apiGetMe() {
 
 export async function apiUpdateProfile(displayName: string, phone?: string) {
   return apiFetch('/users/profile', {
-    method: 'PUT',
+    method: 'PATCH',
     body: JSON.stringify({ displayName, phone }),
   });
 }
@@ -160,7 +187,7 @@ export async function apiChangePassword(
   newPassword: string
 ) {
   return apiFetch('/users/password', {
-    method: 'PUT',
+    method: 'PATCH',
     body: JSON.stringify({ currentPassword, newPassword }),
   });
 }
@@ -317,9 +344,9 @@ export async function apiSearchUsers(query: string, role?: string) {
 }
 
 export async function apiConnectClient(clientEmail: string) {
-  return apiFetch('/users/clients/connect', {
+  return apiFetch('/users/clients', {
     method: 'POST',
-    body: JSON.stringify({ clientEmail }),
+    body: JSON.stringify({ email: clientEmail }),
   });
 }
 

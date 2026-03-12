@@ -19,7 +19,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@psikotakip/shared": ["./packages/shared/src/index.ts"],
+      "@psikotakip/shared/*": ["./packages/shared/src/*"]
     }
   },
   "include": [
@@ -29,5 +31,5 @@
     ".next/types/**/*.ts",
     "src/types/**/*.d.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "apps/api/**/*"]
 }

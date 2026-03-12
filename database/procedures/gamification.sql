@@ -1,5 +1,5 @@
 -- =====================================================
--- Gamification Stored Procedures
+-- Gamification Stored Procedures (PSK_EBG prefix)
 -- =====================================================
 
 -- Procedure to add XP and update level
@@ -15,9 +15,9 @@ CREATE OR REPLACE PROCEDURE sp_add_xp (
     v_last_activity TIMESTAMP;
 BEGIN
     -- Get current stats
-    SELECT xp, level, current_streak, last_activity_date 
+    SELECT xp, user_level, current_streak, last_activity_date 
     INTO v_current_xp, v_current_level, v_current_streak, v_last_activity
-    FROM gamification
+    FROM psk_ebg_gamification
     WHERE user_id = p_user_id;
     
     -- Add XP
@@ -34,9 +34,9 @@ BEGIN
     END IF;
     
     -- Update gamification
-    UPDATE gamification
+    UPDATE psk_ebg_gamification
     SET xp = v_current_xp,
-        level = v_new_level,
+        user_level = v_new_level,
         current_streak = v_current_streak,
         longest_streak = GREATEST(longest_streak, v_current_streak),
         last_activity_date = CURRENT_TIMESTAMP,
@@ -44,26 +44,22 @@ BEGIN
     WHERE user_id = p_user_id;
     
     -- Log the action
-    INSERT INTO audit_log (
+    INSERT INTO psk_ebg_audit_log (
         audit_id, user_id, action, table_name, record_id, new_values
     ) VALUES (
         'AUD_' || seq_audit.NEXTVAL,
         p_user_id,
         'ADD_XP',
-        'gamification',
+        'psk_ebg_gamification',
         p_user_id,
-        JSON_OBJECT(
-            'xp_added' VALUE p_xp_amount, 
-            'new_level' VALUE v_new_level,
-            'activity_type' VALUE p_activity_type
-        )
+        '{"xp_added":' || p_xp_amount || ',"new_level":' || v_new_level || ',"activity_type":"' || p_activity_type || '"}'
     );
     
     COMMIT;
 EXCEPTION
     WHEN NO_DATA_FOUND THEN
         -- Initialize gamification if not exists
-        INSERT INTO gamification (user_id, xp, level, current_streak)
+        INSERT INTO psk_ebg_gamification (user_id, xp, user_level, current_streak)
         VALUES (p_user_id, p_xp_amount, 1, 1);
         COMMIT;
     WHEN OTHERS THEN
@@ -78,21 +74,21 @@ CREATE OR REPLACE PROCEDURE sp_set_companion (
     p_companion_type IN VARCHAR2
 ) AS
 BEGIN
-    UPDATE gamification
+    UPDATE psk_ebg_gamification
     SET companion_type = p_companion_type,
         companion_created_at = CURRENT_TIMESTAMP
     WHERE user_id = p_user_id;
     
     -- Log the action
-    INSERT INTO audit_log (
+    INSERT INTO psk_ebg_audit_log (
         audit_id, user_id, action, table_name, record_id, new_values
     ) VALUES (
         'AUD_' || seq_audit.NEXTVAL,
         p_user_id,
         'SET_COMPANION',
-        'gamification',
+        'psk_ebg_gamification',
         p_user_id,
-        JSON_OBJECT('companion_type' VALUE p_companion_type)
+        '{"companion_type":"' || p_companion_type || '"}'
     );
     
     COMMIT;
@@ -107,12 +103,12 @@ CREATE OR REPLACE PROCEDURE sp_get_gamification (
 BEGIN
     OPEN p_cursor FOR
         SELECT 
-            user_id, xp, level, current_streak, longest_streak,
+            user_id, xp, user_level, current_streak, longest_streak,
             companion_type, companion_created_at, last_activity_date,
             total_tasks_completed,
             -- Calculate XP for next level
-            (level * 100) - xp as xp_to_next_level
-        FROM gamification
+            (user_level * 100) - xp as xp_to_next_level
+        FROM psk_ebg_gamification
         WHERE user_id = p_user_id;
 END;
 /
@@ -122,7 +118,7 @@ CREATE OR REPLACE PROCEDURE sp_reset_streak (
     p_user_id IN VARCHAR2
 ) AS
 BEGIN
-    UPDATE gamification
+    UPDATE psk_ebg_gamification
     SET current_streak = 0
     WHERE user_id = p_user_id;
     

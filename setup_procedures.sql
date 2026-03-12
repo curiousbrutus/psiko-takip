@@ -16,17 +16,17 @@ CREATE OR REPLACE PROCEDURE sp_create_user (
 BEGIN
     p_user_id := 'USR_' || seq_users.NEXTVAL || '_' || TO_CHAR(SYSTIMESTAMP, 'YYYYMMDDHH24MISS');
 
-    INSERT INTO users (user_id, email, password_hash, display_name, role)
+    INSERT INTO psk_ebg_users (user_id, email, password_hash, display_name, role)
     VALUES (p_user_id, p_email, p_password_hash, p_display_name, p_role);
 
     -- Initialize gamification for client
     IF p_role = 'danisan' THEN
-        INSERT INTO gamification (user_id, xp, user_level, current_streak)
+        INSERT INTO psk_ebg_gamification (user_id, xp, user_level, current_streak)
         VALUES (p_user_id, 0, 1, 0);
     END IF;
 
     -- Log the action
-    INSERT INTO audit_log (
+    INSERT INTO psk_ebg_audit_log (
         audit_id, user_id, action, table_name, record_id, new_values
     ) VALUES (
         'AUD_' || seq_audit.NEXTVAL,
@@ -57,10 +57,10 @@ CREATE OR REPLACE PROCEDURE sp_authenticate_user (
 BEGIN
     SELECT user_id, password_hash, display_name, role, status
     INTO p_user_id, p_password_hash, p_display_name, p_role, p_status
-    FROM users
+    FROM psk_ebg_users
     WHERE email = p_email AND status = 'active';
 
-    UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE user_id = p_user_id;
+    UPDATE psk_ebg_users SET last_login = CURRENT_TIMESTAMP WHERE user_id = p_user_id;
     COMMIT;
 
 EXCEPTION
@@ -85,7 +85,7 @@ CREATE OR REPLACE PROCEDURE sp_create_session (
 BEGIN
     p_session_id := 'SES_' || seq_sessions.NEXTVAL || '_' || TO_CHAR(SYSTIMESTAMP, 'YYYYMMDDHH24MISS');
 
-    INSERT INTO user_sessions (
+    INSERT INTO psk_ebg_user_sessions (
         session_id, user_id, refresh_token, ip_address, user_agent, expires_at
     ) VALUES (
         p_session_id, p_user_id, p_refresh_token, p_ip_address, p_user_agent, p_expires_at
@@ -100,7 +100,7 @@ CREATE OR REPLACE PROCEDURE sp_invalidate_session (
     p_session_id IN VARCHAR2
 ) AS
 BEGIN
-    UPDATE user_sessions
+    UPDATE psk_ebg_user_sessions
     SET is_active = 0
     WHERE session_id = p_session_id;
 
@@ -115,17 +115,17 @@ CREATE OR REPLACE PROCEDURE sp_connect_client_therapist (
 ) AS
     v_therapist_role VARCHAR2(50);
 BEGIN
-    SELECT role INTO v_therapist_role FROM users WHERE user_id = p_therapist_id;
+    SELECT role INTO v_therapist_role FROM psk_ebg_users WHERE user_id = p_therapist_id;
 
     IF v_therapist_role != 'terapist' THEN
         RAISE_APPLICATION_ERROR(-20001, 'User is not a therapist');
     END IF;
 
-    UPDATE users
+    UPDATE psk_ebg_users
     SET connected_therapist_id = p_therapist_id
     WHERE user_id = p_client_id;
 
-    INSERT INTO audit_log (
+    INSERT INTO psk_ebg_audit_log (
         audit_id, user_id, action, table_name, record_id, new_values
     ) VALUES (
         'AUD_' || seq_audit.NEXTVAL,
@@ -157,8 +157,8 @@ BEGIN
             u.user_id, u.email, u.display_name, u.role, u.phone,
             u.status, u.created_at, u.last_login, u.connected_therapist_id,
             t.display_name as therapist_name, t.email as therapist_email
-        FROM users u
-        LEFT JOIN users t ON u.connected_therapist_id = t.user_id
+        FROM psk_ebg_users u
+        LEFT JOIN psk_ebg_users t ON u.connected_therapist_id = t.user_id
         WHERE u.user_id = p_user_id;
 END;
 /
@@ -170,12 +170,12 @@ CREATE OR REPLACE PROCEDURE sp_update_user_profile (
     p_phone IN VARCHAR2
 ) AS
 BEGIN
-    UPDATE users
+    UPDATE psk_ebg_users
     SET display_name = p_display_name,
         phone = p_phone
     WHERE user_id = p_user_id;
 
-    INSERT INTO audit_log (
+    INSERT INTO psk_ebg_audit_log (
         audit_id, user_id, action, table_name, record_id
     ) VALUES (
         'AUD_' || seq_audit.NEXTVAL,
@@ -195,15 +195,15 @@ CREATE OR REPLACE PROCEDURE sp_change_password (
     p_new_password_hash IN VARCHAR2
 ) AS
 BEGIN
-    UPDATE users
+    UPDATE psk_ebg_users
     SET password_hash = p_new_password_hash
     WHERE user_id = p_user_id;
 
-    UPDATE user_sessions
+    UPDATE psk_ebg_user_sessions
     SET is_active = 0
     WHERE user_id = p_user_id;
 
-    INSERT INTO audit_log (
+    INSERT INTO psk_ebg_audit_log (
         audit_id, user_id, action, table_name, record_id
     ) VALUES (
         'AUD_' || seq_audit.NEXTVAL,
@@ -237,7 +237,7 @@ CREATE OR REPLACE PROCEDURE sp_add_xp (
 BEGIN
     SELECT xp, user_level, current_streak, last_activity_date
     INTO v_current_xp, v_current_level, v_current_streak, v_last_activity
-    FROM gamification
+    FROM psk_ebg_gamification
     WHERE user_id = p_user_id;
 
     v_current_xp := v_current_xp + p_xp_amount;
@@ -248,7 +248,7 @@ BEGIN
         v_current_streak := v_current_streak + 1;
     END IF;
 
-    UPDATE gamification
+    UPDATE psk_ebg_gamification
     SET xp = v_current_xp,
         user_level = v_new_level,
         current_streak = v_current_streak,
@@ -257,7 +257,7 @@ BEGIN
         total_tasks_completed = total_tasks_completed + 1
     WHERE user_id = p_user_id;
 
-    INSERT INTO audit_log (
+    INSERT INTO psk_ebg_audit_log (
         audit_id, user_id, action, table_name, record_id, new_values
     ) VALUES (
         'AUD_' || seq_audit.NEXTVAL,
@@ -271,7 +271,7 @@ BEGIN
     COMMIT;
 EXCEPTION
     WHEN NO_DATA_FOUND THEN
-        INSERT INTO gamification (user_id, xp, user_level, current_streak)
+        INSERT INTO psk_ebg_gamification (user_id, xp, user_level, current_streak)
         VALUES (p_user_id, p_xp_amount, 1, 1);
         COMMIT;
     WHEN OTHERS THEN
@@ -286,12 +286,12 @@ CREATE OR REPLACE PROCEDURE sp_set_companion (
     p_companion_type IN VARCHAR2
 ) AS
 BEGIN
-    UPDATE gamification
+    UPDATE psk_ebg_gamification
     SET companion_type = p_companion_type,
         companion_created_at = CURRENT_TIMESTAMP
     WHERE user_id = p_user_id;
 
-    INSERT INTO audit_log (
+    INSERT INTO psk_ebg_audit_log (
         audit_id, user_id, action, table_name, record_id, new_values
     ) VALUES (
         'AUD_' || seq_audit.NEXTVAL,
@@ -318,7 +318,7 @@ BEGIN
             companion_type, companion_created_at, last_activity_date,
             total_tasks_completed,
             (user_level * 100) - xp as xp_to_next_level
-        FROM gamification
+        FROM psk_ebg_gamification
         WHERE user_id = p_user_id;
 END;
 /
@@ -328,7 +328,7 @@ CREATE OR REPLACE PROCEDURE sp_reset_streak (
     p_user_id IN VARCHAR2
 ) AS
 BEGIN
-    UPDATE gamification
+    UPDATE psk_ebg_gamification
     SET current_streak = 0
     WHERE user_id = p_user_id;
 

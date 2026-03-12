@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { notFound, useRouter } from 'next/navigation';
+import { notFound, useParams, useRouter } from 'next/navigation';
 import { educationModules } from '@/lib/education-content';
 import { Button } from '@/components/ui/button';
 import {
@@ -71,12 +71,9 @@ const ContentRenderer = ({ content }: { content: string }) => {
   );
 };
 
-export default function EducationModulePage({
-  params,
-}: {
-  params: { slug: string };
-}) {
+export default function EducationModulePage() {
   const [isCompleted, setIsCompleted] = useState(false);
+  const params = useParams<{ slug: string }>();
   const router = useRouter();
 
   const educationModule = educationModules.find(m => m.slug === params.slug);

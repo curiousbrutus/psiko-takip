@@ -1,0 +1,57 @@
+FAIL src/lib/database/__tests__/journal.repository.test.ts
+  ● Test suite failed to run
+
+      [31mx[0m Expected ',', got 'YYYY'
+        ,-[[36;1;4mC:\Users\Administrator\Desktop\Eyyüb\psiko-takip-firebase\src\lib\database\__tests__\journal.repository.test.ts[0m:59:1]
+     [2m56[0m | 
+     [2m57[0m |       const args = mockExecuteQuery.mock.calls[0];
+     [2m58[0m |       expect(args[0]).toContain('AND prompt = :prompt');
+     [2m59[0m |       expect(args[0]).toContain('AND created_at >= TO_TIMESTAMP(:startDate, \\'YYYY-MM-DD\\')');
+        : [35;1m                                                                               ^^^^[0m
+     [2m60[0m |       expect(args[0]).toContain('AND is_shared = 1');
+     [2m61[0m |       expect(args[1]).toEqual({ userId: 'user1', prompt: 'prompt1', startDate: '2026-01-01' });
+     [2m62[0m |     });
+        `----
+
+
+    Caused by:
+        Syntax Error
+
+      at Object.transformSync (node_modules/next/src/build/swc/index.ts:1232:25)
+      at transformSync (node_modules/next/src/build/swc/index.ts:1322:19)
+      at Object.process (node_modules/next/src/build/swc/jest-transformer.ts:105:25)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+
+FAIL src/lib/database/__tests__/mood.repository.test.ts
+  ● Test suite failed to run
+
+      [31mx[0m Expected ',', got 'YYYY'
+        ,-[[36;1;4mC:\Users\Administrator\Desktop\Eyyüb\psiko-takip-firebase\src\lib\database\__tests__\mood.repository.test.ts[0m:87:1]
+     [2m84[0m |       const result = await getMoodEntries('user1', '2026-01-01');
+     [2m85[0m | 
+     [2m86[0m |       const args = mockExecuteQuery.mock.calls[0];
+     [2m87[0m |       expect(args[0]).toContain('created_at >= TO_TIMESTAMP(:startDate, \\'YYYY-MM-DD\\')');
+        : [35;1m                                                                           ^^^^[0m
+     [2m88[0m |       expect(args[1]).toEqual({ userId: 'user1', startDate: '2026-01-01' });
+     [2m89[0m |       
+     [2m90[0m |       expect(result).toEqual([]);
+        `----
+
+
+    Caused by:
+        Syntax Error
+
+      at Object.transformSync (node_modules/next/src/build/swc/index.ts:1232:25)
+      at transformSync (node_modules/next/src/build/swc/index.ts:1322:19)
+      at Object.process (node_modules/next/src/build/swc/jest-transformer.ts:105:25)
+      at ScriptTransformer.transformSource (node_modules/@jest/transform/build/index.js:422:31)
+      at ScriptTransformer._transformAndBuildScript (node_modules/@jest/transform/build/index.js:519:40)
+      at ScriptTransformer.transform (node_modules/@jest/transform/build/index.js:558:19)
+
+Test Suites: 2 failed, 2 total
+Tests:       0 total
+Snapshots:   0 total
+Time:        2.826 s
+Ran all test suites matching src/lib/database/__tests__/mood.repository.test.ts|src/lib/database/__tests__/journal.repository.test.ts.
