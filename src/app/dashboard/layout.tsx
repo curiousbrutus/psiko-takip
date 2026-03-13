@@ -10,6 +10,8 @@ import HeaderTitle from './_components/header-title';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
+
 
 export default function DashboardLayout({
   children,
@@ -59,12 +61,21 @@ export default function DashboardLayout({
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm truncate">
-                {userData?.displayName || 'Kullanıcı'}
-              </p>
-              <p className="text-xs text-muted-foreground truncate">
-                {user?.email}
-              </p>
+              {userData ? (
+                <>
+                  <p className="font-semibold text-sm truncate">
+                    {userData.displayName}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {userData.email}
+                  </p>
+                </>
+              ) : (
+                <div className="space-y-2">
+                  <Skeleton className="h-3 w-24" />
+                  <Skeleton className="h-2 w-32" />
+                </div>
+              )}
             </div>
             <Button
               variant="ghost"

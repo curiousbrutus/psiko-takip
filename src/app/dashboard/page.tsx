@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import { apiGetGamification } from '@/lib/api-client';
+import { apiGetGamification, apiGetTestSubmissions } from '@/lib/api-client';
 import {
   Card,
   CardContent,
@@ -11,13 +11,24 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { ArrowRight, Flame, Lightbulb, Heart, Leaf } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+
+import {
+  ArrowRight,
+  Flame,
+  Lightbulb,
+  Heart,
+  Leaf,
+  BrainCircuit,
+} from 'lucide-react';
+import { formatDistanceToNow, format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { Progress } from '@/components/ui/progress';
 import { useRouter } from 'next/navigation';
 import { getXpToNextLevel, getCompanionVisual } from '@/lib/gamification';
+import { Skeleton } from '@/components/ui/skeleton';
+
 
 interface DailyInsight {
   title: string;
@@ -32,6 +43,8 @@ export default function DashboardPage() {
     string,
     any
   > | null>(null);
+  const [testSubmissions, setTestSubmissions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [dailyInsight, setDailyInsight] = useState<DailyInsight | null>(null);
   const [showLevelUp, setShowLevelUp] = useState(false);
   const router = useRouter();
@@ -83,35 +96,39 @@ export default function DashboardPage() {
       return;
     }
 
-    const fetchGamification = async () => {
+    const fetchData = async () => {
+      setLoading(true);
       try {
-        const result = await apiGetGamification();
-        if (result.success && result.data) {
-          const data = result.data;
+        const [gamificationRes, testsRes] = await Promise.all([
+          apiGetGamification(),
+          apiGetTestSubmissions(),
+        ]);
 
+        if (gamificationRes.success && gamificationRes.data) {
+          const data = gamificationRes.data;
           if (prevLevel.current !== null && data.level > prevLevel.current) {
             setShowLevelUp(true);
             setTimeout(() => setShowLevelUp(false), 3000);
           }
           prevLevel.current = data.level;
-
           setGamificationData(data);
           generateDailyInsight(data.lastActivityDate);
           if (!data.companion) {
             router.push('/dashboard/companion/onboarding');
           }
-        } else if (userData) {
-          router.push('/dashboard/companion/onboarding');
+        }
+
+        if (testsRes.success) {
+          setTestSubmissions(testsRes.data || []);
         }
       } catch (error) {
-        console.error('Error fetching gamification data:', error);
-        if (userData) {
-          router.push('/dashboard/companion/onboarding');
-        }
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchGamification();
+    fetchData();
   }, [user, userData, router, generateDailyInsight]);
 
   const CompanionCard = () => {
@@ -246,6 +263,58 @@ export default function DashboardPage() {
                   </Link>
                 </Button>
               </CardHeader>
+            </Card>
+          )}
+
+          {testSubmissions.length > 0 && (
+            <Card className="border-none shadow-sm bg-card overflow-hidden">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <BrainCircuit className="h-5 w-5 text-primary" />
+                  Son Test Sonuçlarınız
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {testSubmissions.slice(0, 3).map((sub, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-muted"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                          <BrainCircuit className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm">
+                            {sub.testName}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                            {format(
+                              new Date(sub.submittedAt || sub.assignedAt),
+                              'd MMM yyyy',
+                              { locale: tr }
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="bg-white">
+                        {sub.totalScore} Puan
+                      </Badge>
+                    </div>
+                  ))}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    asChild
+                    className="w-full text-primary hover:bg-primary/5 mt-2"
+                  >
+                    <Link href="/dashboard/tests">
+                      Tüm Testleri Gör <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              </CardContent>
             </Card>
           )}
         </div>

@@ -5,21 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
-
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2 } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Clock } from 'lucide-react';
+import { Loader2, AlertCircle, Clock, Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,42 +15,33 @@ export default function LoginPage() {
   const { login } = useAuth();
   const [loading, setLoading] = useState(false);
   const [pendingTherapist, setPendingTherapist] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
     setPendingTherapist(false);
 
     const formData = new FormData(e.currentTarget);
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
 
+    // Quick-access demo shortcuts (kept for backwards compat)
     if (email.toLowerCase() === 'terapist' && password === 'terapist') {
-      toast({
-        title: 'Demo Girişi',
-        description: 'Terapist paneline yönlendiriliyorsunuz...',
-      });
       router.push('/therapist/dashboard');
       setLoading(false);
       return;
     }
-
     if (email.toLowerCase() === 'danisan' && password === 'danisan') {
-      toast({
-        title: 'Demo Girişi',
-        description: 'Danışan paneline yönlendiriliyorsunuz...',
-      });
       router.push('/dashboard');
       setLoading(false);
       return;
     }
 
     if (!email || !password) {
-      toast({
-        title: 'Hata',
-        description: 'E-posta ve şifre gereklidir.',
-        variant: 'destructive',
-      });
+      setError('E-posta ve şifre gereklidir.');
       setLoading(false);
       return;
     }
@@ -78,8 +57,8 @@ export default function LoginPage() {
       }
 
       toast({
-        title: 'Giriş Başarılı',
-        description: `Hoş geldiniz, ${user.displayName}!`,
+        title: 'Hoş geldiniz!',
+        description: `${user.displayName} olarak giriş yapıldı.`,
       });
 
       if (user.role === 'terapist' || user.role === 'kurum_yoneticisi') {
@@ -87,71 +66,129 @@ export default function LoginPage() {
       } else {
         router.push('/dashboard');
       }
-    } catch (error: any) {
-      toast({
-        title: 'Giriş Başarısız',
-        description:
-          error.message ||
-          'Giriş yapılamadı. Lütfen bilgilerinizi kontrol edin.',
-        variant: 'destructive',
-      });
+    } catch (err: any) {
+      setError(
+        err.message || 'Giriş yapılamadı. Lütfen bilgilerinizi kontrol edin.'
+      );
       setLoading(false);
     }
   };
 
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle className="text-2xl">Giriş Yap</CardTitle>
-        <CardDescription>Başlamak için hesabınıza giriş yapın.</CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-4">
-        {pendingTherapist && (
-          <Alert>
-            <Clock className="h-4 w-4" />
-            <AlertTitle>Hesabınız İnceleniyor</AlertTitle>
-            <AlertDescription>
+    <div className="w-full max-w-md space-y-8">
+      {/* Heading */}
+      <div className="space-y-2">
+        <h2 className="text-3xl font-bold tracking-tight text-foreground">
+          Tekrar hoş geldiniz
+        </h2>
+        <p className="text-muted-foreground">
+          Hesabınıza giriş yaparak platformu kullanmaya devam edin.
+        </p>
+      </div>
+
+      {/* Pending therapist alert */}
+      {pendingTherapist && (
+        <div className="flex gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-800">
+          <Clock className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-amber-800 dark:text-amber-400">
+              Hesabınız İnceleniyor
+            </p>
+            <p className="text-sm text-amber-700/80 dark:text-amber-500 mt-1">
               Terapist başvurunuz onay bekliyor. Onaylandığında e-posta ile
               bilgilendirileceksiniz.
-            </AlertDescription>
-          </Alert>
-        )}
-        <form onSubmit={handleLogin} className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="email">E-posta</Label>
-            <Input
-              name="email"
-              id="email"
-              type="text"
-              placeholder="m@example.com"
-              required
-              disabled={loading}
-            />
+            </p>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password">Şifre</Label>
+        </div>
+      )}
+
+      {/* Error alert */}
+      {error && (
+        <div className="flex gap-3 p-4 rounded-xl bg-destructive/10 border border-destructive/20">
+          <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-destructive">{error}</p>
+        </div>
+      )}
+
+      {/* Form */}
+      <form onSubmit={handleLogin} className="space-y-5">
+        <div className="space-y-2">
+          <Label
+            htmlFor="email"
+            className="text-sm font-medium text-foreground"
+          >
+            E-posta
+          </Label>
+          <Input
+            name="email"
+            id="email"
+            type="text"
+            placeholder="ornek@kurum.com"
+            required
+            disabled={loading}
+            className="h-11 rounded-xl border-border/60 bg-card focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label
+              htmlFor="password"
+              className="text-sm font-medium text-foreground"
+            >
+              Şifre
+            </Label>
+          </div>
+          <div className="relative">
             <Input
               name="password"
               id="password"
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               required
               disabled={loading}
+              className="h-11 rounded-xl border-border/60 bg-card pr-11 focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(v => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              tabIndex={-1}
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </button>
           </div>
-          <Button className="w-full" type="submit" disabled={loading}>
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Giriş Yap
-          </Button>
-        </form>
-      </CardContent>
-      <CardFooter className="flex flex-col items-center">
-        <div className="text-center text-sm">
-          Hesabınız yok mu?{' '}
-          <Link href="/register" className="underline text-primary">
-            Kayıt Ol
-          </Link>
         </div>
-      </CardFooter>
-    </Card>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full h-11 flex items-center justify-center gap-2 rounded-xl bg-[#1a5c45] hover:bg-[#154d39] active:scale-[0.98] text-white font-semibold tracking-wide transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-[#1a5c45]/20"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Giriş yapılıyor...
+            </>
+          ) : (
+            'Giriş Yap'
+          )}
+        </button>
+      </form>
+
+      {/* Footer */}
+      <p className="text-center text-sm text-muted-foreground">
+        Hesabınız yok mu?{' '}
+        <Link
+          href="/register"
+          className="font-semibold text-primary hover:underline underline-offset-2"
+        >
+          Kayıt Ol
+        </Link>
+      </p>
+    </div>
   );
 }

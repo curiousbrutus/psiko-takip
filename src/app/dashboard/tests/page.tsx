@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -8,8 +11,28 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, BrainCircuit, Flame } from 'lucide-react';
+import {
+  ArrowRight,
+  BrainCircuit,
+  Flame,
+  History,
+  CheckCircle2,
+  Clock,
+  ExternalLink,
+} from 'lucide-react';
 import Link from 'next/link';
+import { apiGetTestSubmissions } from '@/lib/api-client';
+import { format } from 'date-fns';
+import { tr } from 'date-fns/locale';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 const availableTests = [
   {
@@ -75,8 +98,58 @@ const availableTests = [
 ];
 
 export default function TestsPage() {
+  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const result = await apiGetTestSubmissions();
+        if (result.success) {
+          setSubmissions(result.data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching test history:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchHistory();
+  }, []);
+
+  const getLatestSubmission = (testName: string) => {
+    // Exact match or contains (backend might use BDE-II vs Beck Depresyon Envanteri)
+    return submissions
+      .filter(
+        s =>
+          s.testName === testName ||
+          testName.toLowerCase().includes(s.testName.toLowerCase())
+      )
+      .sort(
+        (a, b) =>
+          new Date(b.submittedAt || b.assignedAt).getTime() -
+          new Date(a.submittedAt || a.assignedAt).getTime()
+      )[0];
+  };
+
   const enabledTests = availableTests.filter(test => test.enabled);
   const disabledTests = availableTests.filter(test => !test.enabled);
+
+  if (loading) {
+    return (
+      <div className="space-y-8">
+        <div className="text-center space-y-4">
+          <Skeleton className="h-10 w-64 mx-auto" />
+          <Skeleton className="h-6 w-96 mx-auto" />
+        </div>
+        <div className="grid gap-6 md:grid-cols-2">
+          {[1, 2, 3].map(i => (
+            <Skeleton key={i} className="h-64 w-full" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
@@ -133,10 +206,37 @@ export default function TestsPage() {
                       </CardTitle>
                     </div>
                   </div>
+                  {getLatestSubmission(test.title) && (
+                    <Badge
+                      variant="secondary"
+                      className="bg-green-500/10 text-green-700 border-green-200 flex gap-1 items-center"
+                    >
+                      <CheckCircle2 className="h-3 w-3" />
+                      Tamamlandı
+                    </Badge>
+                  )}
                 </div>
               </CardHeader>
 
               <CardContent className="flex-1 space-y-4">
+                {getLatestSubmission(test.title) && (
+                  <div className="flex items-center justify-between p-2 rounded-lg bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-800/20 mb-2">
+                    <div className="text-xs text-green-800 dark:text-green-400 font-medium">
+                      Son Sonuç: {getLatestSubmission(test.title).totalScore}{' '}
+                      Puan
+                    </div>
+                    <div className="text-[10px] text-green-600 dark:text-green-500">
+                      {format(
+                        new Date(
+                          getLatestSubmission(test.title).submittedAt ||
+                            getLatestSubmission(test.title).assignedAt
+                        ),
+                        'd MMMM yyyy',
+                        { locale: tr }
+                      )}
+                    </div>
+                  </div>
+                )}
                 <CardDescription className="text-base leading-relaxed">
                   {test.description}
                 </CardDescription>
@@ -269,6 +369,66 @@ export default function TestsPage() {
           </div>
         </div>
       )}
+      {/* Test History Table */}
+      {submissions.length > 0 && (
+        <div className="space-y-6 pt-8 border-t">
+          <div className="flex items-center gap-2">
+            <History className="h-6 w-6 text-primary" />
+            <h2 className="text-2xl font-semibold">Test Geçmişi</h2>
+          </div>
+
+          <div className="rounded-xl border bg-card overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead>Test Adı</TableHead>
+                  <TableHead>Tarih</TableHead>
+                  <TableHead>Skor</TableHead>
+                  <TableHead>Durum</TableHead>
+                  <TableHead className="text-right">İşlem</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {submissions.map((sub, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell className="font-medium">
+                      {sub.testName}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {format(
+                        new Date(sub.submittedAt || sub.assignedAt),
+                        'd MMM yyyy, HH:mm',
+                        { locale: tr }
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="font-mono">
+                        {sub.totalScore}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <span className="inline-flex items-center gap-1.5 text-xs text-green-600 font-medium">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-600" />
+                        Tamamlandı
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="sm" asChild>
+                        <Link
+                          href={`/dashboard/tests/results/${sub.submissionId || idx}`}
+                        >
+                          Detay <ExternalLink className="ml-1 h-3 w-3" />
+                        </Link>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

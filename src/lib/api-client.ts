@@ -267,6 +267,18 @@ export async function apiCreateTestSubmission(
   });
 }
 
+export async function apiGetTestSubmissions(filters?: {
+  testName?: string;
+  clientId?: string;
+}) {
+  const params = new URLSearchParams();
+  if (filters?.testName) params.set('testName', filters.testName);
+  if (filters?.clientId) params.set('clientId', filters.clientId);
+  const qs = params.toString();
+  return apiFetch(`/test-submissions${qs ? '?' + qs : ''}`);
+}
+
+
 // Appointments API
 export async function apiGetAppointments(role?: string) {
   const params = role ? `?role=${role}` : '';

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,6 +20,8 @@ import { useAuth } from '@/hooks/use-auth';
 import { getChatResponseAction } from './actions';
 import Link from 'next/link';
 
+const CONSENT_KEY = 'psikotakip_ai_consent_v1';
+
 type Message = {
   role: 'user' | 'model';
   content: string;
@@ -30,6 +32,14 @@ export default function AssistantPage() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isConsentGiven, setIsConsentGiven] = useState(false);
+
+  // Check localStorage on mount — only show consent once
+  useEffect(() => {
+    const stored = typeof window !== 'undefined'
+      ? localStorage.getItem(CONSENT_KEY)
+      : null;
+    if (stored === 'true') setIsConsentGiven(true);
+  }, []);
 
   const { user, userData } = useAuth();
   const router = useRouter();
@@ -118,7 +128,10 @@ export default function AssistantPage() {
             <Button variant="outline" asChild>
               <Link href="/dashboard">Vazgeç</Link>
             </Button>
-            <Button onClick={() => setIsConsentGiven(true)}>
+            <Button onClick={() => {
+              localStorage.setItem(CONSENT_KEY, 'true');
+              setIsConsentGiven(true);
+            }}>
               Anladım ve Kabul Ediyorum
             </Button>
           </CardFooter>
