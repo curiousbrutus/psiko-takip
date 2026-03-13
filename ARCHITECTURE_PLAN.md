@@ -1,5 +1,7 @@
 # Psikotakip — Architecture Migration Plan
 
+> New agent onboarding: read `agent_handover.md` at repo root first.
+
 > **Purpose**: This document is the source of truth for the planned architectural migration of the Psikotakip platform. Any AI agent or developer picking up this project should read this first before making structural changes.
 
 ---
@@ -597,3 +599,85 @@ Smoke test env overrides (optional):
 - `SMOKE_THERAPIST_PASSWORD`
 - `SMOKE_CLIENT_EMAIL`
 - `SMOKE_CLIENT_PASSWORD`
+
+---
+
+## 9. V2 Plan (Oracle-First + Local Ollama + DTx Safety)
+
+### 9.1 Product Direction (approved)
+
+- Keep Oracle as primary transactional DB.
+- Use local Ollama models for AI (`qwen3.5:latest` primary, `qwen2.5:3b` fallback).
+- Prioritize therapist-facing value: risk visibility, session prep, and richer test data.
+
+### 9.2 Test Expansion Priority
+
+1. Young Şema Ölçeği (first priority)
+2. Kısa Semptom Envanteri
+3. Beck Anksiyete Ölçeği
+
+Implementation note:
+
+- Current Young module is integrated in web test flow as a short-form DTx-friendly scale.
+- For clinical production, item text can be replaced with licensed/full instrument wording while preserving API/data contracts.
+
+### 9.3 AI Integration (Local)
+
+- Add AI provider abstraction in API:
+  - `OllamaProvider` (primary)
+  - model routing + fallback (`qwen3.5:latest` → `qwen2.5:3b`)
+  - timeout/retry/circuit breaker
+- Add health endpoints:
+  - `/ai/health`
+  - `/ai/models`
+
+### 9.4 DTx Safety and Audit Additions
+
+Add Oracle tables for traceability and human-in-the-loop:
+
+- `PSK_EBG_AI_SESSIONS`
+- `PSK_EBG_AI_MESSAGES`
+- `PSK_EBG_AI_RECOMMENDATIONS`
+- `PSK_EBG_RISK_FLAGS`
+- `PSK_EBG_HUMAN_REVIEWS`
+- `PSK_EBG_CONSENT_EVENTS`
+- `PSK_EBG_AUDIT_EVENTS`
+
+Mandatory fields for each AI recommendation:
+
+- `model_name`, `model_version`
+- `confidence`
+- `requires_human_review`
+- `final_human_decision`
+- `prompt_hash` / `context_hash`
+
+### 9.5 Therapist Demo Dataset (12 users)
+
+- 1 admin, 3 therapists, 8 clients
+- 30-day synthetic timeline:
+  - mood entries
+  - journal entries
+  - assessment/test history
+  - appointments
+  - gamification trends
+- 3 showcase client stories:
+  - improving trajectory
+  - unstable pattern
+  - high-risk follow-up queue
+
+### 9.6 Implementation Order
+
+Phase A:
+
+1. Young test finalized + seed-compatible data contract
+2. Ollama provider + single AI endpoint
+
+Phase B:
+
+3. AI traceability schema + repository layer
+4. Risk flags + therapist review queue
+
+Phase C:
+
+5. Demo seed generator (12 users)
+6. Therapist dashboard cards backed by seeded analytics

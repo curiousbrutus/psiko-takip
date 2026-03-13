@@ -1,305 +1,219 @@
-# Psikotakip - Mental Health Tracking Platform
+# Psikotakip
 
-Psikotakip is a comprehensive mental health tracking application designed for mental health professionals, patients, and institutional workers. The application provides tools for therapy management, patient progress tracking, gamification, and AI-powered therapeutic assistance.
+> New agent onboarding: read `agent_handover.md` first.
 
-## 🌟 Features
+Psikotakip is a mental health tracking platform for three roles:
+- `danisan` (client/patient)
+- `terapist` (therapist)
+- `kurum_yoneticisi` (institution admin)
 
-- **User Management**: Role-based access control for clients (patients), therapists, and administrators
-- **Authentication**: Secure JWT-based authentication with refresh tokens
-- **Gamification**: XP system, levels, streaks, and virtual companions to motivate engagement
-- **Mood Tracking**: Daily mood entries with morning and evening check-ins
-- **Journal Entries**: Private and shared journal entries with therapist visibility options
-- **Assessments**: Standardized psychological tests (Beck, GAD-7, PHQ-9, etc.)
-- **Therapeutic Chat**: AI-powered therapeutic assistant using Google Gemini
-- **Appointments**: Scheduling and management of therapy sessions
-- **Collaborative Tasks**: Interactive CBT exercises between therapist and client
-- **Analytics**: Progress tracking and visualization of mental health metrics
-- **HIPAA/KVKK Compliant**: Full audit logging and data protection
+The project now uses a lean monorepo architecture:
+- **Web app**: Next.js (UI + AI flows)
+- **API**: NestJS (`apps/api`) with Oracle database
+- **Shared contracts**: `packages/shared`
 
-## 🏗️ Architecture
+---
 
-### Current Setup: Local Oracle Database
+## Current Architecture
 
-This version uses a local Oracle database instead of Firebase, designed for:
-- **Local Server Deployment**: Run on your own infrastructure
-- **Oracle Database**: PL/SQL stored procedures and triggers
-- **JWT Authentication**: Secure token-based authentication
-- **REST API**: Next.js API routes for all operations
-- **Network Access**: Accessible from local network devices
+- `apps/api`: NestJS REST API on `http://localhost:3001`
+- `src` (root): Next.js web app on `http://localhost:9002`
+- `packages/shared`: shared TypeScript types/constants used across apps
+- `database`: Oracle schema/procedure scripts (`PSK_EBG_*` tables)
 
-### Technology Stack
+The web app calls migrated backend endpoints through `NEXT_PUBLIC_API_URL`.
 
-- **Frontend**: Next.js 15.3, React 18, TypeScript
-- **Backend**: Next.js API Routes
-- **Database**: Oracle Database (19c or later)
-- **Authentication**: JWT (jsonwebtoken, bcryptjs)
-- **AI**: Google Gemini via Genkit
-- **UI**: Radix UI, Tailwind CSS, shadcn/ui
-- **Data Visualization**: Recharts
-- **Forms**: React Hook Form with Zod validation
+---
 
-## 📋 Prerequisites
+## Features
 
-Before setting up the application, ensure you have:
+- JWT auth (access + refresh)
+- Role-based workflows (client/therapist/admin)
+- Mood, journal, gratitude tracking
+- Assessment task assignment and results
+- Test submissions and therapist review
+- Collaborative tasks and appointments
+- Gamification (XP, streak, companion)
+- AI support flows via Genkit/Gemini
 
-1. **Oracle Database** (19c, 21c XE, or later)
-2. **Node.js** (version 20 or later)
-3. **npm** or **yarn** package manager
-4. **Oracle Instant Client** (for node-oracledb)
+---
 
-## 🚀 Quick Start
+## Prerequisites
 
-### 1. Clone the Repository
+- Node.js `20+`
+- npm `10+`
+- Oracle Database (12c/19c/21c)
+- Oracle Instant Client (for `oracledb`)
+
+---
+
+## Quick Start
+
+### 1) Clone
 
 ```bash
-git clone https://github.com/curiousbrutus/psiko-takip-firebase.git
+git clone https://github.com/curiousbrutus/psiko-takip.git
 cd psiko-takip-firebase
 ```
 
-### 2. Install Dependencies
+### 2) Install dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Setup Oracle Database
+### 3) Configure environment
 
-Follow the detailed guide in [docs/DATABASE_SETUP.md](docs/DATABASE_SETUP.md):
+Create/update `.env` at repo root (and optionally `apps/api/.env`):
 
-```bash
-# Connect to Oracle as SYSTEM user
-sqlplus system/password@localhost:1521/XEPDB1
+```env
+# Oracle
+ORACLE_USER=FTH
+ORACLE_PASSWORD=YOUR_PASSWORD
+ORACLE_CONNECTION_STRING=BYZDB
+ORACLE_POOL_MIN=2
+ORACLE_POOL_MAX=10
 
-# Create application user
+# JWT
+JWT_SECRET=psikotakip-jwt-secret-key-2024-local
+JWT_REFRESH_SECRET=psikotakip-refresh-secret-key-2024-local
+JWT_EXPIRES_IN=15m
+JWT_REFRESH_EXPIRES_IN=7d
+
+# API routing for web
+NEXT_PUBLIC_API_URL=http://localhost:3001
+
+# Optional AI
+GOOGLE_GENAI_API_KEY=YOUR_KEY
+```
+
+### 4) Initialize database
+
+Run the SQL scripts in Oracle SQL*Plus (or compatible client):
+
+```sql
 @database/schema.sql
-
-# Run stored procedures
 @database/procedures/user_management.sql
 @database/procedures/gamification.sql
 ```
 
-### 4. Configure Environment
+### 5) Start API and Web
 
-Copy `.env.example` to `.env.local` and configure:
-
+Terminal 1:
 ```bash
-cp .env.example .env.local
+npm run build:api
+npm run start --workspace @psikotakip/api
 ```
 
-Edit `.env.local`:
-
-```env
-# Database Configuration
-ORACLE_USER=psikotakip_user
-ORACLE_PASSWORD=your_secure_password
-ORACLE_CONNECTION_STRING=localhost:1521/XEPDB1
-
-# JWT Configuration
-JWT_SECRET=your-32-char-secret-key
-JWT_REFRESH_SECRET=your-32-char-refresh-key
-
-# Google AI (optional)
-GOOGLE_GENAI_API_KEY=your_google_ai_key
-```
-
-### 5. Run the Application
-
+Terminal 2:
 ```bash
-# Development mode
 npm run dev
+```
 
-# Production mode
+Open:
+- Web: `http://localhost:9002`
+- API: `http://localhost:3001`
+
+---
+
+## Development Commands
+
+```bash
+# Web
+npm run dev
 npm run build
-npm start
-```
-
-The application will be available at `http://localhost:9002`
-
-## 🌐 Network Configuration
-
-### Local Network Access
-
-To access from other devices on your network:
-
-```bash
-# Edit package.json dev script:
-"dev": "next dev --turbopack -p 9002 -H 0.0.0.0"
-```
-
-Find your local IP:
-```bash
-# Linux/Mac
-ifconfig | grep "inet "
-
-# Windows
-ipconfig
-```
-
-Access from: `http://YOUR_LOCAL_IP:9002`
-
-### Firewall Configuration
-
-**Linux (UFW):**
-```bash
-sudo ufw allow 9002/tcp
-sudo ufw allow 1521/tcp
-```
-
-**Windows:**
-```powershell
-New-NetFirewallRule -DisplayName "Psikotakip" -Direction Inbound -LocalPort 9002 -Protocol TCP -Action Allow
-```
-
-## 📚 Documentation
-
-- **[Database Setup Guide](docs/DATABASE_SETUP.md)** - Complete Oracle database installation and configuration
-- **[API Documentation](docs/API_DOCUMENTATION.md)** - REST API endpoints and usage
-- **[Technical Documentation](TECHNICAL_DOCUMENTATION.md)** - System architecture and features
-
-## 🔐 Security
-
-### Best Practices
-
-1. **Environment Variables**: Never commit `.env.local` to version control
-2. **Strong Passwords**: Use passwords with minimum 8 characters, including uppercase, lowercase, and numbers
-3. **JWT Secrets**: Use cryptographically secure random strings (32+ characters)
-4. **HTTPS**: Always use HTTPS in production
-5. **Database Security**: Use strong database passwords and restrict network access
-6. **Audit Logging**: All patient data access is logged for HIPAA/KVKK compliance
-
-### Generate Secure Keys
-
-```bash
-# Generate JWT secret
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
-
-## 🧪 Testing
-
-```bash
-# Run all tests
-npm test
-
-# Run with coverage
-npm run test:coverage
-
-# Run in watch mode
-npm run test:watch
-```
-
-## 📦 Project Structure
-
-```
-psiko-takip-firebase/
-├── database/                 # Database schema and migrations
-│   ├── schema.sql           # Main database schema
-│   ├── procedures/          # Stored procedures
-│   ├── migrations/          # Database migrations
-│   └── seeds/               # Sample data
-├── docs/                    # Documentation
-│   ├── DATABASE_SETUP.md
-│   └── API_DOCUMENTATION.md
-├── src/
-│   ├── app/                 # Next.js app directory
-│   │   ├── api/            # API routes
-│   │   ├── (auth)/         # Authentication pages
-│   │   └── dashboard/      # Dashboard pages
-│   ├── components/          # React components
-│   ├── lib/                 # Utilities and libraries
-│   │   ├── auth/           # Authentication utilities
-│   │   ├── database/       # Database repositories
-│   │   └── firebase/       # (Legacy - being replaced)
-│   ├── hooks/              # React hooks
-│   ├── middleware/         # API middleware
-│   └── types/              # TypeScript types
-├── public/                  # Static assets
-├── .env.example            # Environment template
-└── package.json
-```
-
-## 🔧 Development
-
-### Code Quality
-
-```bash
-# Lint code
 npm run lint
-
-# Fix linting issues
-npm run lint:fix
-
-# Format code
-npm run format
-
-# Type checking
 npm run typecheck
+
+# API
+npm run dev:api
+npm run build:api
+npm run typecheck:api
+
+# Shared package typecheck
+npm run typecheck:shared
+
+# API smoke test
+npm run smoke:api
 ```
 
-### Database Management
+---
+
+## Project Structure
+
+```text
+.
+├─ apps/
+│  └─ api/                    # NestJS API
+├─ packages/
+│  └─ shared/                 # Shared TS contracts
+├─ src/                       # Next.js web app
+├─ database/                  # Oracle schema/procedures
+│  └─ scripts/                # DB maintenance/verification SQL
+├─ docs/                      # Supporting docs
+│  └─ product/                # Product/strategy notes
+└─ scripts/                   # Utility scripts
+	 └─ db/                     # Local DB connectivity helpers
+```
+
+### Lean regrouping (root cleanup)
+
+- SQL helpers moved from root to `database/scripts/`:
+	- `check_version.sql`
+	- `fix_gamification.sql`
+	- `setup_procedures.sql`
+	- `setup_schema.sql`
+	- `test_connection.sql`
+	- `verify_schema.sql`
+- DB JS helper moved to `scripts/db/test_db.js`
+- Product notes moved to `docs/product/`
+
+---
+
+## Validation Flow (Recommended)
+
+1. `npm run typecheck:api`
+2. `npm run build:api`
+3. Start API on `3001`
+4. `npm run smoke:api`
+5. Start web and do manual sanity pass (`/login`, `/dashboard`, `/dashboard/journey`, `/dashboard/tests`, `/dashboard/profile`)
+
+---
+
+## Demo Seed (Therapist Showcase)
+
+Use the demo seeder to generate a complete therapist/client showcase dataset.
 
 ```bash
-# Export database
-expdp psikotakip_user/password@XEPDB1 directory=DATA_PUMP_DIR dumpfile=backup.dmp
-
-# Import database
-impdp psikotakip_user/password@XEPDB1 directory=DATA_PUMP_DIR dumpfile=backup.dmp
+npm run seed:demo
 ```
 
-## 🐛 Troubleshooting
+- Default password for generated users: `Test123!`
+- By default, emails are auto-tagged per run (for example `...run400142@...`) to avoid collisions.
 
-### Database Connection Issues
+Set `DEMO_TAG` when you want deterministic emails across runs:
 
 ```bash
-# Check Oracle service
-sudo systemctl status oracle-xe-21c  # Linux
-services.msc                          # Windows
-
-# Check listener
-lsnrctl status
-
-# Test connection
-sqlplus psikotakip_user/password@localhost:1521/XEPDB1
+$env:DEMO_TAG='showcase'; npm run seed:demo
 ```
 
-### Node.js Module Issues
+Optional variables:
+- `API_BASE_URL` (default: `http://localhost:3001`)
+- `DEMO_DEFAULT_PASSWORD` (default: `Test123!`)
 
-```bash
-# Clean install
-rm -rf node_modules package-lock.json
-npm install
+---
 
-# Install Oracle Instant Client
-# Linux: export LD_LIBRARY_PATH=/path/to/instantclient
-# Windows: Add to PATH
-```
+## Related Docs
 
-## 📝 User Roles
+- `ARCHITECTURE_PLAN.md`
+- `docs/API_DOCUMENTATION.md`
+- `docs/SETUP_CHECKLIST.md`
+- `TECHNICAL_DOCUMENTATION.md`
 
-- **danisan** (Client/Patient): Can track mood, write journals, take tests, view own data
-- **terapist** (Therapist): Can manage clients, assign assessments, view client progress
-- **kurum_yoneticisi** (Administrator): Full system access and user management
+---
 
-## 🤝 Contributing
+## Notes
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is proprietary software. All rights reserved.
-
-## 🆘 Support
-
-For issues and questions:
-- GitHub Issues: [https://github.com/curiousbrutus/psiko-takip-firebase/issues](https://github.com/curiousbrutus/psiko-takip-firebase/issues)
-- Email: support@psikotakip.com
-
-## 🙏 Acknowledgments
-
-- Built with [Next.js](https://nextjs.org/)
-- UI components from [shadcn/ui](https://ui.shadcn.com/)
-- AI powered by [Google Gemini](https://ai.google.dev/)
-- Oracle Database by [Oracle](https://www.oracle.com/database/)
+- API migration is active; legacy Next API routes were removed for migrated domains.
+- Keep Oracle table names with `PSK_EBG_` prefix.
+- Do not commit `.env` secrets.

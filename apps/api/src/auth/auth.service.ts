@@ -6,7 +6,7 @@ import { AuthResponse, JwtPayload, User } from '@psikotakip/shared/types';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
-import { UsersService } from '../users/users.service';
+import { UsersService } from '../users';
 
 @Injectable()
 export class AuthService {
