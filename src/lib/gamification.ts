@@ -1,8 +1,32 @@
 export type CompanionType = 'plant' | 'animal';
 
-export const getXpToNextLevel = (level: number): number => {
-  // A simple formula for increasing XP requirements per level
-  return 100 + (level - 1) * 50;
+// The backend levels up every 100 XP (level = floor(totalXp / 100) + 1).
+// Keep this in sync with GamificationRepository.updateXp on the API side.
+export const XP_PER_LEVEL = 100;
+
+export interface LevelProgress {
+  level: number;
+  xpIntoLevel: number;
+  xpForLevel: number;
+  progressPct: number;
+}
+
+/** Within-level progress derived from cumulative XP, consistent with the API. */
+export const getLevelProgress = (
+  totalXp: number,
+  level?: number
+): LevelProgress => {
+  const lvl = level ?? Math.floor(totalXp / XP_PER_LEVEL) + 1;
+  const xpIntoLevel = Math.max(
+    0,
+    Math.min(XP_PER_LEVEL, totalXp - (lvl - 1) * XP_PER_LEVEL)
+  );
+  return {
+    level: lvl,
+    xpIntoLevel,
+    xpForLevel: XP_PER_LEVEL,
+    progressPct: (xpIntoLevel / XP_PER_LEVEL) * 100,
+  };
 };
 
 export const getCompanionVisual = (

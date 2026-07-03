@@ -69,14 +69,24 @@ export class GamificationRepository {
     const currentXp = (existing.rows[0].xp || 0) + (xp || 0);
     const userLevel = Math.floor(currentXp / 100) + 1;
 
+    // Streak is per calendar day: unchanged if already active today, +1 if the
+    // last activity was yesterday, otherwise reset to 1. (Previously it was
+    // incremented on every XP update, which inflated the streak.)
+    const streakExpr = `CASE
+             WHEN last_activity_date IS NULL THEN 1
+             WHEN TRUNC(last_activity_date) = TRUNC(CURRENT_TIMESTAMP) THEN GREATEST(current_streak, 1)
+             WHEN TRUNC(last_activity_date) = TRUNC(CURRENT_TIMESTAMP) - 1 THEN current_streak + 1
+             ELSE 1
+           END`;
+
     await this.oracleService.executeQuery(
       `UPDATE psk_ebg_gamification
        SET xp = :xp,
            user_level = :userLevel,
-           last_activity_date = CURRENT_TIMESTAMP,
            total_tasks_completed = total_tasks_completed + 1,
-           current_streak = current_streak + 1,
-           longest_streak = GREATEST(longest_streak, current_streak + 1)
+           current_streak = ${streakExpr},
+           longest_streak = GREATEST(longest_streak, ${streakExpr}),
+           last_activity_date = CURRENT_TIMESTAMP
        WHERE user_id = :userId`,
       { xp: currentXp, userLevel, userId },
       { autoCommit: true }

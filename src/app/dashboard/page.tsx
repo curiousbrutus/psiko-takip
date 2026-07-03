@@ -26,7 +26,7 @@ import { formatDistanceToNow, format } from 'date-fns';
 import { tr } from 'date-fns/locale';
 import { Progress } from '@/components/ui/progress';
 import { useRouter } from 'next/navigation';
-import { getXpToNextLevel, getCompanionVisual } from '@/lib/gamification';
+import { getLevelProgress, getCompanionVisual } from '@/lib/gamification';
 import { Skeleton } from '@/components/ui/skeleton';
 
 
@@ -151,8 +151,7 @@ export default function DashboardPage() {
     }
 
     const { companion, level, xp } = gamificationData;
-    const xpToNextLevel = getXpToNextLevel(level);
-    const progressPercentage = (xp / xpToNextLevel) * 100;
+    const { xpIntoLevel, xpForLevel, progressPct } = getLevelProgress(xp, level);
 
     return (
       <Card className="bg-gradient-to-br from-muted/30 to-muted/10 card-hover-lift relative overflow-hidden">
@@ -199,12 +198,12 @@ export default function DashboardPage() {
                 ⚡ Enerji
               </span>
               <span className="font-semibold">
-                {xp} / {xpToNextLevel}
+                {xpIntoLevel} / {xpForLevel}
               </span>
             </div>
             <div className="relative">
               <Progress
-                value={progressPercentage}
+                value={progressPct}
                 className="h-3 progress-turkish"
               />
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-full animate-pulse" />

@@ -104,7 +104,7 @@ export default function BeckDepressionInventoryPage() {
               <FormField
                 key={q.id}
                 control={form.control}
-                name={`q${q.id}` as keyof FormValues}
+                name={`q${q.id}` as Extract<keyof FormValues, string>}
                 render={({ field }) => (
                   <Card>
                     <CardHeader>

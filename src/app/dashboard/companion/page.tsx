@@ -10,6 +10,7 @@ import {
   getCompanionStageName,
   getNextStageLevel,
   getDefaultCompanionName,
+  getLevelProgress,
   type CompanionType,
 } from '@/lib/gamification';
 import {
@@ -214,11 +215,7 @@ export default function CompanionPage() {
   const level = data?.level ?? 1;
   const xp = data?.xp ?? 0;
   const streak = data?.currentStreak ?? 0;
-  // Backend levels every 100 XP (floor(xp/100)+1); show within-level progress so
-  // the bar stays consistent with the level the API reports.
-  const xpInLevel = Math.max(0, xp - (level - 1) * 100);
-  const xpToNext = 100;
-  const progress = Math.min(100, (xpInLevel / xpToNext) * 100);
+  const { xpIntoLevel, xpForLevel, progressPct } = getLevelProgress(xp, level);
   const stageName = getCompanionStageName(companionType, level);
   const nextStageLevel = getNextStageLevel(level);
   const visual = getCompanionVisual({ type: companionType }, level);
@@ -314,10 +311,10 @@ export default function CompanionPage() {
               ⚡ Enerji
             </span>
             <span className="font-semibold">
-              {xpInLevel} / {xpToNext}
+              {xpIntoLevel} / {xpForLevel}
             </span>
           </div>
-          <Progress value={progress} className="h-3" />
+          <Progress value={progressPct} className="h-3" />
           <p className="text-xs text-muted-foreground">
             {nextStageLevel
               ? `Bir sonraki aşama için Seviye ${nextStageLevel}. Yolculuk görevleri ve günlük selam enerji kazandırır.`

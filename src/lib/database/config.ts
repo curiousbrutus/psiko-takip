@@ -186,7 +186,7 @@ export function generateId(prefix: string): string {
 export async function healthCheck(): Promise<boolean> {
   try {
     const result = await executeQuery('SELECT 1 as health FROM DUAL');
-    return result.rows && result.rows.length > 0;
+    return Boolean(result.rows && result.rows.length > 0);
   } catch (err) {
     console.error('Database health check failed:', err);
     return false;
