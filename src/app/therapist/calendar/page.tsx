@@ -141,7 +141,7 @@ export default function CalendarPage() {
       ...values,
       appointmentDate,
       therapistId: user.uid,
-      therapistName: userData.displayName,
+      therapistName: userData.displayName || 'Terapist',
       clientName: selectedClient.displayName,
     });
 

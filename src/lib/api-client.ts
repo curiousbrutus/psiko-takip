@@ -196,7 +196,16 @@ export async function apiChangePassword(
 
 // Gamification API
 export async function apiGetGamification() {
-  return apiFetch('/gamification');
+  const res = await apiFetch('/gamification');
+  // Backend stores the companion as a flat `companionType`; the UI expects a
+  // `companion` object. Normalize so the companion persists across reloads.
+  if (res?.data && res.data.companionType && !res.data.companion) {
+    res.data.companion = {
+      type: res.data.companionType,
+      createdAt: res.data.companionCreatedAt ?? null,
+    };
+  }
+  return res;
 }
 
 export async function apiUpdateGamification(xp: number, activityType?: string) {

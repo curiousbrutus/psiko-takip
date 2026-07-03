@@ -106,8 +106,8 @@ export default function AssessmentPage() {
     if (!user || !assessment || !taskData) return;
     setIsLoading(true);
 
-    const score = Object.values(values).reduce(
-      (sum, value) => sum + parseInt(value, 10),
+    const score = Object.values(values).reduce<number>(
+      (sum, value) => sum + parseInt(String(value), 10),
       0
     );
 

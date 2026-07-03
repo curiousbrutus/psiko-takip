@@ -108,19 +108,8 @@ export default function ClientProfilePage() {
 
     if (!user || !clientId) return;
 
-    if (
-      therapistData &&
-      therapistData.danisanlarim &&
-      !therapistData.danisanlarim.includes(clientId)
-    ) {
-      toast({
-        title: 'Yetkisiz Erişim',
-        description: 'Bu danışanın profilini görüntüleme yetkiniz yok.',
-        variant: 'destructive',
-      });
-      router.push('/therapist/dashboard');
-      return;
-    }
+    // Authorization is enforced server-side: apiGetClientDetail returns 403 if
+    // this client is not linked to the requesting therapist (handled below).
 
     setLoadingClient(true);
     setLoadingJournals(true);

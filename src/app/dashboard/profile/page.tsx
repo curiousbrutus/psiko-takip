@@ -41,7 +41,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (userData) {
-      setFullName(userData.displayName);
+      setFullName(userData.displayName || '');
       if (userData.profileSymbol) {
         const details = profileSymbols.find(
           s => s.emoji === userData.profileSymbol

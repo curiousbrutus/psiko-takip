@@ -213,6 +213,11 @@ export default function DashboardPage() {
               💪 Her küçük adım, büyük değişimlerin başlangıcı
             </p>
           </div>
+          <Button asChild variant="outline" size="sm" className="w-full">
+            <Link href="/dashboard/companion">
+              Yoldaşınla vakit geçir <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
         </CardContent>
       </Card>
     );

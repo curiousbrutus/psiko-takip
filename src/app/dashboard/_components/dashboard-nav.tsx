@@ -12,10 +12,12 @@ import {
   Sparkles,
   BookOpen,
   Calendar,
+  Sprout,
 } from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', label: 'Kontrol Paneli', icon: LayoutDashboard },
+  { href: '/dashboard/companion', label: 'Yoldaşım', icon: Sprout },
   { href: '/dashboard/journey', label: 'Günlük Yolculuk', icon: Route },
   { href: '/dashboard/assistant', label: 'Dijital Asistan', icon: Sparkles },
   { href: '/dashboard/tests', label: 'Testler', icon: FlaskConical },
