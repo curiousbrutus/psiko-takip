@@ -315,11 +315,22 @@ export default function CompanionPage() {
             </span>
           </div>
           <Progress value={progressPct} className="h-3" />
-          <p className="text-xs text-muted-foreground">
-            {nextStageLevel
-              ? `Bir sonraki aşama için Seviye ${nextStageLevel}. Yolculuk görevleri ve günlük selam enerji kazandırır.`
-              : 'Yoldaşın tümüyle büyüdü — ama yolculuk hiç bitmez. 🌸'}
-          </p>
+          {nextStageLevel ? (
+            <div className="flex items-center gap-3 rounded-lg border bg-muted/30 px-3 py-2">
+              <span className="text-3xl">{visual}</span>
+              <div className="flex-1 text-xs text-muted-foreground">
+                Bir sonraki aşama <span className="font-medium text-foreground">Seviye {nextStageLevel}</span>
+                'de. Yolculuk görevleri ve günlük selam enerji kazandırır.
+              </div>
+              <span className="text-2xl opacity-40" title="Sonraki aşama">
+                {getCompanionVisual({ type: companionType }, nextStageLevel)}
+              </span>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              Yoldaşın tümüyle büyüdü — ama yolculuk hiç bitmez. 🌸
+            </p>
+          )}
         </CardContent>
       </Card>
 
