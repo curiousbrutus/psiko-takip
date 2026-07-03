@@ -124,26 +124,37 @@ export default function ClientsPage() {
       if (response.success && response.data) {
         const clientsWithDetails: Client[] = response.data.map(
           (clientDoc: any) => {
+            const isInvitation =
+              clientDoc.kind === 'invitation' || clientDoc.status === 'invited';
+
+            let status: Client['status'];
+            if (isInvitation) {
+              status = 'Davet Edildi';
+            } else if (clientDoc.status === 'passive') {
+              status = 'Pasif';
+            } else {
+              status = 'Aktif';
+            }
+
+            const lastActivitySource =
+              clientDoc.lastLogin || clientDoc.lastActivityDate;
             let lastActivity = 'Aktivite yok';
-            if (clientDoc.status === 'Davet Edildi') {
+            if (isInvitation) {
               lastActivity = 'Davet bekleniyor';
-            } else if (clientDoc.lastActivityDate) {
-              lastActivity = formatDistanceToNow(
-                new Date(clientDoc.lastActivityDate),
-                {
-                  addSuffix: true,
-                  locale: tr,
-                }
-              );
+            } else if (lastActivitySource) {
+              lastActivity = formatDistanceToNow(new Date(lastActivitySource), {
+                addSuffix: true,
+                locale: tr,
+              });
             }
 
             return {
-              id: clientDoc.userId || clientDoc.id,
-              displayName: clientDoc.displayName,
+              id: clientDoc.userId || clientDoc.invitationId || clientDoc.id,
+              displayName: clientDoc.displayName || clientDoc.email,
               email: clientDoc.email,
               photoURL: clientDoc.photoURL,
               lastActivity,
-              status: clientDoc.status || 'Pasif',
+              status,
             };
           }
         );

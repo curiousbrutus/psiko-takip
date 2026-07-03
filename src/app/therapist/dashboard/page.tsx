@@ -38,8 +38,11 @@ export default function TherapistDashboardPage() {
           apiGetAppointments('terapist'),
         ]);
 
+        const activeClients = (clientsRes.data || []).filter(
+          (c: any) => c.kind !== 'invitation'
+        );
         setStats({
-          clients: clientsRes.data?.length || 0,
+          clients: activeClients.length,
           appointments: appointmentsRes.data?.length || 0,
           assessments: 0, // Placeholder for pending assessments
         });

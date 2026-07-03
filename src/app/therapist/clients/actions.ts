@@ -45,9 +45,12 @@ export async function addClientAction(
     });
 
     if (response.success) {
+      const linked = response.data?.type === 'linked';
       return {
         success: true,
-        message: `${fullName} başarıyla davet edildi. Kaydı tamamlamaları için bilgilendirme yapabilirsiniz.`,
+        message: linked
+          ? `${fullName} hesabınıza bağlandı.`
+          : `${fullName} davet edildi. Bu e-posta ile kayıt olduğunda hesabınıza otomatik bağlanacak.`,
       };
     }
 
@@ -59,7 +62,10 @@ export async function addClientAction(
     console.error('Error adding new client:', error);
     return {
       success: false,
-      message: 'Danışan eklenirken bir hata oluştu. Lütfen tekrar deneyin.',
+      message:
+        error instanceof Error
+          ? error.message
+          : 'Danışan eklenirken bir hata oluştu. Lütfen tekrar deneyin.',
     };
   }
 }
@@ -79,10 +85,13 @@ export async function updateClientStatusAction(
 
   const { clientId, status } = validation.data;
 
+  // Backend uses an English enum for the therapist-facing client status.
+  const apiStatus = status === 'Aktif' ? 'active' : 'passive';
+
   try {
     const response = await apiFetch(`/users/clients/${clientId}`, {
       method: 'PATCH',
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({ status: apiStatus }),
     });
 
     if (response.success) {
@@ -95,6 +104,12 @@ export async function updateClientStatusAction(
     };
   } catch (error) {
     console.error('Error updating client status:', error);
-    return { success: false, message: 'Durum güncellenirken bir hata oluştu.' };
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : 'Durum güncellenirken bir hata oluştu.',
+    };
   }
 }

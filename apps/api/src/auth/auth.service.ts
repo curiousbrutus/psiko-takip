@@ -82,6 +82,10 @@ export class AuthService {
     return { success: true };
   }
 
+  async getMe(userId: string): Promise<User | null> {
+    return this.usersService.getProfile(userId);
+  }
+
   private generateTokens(user: User) {
     const payload: JwtPayload = {
       userId: user.userId,

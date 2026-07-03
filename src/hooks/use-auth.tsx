@@ -80,10 +80,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const storedUser = getStoredUser();
       if (storedUser) {
         try {
-          const data = await apiGetMe();
-          const appUser = buildAppUser(data.user);
+          // /auth/me responds with { success, data: <profile> }
+          const res = await apiGetMe();
+          const profile = res?.data ?? res?.user ?? res;
+          const appUser = buildAppUser(profile);
           setUser(appUser);
-          setStoredUser(data.user);
+          setStoredUser(profile);
         } catch {
           clearTokens();
           setUser(null);

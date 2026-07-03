@@ -99,10 +99,12 @@ export default function CalendarPage() {
       const response = await apiGetClients();
       if (response.success && response.data) {
         setClients(
-          response.data.map((c: any) => ({
-            id: c.userId || c.id,
-            displayName: c.displayName,
-          }))
+          response.data
+            .filter((c: any) => c.kind !== 'invitation' && c.userId)
+            .map((c: any) => ({
+              id: c.userId,
+              displayName: c.displayName,
+            }))
         );
       }
     } catch (error) {

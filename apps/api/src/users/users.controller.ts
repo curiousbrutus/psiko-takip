@@ -1,11 +1,23 @@
-import { Body, Controller, Get, Patch, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ConnectClientDto } from './dto/connect-client.dto';
 import { SearchUsersQueryDto } from './dto/search-users-query.dto';
+import { UpdateClientStatusDto } from './dto/update-client-status.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UsersService } from './users.service';
-import { Param, Post, Query } from '@nestjs/common';
 
 interface AuthRequest {
   user: {
@@ -15,7 +27,7 @@ interface AuthRequest {
 }
 
 @Controller('users')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -50,22 +62,44 @@ export class UsersController {
   }
 
   @Get('clients')
+  @Roles('terapist')
   async getClients(@Req() req: AuthRequest) {
     const data = await this.usersService.getTherapistClients(req.user.userId);
     return { success: true, data };
   }
 
   @Post('clients')
+  @Roles('terapist')
   async connectClient(@Req() req: AuthRequest, @Body() dto: ConnectClientDto) {
     const data = await this.usersService.connectClientToTherapist(req.user.userId, dto);
+    const message =
+      data.type === 'linked'
+        ? 'Danisan basariyla baglandi'
+        : 'Davet olusturuldu. Danisan bu e-posta ile kayit oldugunda otomatik baglanacak';
     return {
       success: true,
-      message: 'Danisan basariyla baglandi',
+      message,
       data,
     };
   }
 
+  @Patch('clients/:clientId')
+  @Roles('terapist')
+  async updateClientStatus(
+    @Req() req: AuthRequest,
+    @Param('clientId') clientId: string,
+    @Body() dto: UpdateClientStatusDto
+  ) {
+    const data = await this.usersService.updateClientStatus(
+      req.user.userId,
+      clientId,
+      dto.status
+    );
+    return { success: true, data };
+  }
+
   @Get('clients/:clientId')
+  @Roles('terapist')
   async getClientDetail(@Req() req: AuthRequest, @Param('clientId') clientId: string) {
     const data = await this.usersService.getClientDetailForTherapist(
       req.user.userId,
@@ -75,6 +109,7 @@ export class UsersController {
   }
 
   @Get('search')
+  @Roles('terapist', 'kurum_yoneticisi')
   async searchUsers(@Query() query: SearchUsersQueryDto) {
     const data = await this.usersService.searchUsers(query);
     return { success: true, data };

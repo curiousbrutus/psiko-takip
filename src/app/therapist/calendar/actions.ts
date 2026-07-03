@@ -58,10 +58,13 @@ export async function getClientsForTherapistAction(
   try {
     const response = await apiGetClients();
     if (response.success && response.data) {
-      return response.data.map((client: any) => ({
-        id: client.userId || client.id,
-        displayName: client.displayName,
-      }));
+      // Only registered clients can be scheduled; skip pending invitations.
+      return response.data
+        .filter((client: any) => client.kind !== 'invitation' && client.userId)
+        .map((client: any) => ({
+          id: client.userId,
+          displayName: client.displayName,
+        }));
     }
     return [];
   } catch (error) {

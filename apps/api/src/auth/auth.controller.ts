@@ -31,7 +31,8 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  me(@Req() req: { user: unknown }) {
-    return { success: true, data: req.user };
+  async me(@Req() req: { user: { userId: string } }) {
+    const profile = await this.authService.getMe(req.user.userId);
+    return { success: true, data: profile };
   }
 }

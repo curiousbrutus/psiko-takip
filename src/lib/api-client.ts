@@ -13,6 +13,8 @@ const REMOTE_ENDPOINT_PREFIXES = [
   '/auth/me',
   '/users/profile',
   '/users/password',
+  '/users/clients',
+  '/users/search',
   '/mood-entries',
   '/journal-entries',
   '/gratitude-entries',

@@ -24,7 +24,8 @@ async function bootstrap() {
   );
 
   const port = Number(process.env.PORT || 3001);
-  await app.listen(port);
+  await app.listen(port, '172.16.0.70');
+  console.log(`Application is running on: http://172.16.0.70:${port}`);
 }
 
 bootstrap();
