@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { apiGetGamification, apiUpdateGamification } from '@/lib/api-client';
@@ -297,6 +298,14 @@ export default function CompanionPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Chat CTA — the heart of the between-sessions companion */}
+      <Button asChild size="lg" className="w-full h-14 text-base gap-2">
+        <Link href="/dashboard/companion/chat">
+          <MessageCircle className="h-5 w-5" />
+          Yoldaşınla Sohbet Et
+        </Link>
+      </Button>
 
       {/* Progress */}
       <Card>

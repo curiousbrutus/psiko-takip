@@ -14,6 +14,7 @@ import { jwtConfig } from './config/jwt.config';
 import { OracleModule } from './database/oracle.module';
 import { UsersModule } from './users';
 import { AiModule } from './ai';
+import { CompanionModule } from './companion/companion.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { AiModule } from './ai';
     TestsModule,
     UsersModule,
     AiModule,
+    CompanionModule,
   ],
 })
 export class AppModule {}

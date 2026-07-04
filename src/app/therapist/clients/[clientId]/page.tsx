@@ -56,6 +56,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { assignTaskAction, assignAssessmentAction } from './task-actions';
 import ProgressChart from './_components/progress-chart';
+import CompanionSettings from './_components/companion-settings';
+import { Sprout } from 'lucide-react';
 
 interface SharedJournal {
   id: string;
@@ -354,7 +356,7 @@ export default function ClientProfilePage() {
       </div>
 
       <Tabs defaultValue="progress" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="progress">
             <TrendingUp className="mr-2 h-4 w-4" /> İlerleme
           </TabsTrigger>
@@ -369,6 +371,9 @@ export default function ClientProfilePage() {
           </TabsTrigger>
           <TabsTrigger value="results">
             <BarChart2 className="mr-2 h-4 w-4" /> Test Sonuçları
+          </TabsTrigger>
+          <TabsTrigger value="yoldas">
+            <Sprout className="mr-2 h-4 w-4" /> Yoldaş
           </TabsTrigger>
         </TabsList>
 
@@ -700,6 +705,10 @@ export default function ClientProfilePage() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="yoldas" className="mt-6">
+          <CompanionSettings clientId={clientId} />
         </TabsContent>
       </Tabs>
     </div>

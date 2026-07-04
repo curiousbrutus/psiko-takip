@@ -15,6 +15,7 @@ const REMOTE_ENDPOINT_PREFIXES = [
   '/users/password',
   '/users/clients',
   '/users/search',
+  '/companion',
   '/mood-entries',
   '/journal-entries',
   '/gratitude-entries',
@@ -371,6 +372,33 @@ export async function apiConnectClient(clientEmail: string) {
     method: 'POST',
     body: JSON.stringify({ email: clientEmail }),
   });
+}
+
+// Companion (Yoldaş) API
+export async function apiCompanionChat(message: string) {
+  return apiFetch('/companion/chat', {
+    method: 'POST',
+    body: JSON.stringify({ message }),
+  });
+}
+
+export async function apiGetCompanionMessages() {
+  return apiFetch('/companion/messages');
+}
+
+export async function apiGetCompanionConfig(clientId: string) {
+  return apiFetch(`/companion/config/${clientId}`);
+}
+
+export async function apiSetCompanionConfig(clientId: string, config: any) {
+  return apiFetch(`/companion/config/${clientId}`, {
+    method: 'PUT',
+    body: JSON.stringify(config),
+  });
+}
+
+export async function apiGetCompanionFlags(clientId: string) {
+  return apiFetch(`/companion/flags/${clientId}`);
 }
 
 // Gratitude Jar API
